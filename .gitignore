@@ -1,0 +1,52 @@
+# Renomear para .gitignore na raiz do repositório.
+
+# ── Credenciais — o motivo número um de vazamento em repositório ───────────
+config_local.py
+*.env
+.env*
+credenciais*
+*_secret*
+token*
+
+# ── Instant Client e ambiente ─────────────────────────────────────────────
+instantclient*/
+.venv/
+__pycache__/
+*.pyc
+
+# ── Saídas pesadas ou com dado detalhado ──────────────────────────────────
+# O painel usa só os JSON de painel/dados/. Os Excel ficam locais: são
+# grandes, mudam inteiros a cada execução e inflam o histórico do Git para
+# sempre. Nada que entra no Git sai depois.
+*.xlsx
+*.xls
+*.log
+ARQ*GERADOS*/
+saida_local/
+
+# ── Exceção: os dados do painel entram ────────────────────────────────────
+!painel/dados/*.json
+*.pdf
+*.exe
+*.xls
+*.sql
+*.bat
+*.zip
+*.txt
+_cache/
+files*/
+arq antigos/
+diagnosticos do claude antigos/
+lançamento controle obras SISGEPAT/
+13 - DEMONSTRATIVOS CONTÁBEIS/
+mestre*.py
+mestreult*.py
+diag23.py
+auditoria_*.py
+relatorio_integridade.py
+patch_*.py
+gnd.py
+atualizar_mes.py
+MONITOR_GND.md
+conciliacao_siggo_sisgepat*.py
+mestre ultimo.py
