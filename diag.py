@@ -224,7 +224,12 @@ def main():
     # contábil (exit 1) nunca chegaria a publicar, que é justamente o dia em
     # que o painel mais importa.
     if a.json:
-        from saida import json_out
+        from saida import json_out, html_out
+        doc = json_out.serializar(
+            todos_achados,
+            mes=a.mes, ano=a.ano, escopo=label,
+            extras=coletar_indicadores(totais),
+        )
         caminho = json_out.gravar(
             todos_achados,
             mes=a.mes, ano=a.ano, escopo=label,
@@ -232,6 +237,7 @@ def main():
             dir_dados=str(PAINEL_DIR),
         )
         print(f"  JSON salvo: {caminho}")
+        html_out.gerar_diag(doc, PAINEL_DIR.parent / "painel_diag.html")
 
     # Exit code: 1 se houver erros
     sys.exit(1 if n_err else 0)

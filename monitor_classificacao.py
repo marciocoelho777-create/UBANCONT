@@ -204,9 +204,82 @@ HAVING ABS(SUM(b.VACREDITO - b.VADEBITO)) > 0.01
 """
 
 
+def _campos_obrigatorios(regras, conta):
+    """Para cada demonstrativo, campos que TODOS os itens daquela conta exigem.
+
+    A lógica: um campo é obrigatório num demonstrativo se ele aparece em TODOS
+    os itens daquela conta — sem exceção. Se existe ao menos um item sem aquele
+    campo, um registro sem o campo ainda pode casar com esse item, logo o campo
+    não é obrigatório para esse demonstrativo.
+
+    Exemplo confirmado em 15/08/2026:
+      BO: todos os 8 itens da 622920104 exigem INCATEGORIA (GND 1..9).
+          Logo INCATEGORIA é obrigatório. Zero = some do BO. ✔
+      DFC: 140 itens exigem COFUNCAO+CONATUREZA, mas não toda despesa pertence
+          ao DFC. Um item genérico sem esses filtros poderia existir, e mesmo
+          sem ele, "não pertencer ao DFC" é correto, não erro.
+          → DFC excluído: não há como distinguir "classificação ausente" de
+            "simplesmente não pertence ao DFC" sem conhecer o escopo esperado.
+      BF: há um item sem COFONTE (Recursos Não Vinculados), logo COFONTE não é
+          obrigatório. Zero pode ser correto para esse item específico.
+          → BF excluído pela mesma razão.
+
+    Resultado prático: apenas o BO tem campos verdadeiramente obrigatórios
+    neste conjunto de contas. O monitor reporta somente o que é demonstrável.
+    """
+    obrig = {}
+    # Demonstrativos excluídos do monitor com justificativa documentada.
+    EXCLUIDOS = {
+        "DFC":  ("O DFC captura categorias específicas de fluxo, não toda "
+                 "despesa de uma conta. Um registro sem COFUNCAO pode "
+                 "legitimamente não pertencer ao DFC. Medido: 37.252 falsos "
+                 "positivos em 15/08/2026, R$ 52,5 bi inexistentes."),
+        "DVP":  "Sem campo universalmente obrigatório nas contas monitoradas.",
+        "DMPL": "Sem campo universalmente obrigatório nas contas monitoradas.",
+        "BP":   "O BP não filtra por nenhum campo — captura todos os registros.",
+    }
+    for (dem, ini, fim), itens in regras.items():
+        if dem in EXCLUIDOS:
+            continue
+        if not (ini <= conta <= fim):
+            continue
+        # Campos que aparecem em TODOS os itens deste demonstrativo
+        todos = None
+        for exig in itens:
+            campos_item = set(exig.keys())
+            todos = campos_item if todos is None else todos & campos_item
+        if todos:
+            obrig.setdefault(dem, set()).update(todos)
+    return obrig
+
+
 def varrer(conn, mes, ano, regras):
-    faixas = sorted({(ini, fim) for (_, ini, fim) in regras})
+    """Registros onde um campo OBRIGATÓRIO está zerado — e portanto o valor
+    não pode casar com NENHUM item daquele demonstrativo.
+
+    Só inclui demonstrativos onde existe ao menos um campo verdadeiramente
+    obrigatório para a conta (ver _campos_obrigatorios). Em 15/08/2026 com
+    as contas da Lista de Equações do BO, isso restringe o monitor ao BO:
+    BF tem item sem COFONTE e DFC não tem campo universalmente obrigatório.
+
+    Por que não o DFC:
+    37.252 falsos positivos em 15/08/2026 — a varredura anterior testava
+    "campo zerado" sem verificar se o campo era realmente obrigatório para
+    aquela conta naquele demonstrativo. A maioria das despesas não pertence
+    ao DFC, e isso é correto, não erro. Incluir o DFC exigiria saber QUAIS
+    registros deveriam pertencer a ele, que é informação que não temos.
+    """
+    # Restringe às faixas do BO — único demonstrativo onde "campo obrigatório
+    # zerado = valor perdido" é demonstrável sem ambiguidade. As 494 combinações
+    # do ITEMBALANCO incluem contas de caixa, receita e investimento; varrer
+    # todas trouxe 173.745 agregados e DFC falso-positivo em 16/08/2026.
+    # A expansão para outros demonstrativos exige evidência caso a caso.
+    faixas = sorted({(ini, fim) for (dem, ini, fim) in regras if dem == "BO"})
+    if not faixas:
+        print("  [aviso] nenhuma faixa BO encontrada — verifique o ITEMBALANCO")
+        return []
     pred = " OR ".join(f"b.COCONTACONTABIL BETWEEN {a} AND {z}" for a, z in faixas)
+
     cur = conn.cursor()
     cur.execute(SQL_BG.format(ano=ano, mes=mes, faixas=pred))
     cols = [d[0] for d in cur.description]
@@ -218,19 +291,31 @@ def varrer(conn, mes, ano, regras):
     for l in linhas:
         conta = int(l["COCONTACONTABIL"])
         reg = {bg: _norm(l[bg]) for bg in CAMPOS.values()}
-        perdidos, mantidos = [], []
-        for dem, itens in demonstrativos_da_conta(regras, conta).items():
-            if any(capturado(i, reg) for i in itens):
-                mantidos.append(dem)
-            else:
+        obrig = _campos_obrigatorios(regras, conta)
+
+        perdidos, mantidos, zerados_tot = [], [], set()
+        for dem, campos_obrig in obrig.items():
+            zerados = [c for c in campos_obrig if reg.get(c) is None]
+            if zerados:
                 perdidos.append(dem)
+                zerados_tot.update(zerados)
+            else:
+                mantidos.append(dem)
+
         if perdidos:
+            # Demonstrativos onde o campo não é obrigatório: o registro
+            # pode ou não aparecer — não sabemos, não reportamos.
+            todos_dems = set(d for (d, ini, fim) in regras
+                           if ini <= conta <= fim)
+            incertos = sorted(todos_dems - set(perdidos) - set(mantidos))
             achados.append({
                 "mes": int(l["INMES"]), "conta": conta,
                 "valor": float(l["VLR"]), "registros": int(l["QTD"]),
                 "campos": {k: v for k, v in reg.items()},
-                "zerados": sorted(k for k, v in reg.items() if v is None),
-                "some_de": sorted(perdidos), "permanece_em": sorted(mantidos),
+                "zerados": sorted(zerados_tot),
+                "some_de": sorted(perdidos),
+                "permanece_em": sorted(mantidos),
+                "incerto_em": incertos,
             })
     return achados
 
@@ -305,6 +390,8 @@ def main():
     dest = DIR_DADOS / f"{a.ano}-{a.mes:02d}_{datetime.now():%Y%m%d_%H%M%S}.json"
     dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     (RAIZ / "MONITOR_CLASSIFICACAO.md").write_text(markdown(doc), encoding="utf-8")
+    from saida import html_out
+    html_out.gerar_classificacao(doc, RAIZ / "painel" / "painel_classificacao.html")
     print(f"\n  JSON: {dest}")
     sys.exit(1 if achados else 0)
 

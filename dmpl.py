@@ -114,13 +114,23 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────────────────────
 #  CONFIGURACAO  (ajuste conforme ambiente - mesmos valores do BF/BO/DFC/DVP)
 # ─────────────────────────────────────────────────────────────────────────────
-DB_USER     = "usefp07"
-DB_PASSWORD = "mar2c"
-DB_HOST     = "10.69.1.118"
-DB_PORT     = 1521
-DB_SERVICE  = "oraprd06"
-
-INSTANT_CLIENT_DIR = r"C:\balanço 2026 gemini arquivos\instantclient_23_9"
+# Credenciais carregadas de config_local.py (nunca em texto puro aqui)
+DB_USER = DB_PASSWORD = DB_HOST = DB_SERVICE = ""
+DB_PORT = 1521
+INSTANT_CLIENT_DIR = ""
+try:
+    import importlib.util as _ilu, pathlib as _pl
+    _cfg = _pl.Path(__file__).parent / "config_local.py"
+    if _cfg.exists():
+        _spec = _ilu.spec_from_file_location("config_local", _cfg)
+        _mod  = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        for _k in ("DB_USER","DB_PASSWORD","DB_HOST","DB_PORT",
+                   "DB_SERVICE","INSTANT_CLIENT_DIR"):
+            if hasattr(_mod, _k):
+                globals()[_k] = getattr(_mod, _k)
+except Exception:
+    pass
 OUTPUT_DIR         = Path(r"C:\balanço 2026 gemini arquivos")
 
 MESES = {1:'Janeiro',2:'Fevereiro',3:'Marco',4:'Abril',5:'Maio',
