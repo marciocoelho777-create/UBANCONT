@@ -28,9 +28,36 @@ intermediários essa conta costuma estar zerada (o encerramento ocorre no
 fechamento do exercício); nesse caso o controle vira INFO explicitando que a
 validação do resultado fica a cargo dos cruzamentos X6 (DMPL) e R1a (BP),
 em vez de fingir que verificou algo.
+
+CORREÇÃO 16/08/2026 — DVP-01 comparava totais incompatíveis
+-------------------------------------------------------------
+Investigado em 16/08/2026 (execução 8/2026): a 891XXXXXX não fica
+necessariamente zerada em mês intermediário — algumas UGs (autarquias/fundos
+que encerram resultado mensalmente, ex.: UG 130101/conta 891240100) lançam
+nela mês a mês, enquanto a administração direta só encerra no fechamento do
+exercício. O código anterior comparava esse saldo PARCIAL de uma única UG
+contra o VPA−VPD CONSOLIDADO de todo o GDF — comparação de grandezas
+incompatíveis, que gerou um "erro" de R$ 14,3 bilhões sem nenhum problema
+contábil real (confirmado cruzando com BALANCOGERAL, fonte oficial dos
+demonstrativos: os dados batem).
+
+Tentativa de correção por UG (comparar 891 da UG × VPA−VPD da MESMA UG) foi
+descartada: testado com os dados reais, a UG 130101 sozinha tem VPA−VPD de
+R$ 17,3 bilhões (ela concentra lançamentos de consolidação entre fundos),
+contra R$ 256 mil na 891 — o mesmo tipo de falso positivo, só que menor.
+Ou seja, um lançamento parcial em 891 não significa "esta UG encerrou o
+resultado do período"; é outra coisa (ajuste pontual), e não há como
+distinguir isso do encerramento real sem conhecer a natureza do lançamento.
+
+Correção definitiva: 891XXXXXX só é fonte independente do resultado no
+FECHAMENTO DO EXERCÍCIO (mês 12, quando o encerramento anual realmente
+ocorre). Em qualquer mês intermediário — mesmo com lançamentos parciais na
+891 — o DVP-01 vira INFO (a validação do resultado fica com os cruzamentos
+X6/DMPL e R1a/BP, que comparam fontes independentes de verdade). Só em
+dezembro o controle vira OK/ERRO de fato.
 """
 from __future__ import annotations
-from . import (Achado, query_one, D,
+from . import (Achado, query_one, query_all, D,
                achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
 
 SQL_DVP = """
@@ -72,9 +99,34 @@ SELECT
 FROM MIL{ano}.VSALDOCONTABIL v
 """
 
+# Detalhe informativo para o DVP-01 (não decide OK/ERRO fora de dezembro,
+# ver docstring do módulo) — quais UGs já lançaram algo em 891XXXXXX.
+SQL_DVP_UG = """
+SELECT v.COUG,
+    SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
+              AND v.COCONTACONTABIL BETWEEN 400000000 AND 499999999
+         THEN v.VACREDITO - v.VADEBITO ELSE 0 END)   AS VPA,
+    SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
+              AND v.COCONTACONTABIL BETWEEN 300000000 AND 399999999
+         THEN v.VADEBITO - v.VACREDITO ELSE 0 END)   AS VPD,
+    SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
+              AND v.COCONTACONTABIL BETWEEN 891000000 AND 891999999
+         THEN v.VACREDITO - v.VADEBITO ELSE 0 END)   AS ENCERRAMENTO
+FROM MIL{ano}.VSALDOCONTABIL v
+GROUP BY v.COUG
+HAVING SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
+              AND v.COCONTACONTABIL BETWEEN 891000000 AND 891999999
+         THEN v.VACREDITO - v.VADEBITO ELSE 0 END) != 0
+"""
+
 
 def extrair(conn, mes: int, ano: int) -> dict:
     return query_one(conn, SQL_DVP.format(mes=mes, ano=ano))
+
+
+def extrair_por_ug(conn, mes: int, ano: int) -> list[dict]:
+    """UGs que já lançaram algo em 891XXXXXX (encerramento parcial)."""
+    return query_all(conn, SQL_DVP_UG.format(mes=mes, ano=ano))
 
 
 def auditar(conn, mes: int, ano: int) -> tuple[list[Achado], dict]:
@@ -86,15 +138,28 @@ def auditar(conn, mes: int, ano: int) -> tuple[list[Achado], dict]:
     resultado = vpa - vpd
     t["RESULTADO_PATRIMONIAL"] = resultado
     enc = t.get("RESULTADO_ENCERRAMENTO", D(0))
+    t["RESULTADO_ENCERRAMENTO"] = enc
 
     # ── DVP-01: resultado calculado × conta de encerramento ────────────────
-    if checa_gap(enc):
+    # 891XXXXXX só é fonte independente do resultado no fechamento do
+    # exercício (mês 12). Lançamentos parciais nela em mês intermediário
+    # não significam encerramento (nem do GDF, nem de uma UG isolada — ver
+    # docstring), então fora de dezembro o controle é sempre INFO.
+    ugs = extrair_por_ug(conn, mes, ano)
+    t["DVP01_UGS_COM_LANCAMENTO_891"] = ugs
+    if mes < 12:
+        obs_ugs = ""
+        if ugs:
+            obs_ugs = ("  |  Lançamentos parciais na 891 (não é encerramento, "
+                        "não entra na comparação): " +
+                        ", ".join(f"UG {u['COUG']} {u['ENCERRAMENTO']:,.2f}"
+                                  for u in ugs))
         achados.append(achado_info("DVP", "DVP-01",
-            "Resultado Patrimonial (encerramento ainda não lançado)",
-            f"VPA {vpa:,.2f}  −  VPD {vpd:,.2f}  =  {resultado:,.2f}  — a conta "
-            f"891XXXXXX está zerada no período, então não há fonte "
-            f"independente para confrontar; a validação do resultado fica com "
-            f"os cruzamentos X6 (DMPL) e R1a (BP)", valor=resultado))
+            "Resultado Patrimonial (encerramento do exercício só em dezembro)",
+            f"VPA {vpa:,.2f}  −  VPD {vpd:,.2f}  =  {resultado:,.2f}  — a 891XXXXXX "
+            f"só fecha o exercício em dezembro; a validação do resultado neste "
+            f"período fica com os cruzamentos X6 (DMPL) e R1a (BP)"
+            f"{obs_ugs}", valor=resultado))
     else:
         gap = resultado - enc
         if checa_gap(gap):

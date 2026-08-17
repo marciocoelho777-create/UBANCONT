@@ -1,0 +1,138 @@
+{
+  "gerado_em": "2026-08-16T15:14:37",
+  "mes": 8,
+  "ano": 2026,
+  "escopo": "Consolidado",
+  "totais": {
+    "ERRO": 1,
+    "ALERTA": 0,
+    "OK": 2,
+    "INFO": 12,
+    "TOTAL": 15
+  },
+  "indicadores": {
+    "resultado_exercicio": -14349416055.48
+  },
+  "achados": [
+    {
+      "status": "ERRO",
+      "modulo": "DVP",
+      "codigo": "DVP-01",
+      "titulo": "Encerramento ≠ resultado em 1 UG(s)",
+      "detalhe": "UG 130101: dif -17,305,504,099.78 (result -17,305,248,083.30 vs 891 256,016.48)",
+      "valor": -17305504099.78
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02a",
+      "titulo": "VPA Total positivo",
+      "detalhe": "97,395,950,780.78",
+      "valor": 97395950780.78
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02b",
+      "titulo": "VPD Total positivo",
+      "detalhe": "111,745,366,836.26",
+      "valor": 111745366836.26
+    },
+    {
+      "status": "INFO",
+      "modulo": "DVP",
+      "codigo": "DVP-03",
+      "titulo": "Cobertura dos subtotais detalhados",
+      "detalhe": "VPA: subtotais 58,199,755,932.09 de 97,395,950,780.78 | VPD: subtotais 42,139,828,573.80 de 111,745,366,836.26 — o restante não é aberto por grupo neste diagnóstico",
+      "valor": 100339584505.89
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "X1a",
+      "titulo": "Caixa Inicial BF=DFC",
+      "detalhe": "Pulado — BF ou DFC não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "X1b",
+      "titulo": "Caixa Final BF=DFC",
+      "detalhe": "Pulado — BF ou DFC não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "X2",
+      "titulo": "DFC: I+II+III = Var.Caixa",
+      "detalhe": "Pulado — DFC não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "X6",
+      "titulo": "Resultado do Exercício DMPL=DVP",
+      "detalhe": "Pulado — DMPL ou DVP não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R1a",
+      "titulo": "Resultado BP=DVP",
+      "detalhe": "Pulado — BP ou DVP não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R2",
+      "titulo": "Saldo Final DMPL=PL BP",
+      "detalhe": "Pulado — DMPL ou BP não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R4a",
+      "titulo": "Caixa BP=DFC",
+      "detalhe": "Pulado — BP ou DFC não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R7",
+      "titulo": "Receita BF=BO",
+      "detalhe": "Pulado — BF ou BO não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R8",
+      "titulo": "Despesa Paga BF=BO",
+      "detalhe": "Pulado — BF ou BO não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R10a",
+      "titulo": "Pgtos RPNP BF=BO",
+      "detalhe": "Pulado — BF ou BO não extraído.",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "X",
+      "codigo": "R10b",
+      "titulo": "Pgtos RPP BF=BO",
+      "detalhe": "Pulado — BF ou BO não extraído.",
+      "valor": null
+    }
+  ]
+}
