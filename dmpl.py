@@ -94,6 +94,10 @@ import argparse, sys
 from datetime import datetime
 from pathlib import Path
 
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
 import oracledb
 import pandas as pd
 import openpyxl

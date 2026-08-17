@@ -54,6 +54,10 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+
 import oracledb
 
 RAIZ      = Path(__file__).parent
