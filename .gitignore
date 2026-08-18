@@ -26,7 +26,15 @@ saida_local/
 
 # ── Exceção: os dados do painel entram ────────────────────────────────────
 !painel/dados/*.json
+!Relatorio_Integridade_*.xlsx
 *.pdf
+# Relatório de integridade (relatorio_integridade.py) -- só é regravado
+# quando a pasta 13 muda (--somente-se-mudou), então cada versão que
+# existe já é um snapshot que vale versionar, ao contrário dos outros
+# Excel/PDF locais que mudam a cada execução sem sinalizar nada novo.
+# (Precisa vir DEPOIS do "*.pdf" acima -- regras de .gitignore usam a
+# última que casar, uma exceção antes da regra geral não tem efeito.)
+!Relatorio_Integridade_*.pdf
 *.exe
 *.xls
 *.sql
@@ -43,7 +51,6 @@ mestre*.py
 mestreult*.py
 diag23.py
 auditoria_*.py
-relatorio_integridade.py
 patch_*.py
 gnd.py
 atualizar_mes.py
