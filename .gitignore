@@ -57,3 +57,8 @@ atualizar_mes.py
 MONITOR_GND.md
 conciliacao_siggo_sisgepat*.py
 mestre ultimo.py
+
+# ── Auditoria Consolidada (18/08/2026): só o HTML gerado entra no git,
+#    a fonte Python fica só local (mesmo padrão de auditoria_*.py acima).
+cruzamentos_completo.py
+saida/xlsx_html.py
