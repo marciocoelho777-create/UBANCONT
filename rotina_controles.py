@@ -22,17 +22,18 @@ warnings.filterwarnings('ignore', message='.*SQLAlchemy.*')
 
 import oracledb
 import pandas as pd
+import config_local as _cfg
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CONFIGURACAO
+#  CONFIGURACAO  (credenciais em config_local.py — nao commitado)
 # ─────────────────────────────────────────────────────────────────────────────
-DB_USER     = "usefp07"
-DB_PASSWORD = "mar2c"
-DB_HOST     = "10.69.1.118"
-DB_PORT     = 1521
-DB_SERVICE  = "oraprd06"
+DB_USER     = _cfg.DB_USER
+DB_PASSWORD = _cfg.DB_PASSWORD
+DB_HOST     = _cfg.DB_HOST
+DB_PORT     = _cfg.DB_PORT
+DB_SERVICE  = _cfg.DB_SERVICE
 
-INSTANT_CLIENT_DIR = r"C:\balanço 2026 gemini arquivos\instantclient_23_9"
+INSTANT_CLIENT_DIR = _cfg.INSTANT_CLIENT_DIR
 OUTPUT_DIR         = Path(__file__).parent / "painel"
 ROTINA_DIR         = Path(__file__).parent / "rotina"
 
