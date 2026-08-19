@@ -1,0 +1,575 @@
+# -*- coding: utf-8 -*-
+"""
+=============================================================================
+  CONTROLES DE ROTINA — GDF
+  Executa os SQLs da pasta rotina/ contra o Oracle e gera HTML de auditoria.
+
+  Identifica erros de lancamento e de integridade contabil do GDF.
+
+  Dependencias:  pip install oracledb pandas
+  Uso:
+      python rotina_controles.py --mes 8 --ano 2026
+      python rotina_controles.py --mes 8 --ano 2026 --saida painel/rotina.html
+      python rotina_controles.py --mes 8 --ano 2026 --controles 01,08,15
+=============================================================================
+"""
+import argparse, sys, warnings
+from datetime import datetime
+from html import escape as _esc
+from pathlib import Path
+
+warnings.filterwarnings('ignore', message='.*SQLAlchemy.*')
+
+import oracledb
+import pandas as pd
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  CONFIGURACAO
+# ─────────────────────────────────────────────────────────────────────────────
+DB_USER     = "usefp07"
+DB_PASSWORD = "mar2c"
+DB_HOST     = "10.69.1.118"
+DB_PORT     = 1521
+DB_SERVICE  = "oraprd06"
+
+INSTANT_CLIENT_DIR = r"C:\balanço 2026 gemini arquivos\instantclient_23_9"
+OUTPUT_DIR         = Path(__file__).parent / "painel"
+ROTINA_DIR         = Path(__file__).parent / "rotina"
+
+MESES = {1:'Janeiro', 2:'Fevereiro', 3:'Marco', 4:'Abril', 5:'Maio',
+         6:'Junho', 7:'Julho', 8:'Agosto', 9:'Setembro',
+         10:'Outubro', 11:'Novembro', 12:'Dezembro'}
+
+THRESHOLD    = 0.01   # centavos — diferenca minima para considerar erro
+MAX_LINHAS   = 300    # limite de linhas exibidas por tabela no HTML
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  METADATA DOS CONTROLES
+#
+#  check: 'colN_nz'  — coluna de indice N (0-based) != 0 → linha com erro
+#         'colN_neg' — coluna de indice N < 0           → linha com erro
+#         'all_rows' — toda linha retornada e erro
+#
+#  Indices das colunas de check (apos COGESTAO/COGESTAOCONTAB/COUGCONTAB/COUG
+#  que ocupam os indices 0-3 nos SQLs agrupados):
+#    C01: C_84 esta no indice 5 (apos C_10 no indice 4)
+#    C02-C06, C08-C10, C13, C14, C16: diferenca no indice 4
+#    C15: saldo no indice 2 (SELECT sem GROUP BY: corrconta, conta, saldo, ug)
+#    C17: all_rows (filtro WHERE ja seleciona so os erros)
+#    C18: saldo no indice 3 (SELECT: nomeconta, conta, gestao, saldo, ug)
+# ─────────────────────────────────────────────────────────────────────────────
+CONTROLES = [
+    {
+        'id': '01', 'check': 'col5_nz',
+        'nome': 'C01 — Contas 21 Fluxo Principal × 827110101',
+        'tipo': 'LANCAMENTO',
+        'sql': '01-Controle 1 - Contas 21 F Principal do exercício x 827110101 LANÇAMENTO.sql',
+        'descricao': (
+            'Verifica se os lancamentos nas contas 21 do Fluxo Principal do exercicio '
+            '(211xxx–215xxx) estao em equilibrio com a NE Principal (827110101). '
+            'Diferenca != 0 por UG indica lancamento inconsistente.'
+        ),
+    },
+    {
+        'id': '02', 'check': 'col4_nz',
+        'nome': 'C02 — Contas 21 RP × 827110201/827110203/631810000',
+        'tipo': 'LANCAMENTO',
+        'sql': '02-Controle 2 - Contas 21 F Ret do exercício x 827110201,827110203,63181 LANÇAMENTO.sql',
+        'descricao': (
+            'Equilibrio entre contas 21 de Restos a Pagar e as contas '
+            '827110201, 827110203 e 631810000. Diferenca != 0 = RP sem contrapartida.'
+        ),
+    },
+    {
+        'id': '03', 'check': 'col4_nz',
+        'nome': 'C03 — 21xxx98xx = 63211xxxx',
+        'tipo': 'LANCAMENTO',
+        'sql': '03-Controle 3 - 21xxx98xx = 63211xxxx LANÇAMENTO.sql',
+        'descricao': (
+            'Contas de cancelamento de RP (21xxx98xx) devem corresponder a '
+            '632110100 e 632110300. Diferenca != 0 = cancelamento sem registro adequado.'
+        ),
+    },
+    {
+        'id': '04', 'check': 'col4_nz',
+        'nome': 'C04 — Contas 21 sem NE × 827110401',
+        'tipo': 'LANCAMENTO',
+        'sql': '04-Controle 4 - Contas 21 sem NE x 827110401 LANÇAMENTO.sql',
+        'descricao': (
+            'Lancamentos em contas 21 sem nota de empenho frente a conta 827110401. '
+            'Diferenca != 0 = RP sem empenho identificado.'
+        ),
+    },
+    {
+        'id': '05', 'check': 'col4_nz',
+        'nome': 'C05 — Contas 21 em liquidacao × 827110196',
+        'tipo': 'LANCAMENTO',
+        'sql': '05-Controle 5 - Contas 21 em liquidação  x 827110196 LANÇAMENTO.sql',
+        'descricao': (
+            'RP em liquidacao: contas 218919600/218929600 e 218919896/218929896 '
+            'frente a 827110196 e 631200000. Diferenca != 0 = RP em liquidacao inconsistente.'
+        ),
+    },
+    {
+        'id': '06', 'check': 'col4_nz',
+        'nome': 'C06 — RPNP liquidado × 631300000',
+        'tipo': 'LANCAMENTO',
+        'sql': '06-Controle 6 - Contas 21 RPNP liquidado x 6313 LANÇAMENTO.sql',
+        'descricao': (
+            'RPNP liquidado: contas 218914002/218924002 frente a conta 631300000. '
+            'Diferenca != 0 = liquidacao de RPNP sem registro correto.'
+        ),
+    },
+    {
+        'id': '08', 'check': 'col4_nz',
+        'nome': 'C08 — Balancete INTRA',
+        'tipo': 'INTEGRIDADE',
+        'sql': '08-Controle 8 - Balancete INTRA.sql',
+        'descricao': (
+            'Equilibrio do balancete INTRA (5o digito = 2). '
+            'Soma das classes 1+2+3+4 deve ser zero. '
+            'Diferenca != 0 = lancamento sem contrapartida INTRA.'
+        ),
+    },
+    {
+        'id': '09', 'check': 'col4_nz',
+        'nome': 'C09 — Balancete Nao INTRA',
+        'tipo': 'INTEGRIDADE',
+        'sql': '09-Controle 9 - Balancete Não INTRA.sql',
+        'descricao': (
+            'Equilibrio do balancete Nao INTRA. '
+            'Soma das classes 1+2+3+4 deve ser zero por UG.'
+        ),
+    },
+    {
+        'id': '10', 'check': 'col4_nz',
+        'nome': 'C10 — Balanco Financeiro (BF)',
+        'tipo': 'INTEGRIDADE',
+        'sql': '10-Balanço-BF.sql',
+        'descricao': (
+            'Equilibrio do Balanco Financeiro por UG (Ingressos = Dispendios + Variacao de Saldo). '
+            'Diferenca != 0 indica BF desequilibrado.'
+        ),
+    },
+    {
+        'id': '13', 'check': 'col4_nz',
+        'nome': 'C13 — Balanco Patrimonial (BP)',
+        'tipo': 'INTEGRIDADE',
+        'sql': '13-Balanço-BP.sql',
+        'descricao': (
+            'Equilibrio do BP por UG (Ativo = Passivo + PL). '
+            'Diferenca != 0 indica inconsistencia patrimonial.'
+        ),
+    },
+    {
+        'id': '14', 'check': 'col4_nz',
+        'nome': 'C14 — Contas 72119XXXX × 82119XXXX',
+        'tipo': 'LANCAMENTO',
+        'sql': '14-72119XXXX.sql',
+        'descricao': (
+            'Equilibrio entre contas 721190100-400 e 821190100-400 '
+            '(excluindo documento 2025NS00005). Diferenca != 0 = contrapartida nao registrada.'
+        ),
+    },
+    {
+        'id': '15', 'check': 'col2_neg',
+        'nome': 'C15 — Receita Negativa (VSALDOCONTABIL)',
+        'tipo': 'INTEGRIDADE',
+        'sql': '15-Receita Negativa Saldo.sql',
+        'descricao': (
+            'Contas de receita orcamentaria (621200000-621399999) com saldo negativo '
+            'no VSALDOCONTABIL. Saldo negativo indica estorno maior que o valor lancado.'
+        ),
+    },
+    {
+        'id': '16', 'check': 'col4_nz',
+        'nome': 'C16 — Contas 5221904XX',
+        'tipo': 'LANCAMENTO',
+        'sql': '16-5221904XX.sql',
+        'descricao': (
+            'Movimentacao nas contas 522190401 e 522190409. '
+            'Valor != 0 indica lancamentos que precisam ser verificados.'
+        ),
+    },
+    {
+        'id': '17', 'check': 'col3_neg',
+        'nome': 'C17 — Inversao de Saldo',
+        'tipo': 'INTEGRIDADE',
+        'sql': '17-Inversão de Saldo.sql',
+        'descricao': (
+            'Contas ativas (classe 1) com saldo natural Devedor (INSALDOCONTABIL=D, ININVERSAOSALDO=N) '
+            'que apresentam saldo Credor (negativo) no VSALDOCONTABIL. '
+            'Saldo negativo = conta com saldo invertido.'
+        ),
+    },
+    {
+        'id': '18', 'check': 'col3_nz',
+        'nome': 'C18 — Previsao Adicional a Lancar',
+        'tipo': 'INTEGRIDADE',
+        'sql': '18-Previsão Adicional a Lançar.sql',
+        'descricao': (
+            'Saldo pendente nas contas de previsao adicional (521920500 e 821191201) ate o mes 6. '
+            'Saldo != 0 indica previsao adicional ainda nao lancada.'
+        ),
+    },
+]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  CONEXAO
+# ─────────────────────────────────────────────────────────────────────────────
+def conectar_oracle():
+    print(f"  Inicializando Oracle Client: {INSTANT_CLIENT_DIR}")
+    try:
+        oracledb.init_oracle_client(lib_dir=INSTANT_CLIENT_DIR)
+    except Exception as e:
+        if "already been initialized" not in str(e):
+            raise
+    dsn = f"{DB_HOST}:{DB_PORT}/{DB_SERVICE}"
+    conn = oracledb.connect(user=DB_USER, password=DB_PASSWORD, dsn=dsn)
+    print(f"  Conectado! Oracle {conn.version}")
+    return conn
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  EXECUCAO DE CADA CONTROLE
+# ─────────────────────────────────────────────────────────────────────────────
+_COLS_ID = {'E997027', 'E997028', 'E997036', 'E997038',
+            'COGESTAO', 'COGESTAOCONTAB', 'COUGCONTAB', 'COUG',
+            'ININVERSAOSALDO', 'NOCONTACONTABIL', 'COUG'}
+
+
+def executar_controle(conn, controle, ano):
+    sql_path = ROTINA_DIR / controle['sql']
+    if not sql_path.exists():
+        raise FileNotFoundError(f"SQL nao encontrado: {sql_path}")
+
+    sql = sql_path.read_text(encoding='utf-8')
+    sql = sql.replace('MIL2026', f'MIL{ano}').strip().rstrip(';')
+
+    print(f"    [{controle['id']}] executando...", end=' ', flush=True)
+    df = pd.read_sql(sql, conn)
+    df.columns = [str(c).upper() for c in df.columns]
+
+    for col in df.columns:
+        if col not in _COLS_ID:
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
+
+    # Determina linhas com problema
+    chk = controle['check']
+    if chk == 'all_rows':
+        mask = pd.Series(True, index=df.index)
+    elif '_nz' in chk:
+        idx = int(chk[3:chk.index('_')])
+        mask = df.iloc[:, idx].abs() > THRESHOLD
+    elif '_neg' in chk:
+        idx = int(chk[3:chk.index('_')])
+        mask = df.iloc[:, idx] < -THRESHOLD
+    else:
+        mask = pd.Series(False, index=df.index)
+
+    df_erro = df[mask].copy()
+    n_erro  = len(df_erro)
+    n_total = len(df)
+    print(f"{n_total} linhas, {n_erro} com erro.")
+    return df, df_erro, n_erro, n_total
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  FORMATACAO
+# ─────────────────────────────────────────────────────────────────────────────
+def _brl(v):
+    try:
+        v = float(v)
+    except (ValueError, TypeError):
+        return str(v)
+    neg = v < 0
+    s = f"{abs(v):,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    return f"({s})" if neg else s
+
+
+def _fmt(v, col):
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return '—'
+    if col not in _COLS_ID:
+        try:
+            return _brl(float(v))
+        except (ValueError, TypeError):
+            pass
+    return _esc(str(v))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  CSS (mesmo padrao visual de auditoria_consolidada.html)
+# ─────────────────────────────────────────────────────────────────────────────
+_CSS = """
+:root{
+  --brand:#1A4A8F;--pg:#F1F4FB;--s1:#FFF;--s2:#E8EDF7;--bd:#C8D5ED;
+  --t1:#0D1829;--t2:#4C5C7A;--t3:#8A9BBD;
+  --err:#BE1C1C;--err-bg:#FEF2F2;--err-bd:#FECACA;
+  --ok:#156030;--ok-bg:#F0FDF4;--ok-bd:#BBF7D0;
+  --inf:#1547A0;--inf-bg:#EFF6FF;--inf-bd:#BFDBFE;
+  --fn:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
+  --r:8px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
+  --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
+  --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
+  --ok:#4ADE80;--ok-bg:#031309;--ok-bd:#14532D;
+  --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
+}}
+:root[data-theme="dark"]{
+  --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
+  --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
+  --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
+  --ok:#4ADE80;--ok-bg:#031309;--ok-bd:#14532D;
+  --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);background:var(--pg)}
+.hd{background:var(--brand);color:#fff;padding:14px 24px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}
+.hd-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.hd-sub{font-size:12px;opacity:.72;margin-top:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:14px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;background:var(--s1);
+     border:1px solid var(--bd);border-radius:var(--r)}
+.nav a{font-size:11px;font-weight:600;color:var(--brand);text-decoration:none;
+       padding:3px 9px;border-radius:100px;border:1px solid var(--bd)}
+.nav a:hover{border-color:var(--brand)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+     padding:13px 15px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+             background:var(--kpi-stripe,var(--bd))}
+.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.025em;color:var(--kpi-color,var(--t1))}
+details.ctrl{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+details.ctrl summary{padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;
+                     list-style:none;display:flex;align-items:center;gap:10px;background:var(--s2)}
+details.ctrl summary::-webkit-details-marker{display:none}
+details.ctrl summary::after{content:'+';font-size:15px;color:var(--t3);margin-left:auto}
+details.ctrl[open] summary::after{content:'\2212'}
+.ctrl-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.ctrl-desc{font-size:12.5px;color:var(--t2);line-height:1.55}
+.chip{font-size:10px;font-weight:700;padding:1px 8px;border-radius:100px;border:1px solid;white-space:nowrap}
+.c-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.c-err{background:var(--err-bg);color:var(--err);border-color:var(--err-bd)}
+.c-inf{background:var(--inf-bg);color:var(--inf);border-color:var(--inf-bd)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:6px;max-height:420px;overflow-y:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--fm)}
+table.tbl th,table.tbl td{padding:4px 9px;border-bottom:1px solid var(--bd);white-space:nowrap}
+table.tbl th{background:var(--s2);font-weight:700;font-family:var(--fn);position:sticky;top:0;z-index:1}
+table.tbl td.num{text-align:right}
+table.tbl tr.err td{background:var(--err-bg)}
+.ok-msg{color:var(--ok);font-size:13px;font-weight:600}
+.stats{font-size:12px;color:var(--t2)}
+.trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
+.falha{color:var(--err);font-size:13px}
+footer{font-size:11px;color:var(--t3);text-align:center;padding:14px}
+@media(max-width:680px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  GERACAO DO HTML
+# ─────────────────────────────────────────────────────────────────────────────
+def _tabela_html(df, df_erro):
+    erro_idx = set(df_erro.index)
+    cols = list(df.columns)
+
+    ths = ''.join(f'<th>{_esc(c)}</th>' for c in cols)
+
+    exibir = df if len(df) <= MAX_LINHAS else df.iloc[:MAX_LINHAS]
+    truncado = len(df) > MAX_LINHAS
+
+    linhas = []
+    for idx, row in exibir.iterrows():
+        cls = ' class="err"' if idx in erro_idx else ''
+        cells = []
+        for c in cols:
+            v = row[c]
+            if c not in _COLS_ID:
+                try:
+                    cells.append(f'<td class="num">{_fmt(v, c)}</td>')
+                    continue
+                except Exception:
+                    pass
+            cells.append(f'<td>{_fmt(v, c)}</td>')
+        linhas.append(f'<tr{cls}>{"".join(cells)}</tr>')
+
+    tbl = (
+        f'<div class="tbl-wrap"><table class="tbl">'
+        f'<thead><tr>{ths}</tr></thead>'
+        f'<tbody>{"".join(linhas)}</tbody>'
+        f'</table></div>'
+    )
+    nota = (f'<p class="trunc">Exibindo {MAX_LINHAS} de {len(df)} linhas.</p>'
+            if truncado else '')
+    return tbl + nota
+
+
+def gerar_html(resultados, mes, ano, saida):
+    """resultados: list of (controle, df|None, df_erro|None, n_erro, n_total)"""
+    n_err    = sum(1 for _, df, _, ne, _ in resultados if df is not None and ne > 0)
+    n_ok     = sum(1 for _, df, _, ne, _ in resultados if df is not None and ne == 0)
+    n_falhou = sum(1 for _, df, _, _, _ in resultados if df is None)
+    tot_err  = sum((ne or 0) for _, _, _, ne, _ in resultados)
+
+    mes_label = f'{mes:02d}/{ano} — {MESES[mes]}/{ano}'
+    agora     = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+    # KPIs
+    kpi_cor   = 'var(--err)' if n_err else 'var(--ok)'
+    kpis = f"""
+<div class="kpi-row">
+  <div class="kpi" style="--kpi-stripe:{kpi_cor};--kpi-color:{kpi_cor}">
+    <div class="kpi-lbl">Controles com Erro</div>
+    <div class="kpi-val">{n_err}</div>
+  </div>
+  <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)">
+    <div class="kpi-lbl">Controles OK</div>
+    <div class="kpi-val">{n_ok}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-lbl">Total de Controles</div>
+    <div class="kpi-val">{len(resultados)}</div>
+  </div>
+  <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:{'var(--err)' if tot_err else 'var(--t1)'}">
+    <div class="kpi-lbl">Linhas com Erro</div>
+    <div class="kpi-val">{tot_err:,}</div>
+  </div>
+</div>"""
+
+    # Nav
+    nav = '<div class="nav">' + ''.join(
+        f'<a href="#ctrl-{c["id"]}">{c["id"]}</a>'
+        for c, _, _, _, _ in resultados
+    ) + '</div>'
+
+    # Cards
+    cards = []
+    for controle, df, df_erro, n_erro, n_total in resultados:
+        cid = controle['id']
+
+        if df is None:
+            status = '<span class="chip c-err">FALHA</span>'
+            corpo  = '<p class="falha">Falha ao executar o SQL deste controle.</p>'
+            aberto = ' open'
+        elif n_erro > 0:
+            status = '<span class="chip c-err">ERRO</span>'
+            corpo  = (f'<p class="stats">{n_erro} de {n_total} linhas com divergencia</p>'
+                      + _tabela_html(df, df_erro))
+            aberto = ' open'
+        else:
+            status = '<span class="chip c-ok">OK</span>'
+            corpo  = f'<p class="ok-msg">&#10003; Nenhuma divergencia encontrada ({n_total} linhas verificadas).</p>'
+            aberto = ''
+
+        tipo = f'<span class="chip c-inf">{_esc(controle["tipo"])}</span>'
+
+        cards.append(f"""
+<details class="ctrl"{aberto} id="ctrl-{cid}">
+  <summary>{status} {tipo} {_esc(controle["nome"])}</summary>
+  <div class="ctrl-body">
+    <p class="ctrl-desc">{_esc(controle["descricao"])}</p>
+    {corpo}
+  </div>
+</details>""")
+
+    resultado_geral = (
+        f'<span style="color:#fff;font-weight:700;opacity:.9">'
+        f'{n_err} controle(s) com ERRO</span>'
+        if n_err else
+        '<span style="color:#a7f3d0;font-weight:700">Todos os controles OK</span>'
+    )
+
+    page = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controles de Rotina GDF {mes_label}</title>
+<style>{_CSS}</style>
+</head>
+<body>
+<div class="hd">
+  <div>
+    <div class="hd-title">Controles de Rotina &#8212; GDF</div>
+    <div class="hd-sub">{_esc(mes_label)} &middot; Emitido em {agora}</div>
+  </div>
+  <div>{resultado_geral}</div>
+</div>
+<div class="wrap">
+  {nav}
+  {kpis}
+  {"".join(cards)}
+</div>
+<footer>Gerado por rotina_controles.py &middot; {agora}</footer>
+</body>
+</html>"""
+
+    saida.parent.mkdir(parents=True, exist_ok=True)
+    saida.write_text(page, encoding='utf-8')
+    print(f"  HTML salvo: {saida}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  MAIN
+# ─────────────────────────────────────────────────────────────────────────────
+def main():
+    p = argparse.ArgumentParser(
+        description='Controles de Rotina GDF — gera HTML de auditoria a partir dos SQLs em rotina/')
+    p.add_argument('--mes',       type=int, default=datetime.now().month,
+                   help='Mes de referencia 1-12')
+    p.add_argument('--ano',       type=int, default=datetime.now().year)
+    p.add_argument('--saida',     type=str, default=None,
+                   help='Caminho do HTML de saida '
+                        '(default: painel/rotina_controles_AAAA_MM.html)')
+    p.add_argument('--controles', type=str, default='',
+                   help='Executar apenas estes IDs (ex: 01,08,15). Vazio = todos.')
+    a = p.parse_args()
+
+    if not 1 <= a.mes <= 12:
+        print("ERRO: --mes deve estar entre 1 e 12."); sys.exit(1)
+
+    filtro = {x.strip() for x in a.controles.split(',') if x.strip()}
+    lista  = [c for c in CONTROLES if not filtro or c['id'] in filtro]
+
+    saida = (Path(a.saida) if a.saida
+             else OUTPUT_DIR / f'rotina_controles_{a.ano}_{a.mes:02d}.html')
+
+    print(f"\n{'='*60}")
+    print(f"  CONTROLES DE ROTINA — GDF")
+    print(f"  {MESES[a.mes]}/{a.ano}  |  {len(lista)} controles")
+    print(f"{'='*60}")
+
+    print("\n[1/3] Conectando ao Oracle...")
+    conn = conectar_oracle()
+
+    print(f"\n[2/3] Executando {len(lista)} controles...")
+    resultados = []
+    for controle in lista:
+        try:
+            df, df_erro, n_erro, n_total = executar_controle(conn, controle, a.ano)
+            resultados.append((controle, df, df_erro, n_erro, n_total))
+        except Exception as e:
+            print(f"    FALHA: {e}")
+            resultados.append((controle, None, None, 0, 0))
+
+    conn.close()
+    print("  Conexao Oracle encerrada.")
+
+    print("\n[3/3] Gerando HTML...")
+    gerar_html(resultados, a.mes, a.ano, saida)
+
+    n_err = sum(1 for _, df, _, ne, _ in resultados if df is not None and ne > 0)
+    print(f"\n{'='*60}")
+    print(f"  {'CONCLUIDO COM ' + str(n_err) + ' CONTROLE(S) COM ERRO' if n_err else 'CONCLUIDO — TODOS OK'}")
+    print(f"{'='*60}\n")
+
+
+if __name__ == '__main__':
+    main()

@@ -38,6 +38,7 @@ saida_local/
 *.exe
 *.xls
 *.sql
+!rotina/*.sql
 *.bat
 *.zip
 *.txt
