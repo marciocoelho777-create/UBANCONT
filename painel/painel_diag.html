@@ -400,30 +400,51 @@ footer{text-align:center;padding:14px;font-size:11px;color:var(--t3);border-top:
 <script>
 /* AUTO-DATA-START */
 const META = {
-  "gerado_em": "2026-08-19T14:28:16",
+  "gerado_em": "2026-08-19T14:43:34",
   "mes": 8,
   "ano": 2026,
   "escopo": "Consolidado",
   "totais": {
-    "ERRO": 10,
+    "ERRO": 9,
     "ALERTA": 0,
-    "OK": 18,
+    "OK": 19,
     "INFO": 5,
     "TOTAL": 33
   },
   "indicadores": {
-    "caixa_final": 6670535966.36,
+    "caixa_final": 6670664318.73,
     "receita_realizada": 29887978605.9,
     "despesa_paga": 24453079968.12,
     "ingressos": 65664621965.45,
     "dispendios": 65664621965.45,
     "despesa_empenhada": 28337221098.35,
     "despesa_liquidada": 24709263663.25,
-    "ativo_total": 68772657553.57,
-    "patrimonio_liquido": -146024626237.54,
-    "resultado_exercicio": -14396251257.73
+    "ativo_total": 68775295530.91,
+    "patrimonio_liquido": -146025555532.71,
+    "resultado_exercicio": -14397196536.81
   },
   "historico": [
+    {
+      "gerado_em": "2026-08-19T14:43:34",
+      "totais": {
+        "ERRO": 9,
+        "ALERTA": 0,
+        "OK": 19,
+        "INFO": 5,
+        "TOTAL": 33
+      },
+      "erros": [
+        "BF-04",
+        "BO-03",
+        "DFC-01",
+        "DMPL-01",
+        "X1b",
+        "X2",
+        "X6",
+        "R1a",
+        "R2"
+      ]
+    },
     {
       "gerado_em": "2026-08-19T14:28:16",
       "totais": {
@@ -516,19 +537,6 @@ const META = {
         "TOTAL": 4
       },
       "erros": []
-    },
-    {
-      "gerado_em": "2026-08-16T15:14:37",
-      "totais": {
-        "ERRO": 1,
-        "ALERTA": 0,
-        "OK": 2,
-        "INFO": 12,
-        "TOTAL": 15
-      },
-      "erros": [
-        "DVP-01"
-      ]
     }
   ]
 };
@@ -552,14 +560,14 @@ const ACHADOS = [
     "m": "BF",
     "c": "BF-03",
     "t": "Caixa Final positivo",
-    "d": "Caixa Final: 6,670,535,966.36"
+    "d": "Caixa Final: 6,670,664,318.73"
   },
   {
     "s": "ERRO",
     "m": "BF",
     "c": "BF-04",
     "t": "Caixa 111XXXXXX: razão ≠ view de saldos",
-    "d": "Diferença: 30,827,718.05  |  BF (abertura+lançamentos) 6,701,363,684.41  vs VSALDOCONTABIL acumulado 6,670,535,966.36"
+    "d": "Diferença: 30,699,365.68  |  BF (abertura+lançamentos) 6,701,363,684.41  vs VSALDOCONTABIL acumulado 6,670,664,318.73"
   },
   {
     "s": "INFO",
@@ -594,7 +602,7 @@ const ACHADOS = [
     "m": "DFC",
     "c": "DFC-01",
     "t": "Geracao Liquida != Variacao do Caixa",
-    "d": "Gap: 30,768,436.10  |  Geracao 1,241,034,142.67  vs  Var.Caixa 1,210,265,706.57"
+    "d": "Gap: 30,757,932.82  |  Geracao 1,241,034,142.67  vs  Var.Caixa 1,210,276,209.85"
   },
   {
     "s": "OK",
@@ -608,35 +616,35 @@ const ACHADOS = [
     "m": "DFC",
     "c": "DFC-02b",
     "t": "Caixa Final positivo",
-    "d": "6,670,595,248.31"
+    "d": "6,670,605,751.59"
   },
   {
     "s": "INFO",
     "m": "DVP",
     "c": "DVP-01",
     "t": "Resultado Patrimonial (encerramento do exercício só em dezembro)",
-    "d": "VPA 97,986,974,291.16  −  VPD 112,383,225,548.89  =  -14,396,251,257.73  — a 891XXXXXX só fecha o exercício em dezembro; a validação do resultado neste período fica com os cruzamentos X6 (DMPL) e R1a (BP)  |  Lançamentos parciais na 891 (não é encerramento, não entra na comparação): UG 130101 256,016.48"
+    "d": "VPA 97,991,606,965.05  −  VPD 112,388,803,501.86  =  -14,397,196,536.81  — a 891XXXXXX só fecha o exercício em dezembro; a validação do resultado neste período fica com os cruzamentos X6 (DMPL) e R1a (BP)  |  Lançamentos parciais na 891 (não é encerramento, não entra na comparação): UG 130101 256,016.48"
   },
   {
     "s": "OK",
     "m": "DVP",
     "c": "DVP-02a",
     "t": "VPA Total positivo",
-    "d": "97,986,974,291.16"
+    "d": "97,991,606,965.05"
   },
   {
     "s": "OK",
     "m": "DVP",
     "c": "DVP-02b",
     "t": "VPD Total positivo",
-    "d": "112,383,225,548.89"
+    "d": "112,388,803,501.86"
   },
   {
     "s": "INFO",
     "m": "DVP",
     "c": "DVP-03",
     "t": "Cobertura dos subtotais detalhados",
-    "d": "VPA: subtotais 58,751,299,283.72 de 97,986,974,291.16 | VPD: subtotais 42,627,821,782.64 de 112,383,225,548.89 — o restante não é aberto por grupo neste diagnóstico"
+    "d": "VPA: subtotais 58,755,998,082.64 de 97,991,606,965.05 | VPD: subtotais 42,632,571,632.62 de 112,388,803,501.86 — o restante não é aberto por grupo neste diagnóstico"
   },
   {
     "s": "ERRO",
@@ -664,28 +672,28 @@ const ACHADOS = [
     "m": "BP",
     "c": "BP-01",
     "t": "Ativo = Passivo + PL",
-    "d": "Ativo 68,772,657,553.57  =  Passivo+PL 68,772,657,553.57"
+    "d": "Ativo 68,775,295,530.91  =  Passivo+PL 68,775,295,530.91"
   },
   {
     "s": "OK",
     "m": "BP",
     "c": "BP-02",
     "t": "Ativo Circ + Não Circ esgota a classe 1",
-    "d": "Circ 20,370,240,414.14  +  NCirc 48,402,417,139.43  =  68,772,657,553.57  =  classe 1 68,772,657,553.57"
+    "d": "Circ 20,370,069,624.48  +  NCirc 48,405,225,906.43  =  68,775,295,530.91  =  classe 1 68,775,295,530.91"
   },
   {
     "s": "OK",
     "m": "BP",
     "c": "BP-03",
     "t": "Caixa positivo",
-    "d": "Caixa: 6,670,685,284.61"
+    "d": "Caixa: 6,670,605,751.59"
   },
   {
     "s": "OK",
     "m": "BP",
     "c": "BP-04",
     "t": "Passivo + PL esgota a classe 2",
-    "d": "Passivo 214,797,283,791.11  +  PL(231..237) -131,628,355,200.86  =  classe 2 83,168,928,590.25"
+    "d": "Passivo 214,800,851,063.62  +  PL(231..237) -131,628,355,200.86  =  classe 2 83,172,495,862.76"
   },
   {
     "s": "OK",
@@ -699,42 +707,42 @@ const ACHADOS = [
     "m": "X",
     "c": "X1b",
     "t": "Caixa Final: BF ≠ DFC",
-    "d": "Diferença: -59,281.95  |  BF 6,670,535,966.36  DFC 6,670,595,248.31"
+    "d": "Diferença: 58,567.14  |  BF 6,670,664,318.73  DFC 6,670,605,751.59"
   },
   {
     "s": "ERRO",
     "m": "X",
     "c": "X2",
     "t": "DFC: Geração Líquida ≠ Variação do Caixa",
-    "d": "Gap: 30,768,436.10  |  Geração 1,241,034,142.67  Var.Caixa 1,210,265,706.57"
+    "d": "Gap: 30,757,932.82  |  Geração 1,241,034,142.67  Var.Caixa 1,210,276,209.85"
   },
   {
     "s": "ERRO",
     "m": "X",
     "c": "X6",
     "t": "Resultado do Exercício: DMPL ≠ DVP",
-    "d": "Diferença: 66,055,157.47  |  DMPL -14,330,196,100.26  DVP -14,396,251,257.73"
+    "d": "Diferença: 67,000,436.55  |  DMPL -14,330,196,100.26  DVP -14,397,196,536.81"
   },
   {
     "s": "ERRO",
     "m": "X",
     "c": "R1a",
     "t": "Resultado do Exercício: BP ≠ DVP(III)",
-    "d": "Diferença: -19,778.95"
+    "d": "Diferença: -3,795.04"
   },
   {
     "s": "ERRO",
     "m": "X",
     "c": "R2",
     "t": "Saldo Final DMPL ≠ PL do BP",
-    "d": "Diferença: 66,074,936.42"
+    "d": "Diferença: 67,004,231.59"
   },
   {
-    "s": "ERRO",
+    "s": "OK",
     "m": "X",
     "c": "R4a",
-    "t": "Caixa: BP ≠ DFC",
-    "d": "Diferença: 90,036.30"
+    "t": "Caixa: BP = DFC (Caixa Final)",
+    "d": "BP 6,670,605,751.59  =  DFC 6,670,605,751.59"
   },
   {
     "s": "OK",
