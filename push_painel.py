@@ -36,7 +36,8 @@ def run(cmd, check=True, capture=False):
     r = subprocess.run(cmd, shell=True, capture_output=capture, text=True,
                        encoding='utf-8', errors='replace')
     if check and r.returncode != 0:
-        raise RuntimeError(f"Falhou ({r.returncode}): {cmd}\n{r.stderr.strip()}")
+        err = (r.stderr or '').strip()
+        raise RuntimeError(f"Falhou ({r.returncode}): {cmd}\n{err}")
     return r
 
 
