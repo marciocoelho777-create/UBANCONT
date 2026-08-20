@@ -13,7 +13,7 @@
       python rotina_controles.py --mes 8 --ano 2026 --controles 01,08,15
 =============================================================================
 """
-import argparse, sys, warnings
+import argparse, re, sys, warnings
 from datetime import datetime
 from html import escape as _esc
 from pathlib import Path
@@ -286,6 +286,46 @@ _COLS_ID = {'E997027', 'E997028', 'E997036', 'E997038',
             'ININVERSAOSALDO', 'NOCONTACONTABIL',
             'GESTAO', 'GESTAO CONTAB', 'UG CONTAB', 'UG'}
 
+# Colunas que devem ser zero-padded (UG = 6 digitos, GESTAO = 5 digitos)
+_UG_COLS      = {'E997036', 'E997038', 'COUGCONTAB', 'COUG', 'UG CONTAB', 'UG'}
+_GESTAO_COLS  = {'E997027', 'E997028', 'COGESTAO', 'COGESTAOCONTAB', 'GESTAO', 'GESTAO CONTAB'}
+
+# Mapeamento de aliases de grouping Oracle → nome amigavel
+_ALIAS_AMIGAVEL = {
+    'E997027': 'Gestao',       'E997028': 'Gestao Contab',
+    'E997036': 'UG Contab',    'E997038': 'UG',
+    'COGESTAO': 'Gestao',      'COGESTAOCONTAB': 'Gestao Contab',
+    'COUGCONTAB': 'UG Contab', 'COUG': 'UG',
+}
+
+
+def _auto_rename_sql(sql_text):
+    """Gera dict de rename a partir dos aliases calculados (C_N) no SQL."""
+    rename = dict(_ALIAS_AMIGAVEL)
+    segs = re.findall(r'((?:SUM|DECODE)\(.+?)\)\s*as\s+(C_\w+|E\w+)', sql_text, re.DOTALL)
+    for expr, alias in segs:
+        alias_up = alias.upper()
+        if alias_up in rename:
+            continue
+        m = re.search(r'BETWEEN\s+(\d+)\s+AND\s+(\d+)', expr)
+        if m:
+            lo, hi = m.group(1), m.group(2)
+            if lo == hi:
+                rename[alias_up] = lo
+            else:
+                common = ''
+                for a, b in zip(lo, hi):
+                    if a == b:
+                        common += a
+                    else:
+                        break
+                rename[alias_up] = common + 'X' * (len(lo) - len(common))
+            continue
+        m = re.search(r'DECODE\([^,]+,\s*(\d+),', expr)
+        if m:
+            rename[alias_up] = m.group(1)
+    return rename
+
 
 def executar_controle(conn, controle, ano):
     sql_path = ROTINA_DIR / controle['sql']
@@ -299,8 +339,31 @@ def executar_controle(conn, controle, ano):
     df = pd.read_sql(sql, conn)
     df.columns = [str(c).upper() for c in df.columns]
 
+    # Renomeia colunas: usa dict manual se existir, senao parseia o SQL
     if 'rename' in controle:
-        df.rename(columns={k.upper(): v for k, v in controle['rename'].items()}, inplace=True)
+        rename_map = {k.upper(): v for k, v in controle['rename'].items()}
+    else:
+        rename_map = _auto_rename_sql(sql)
+
+    # Marca a coluna de check como DIFERENCA (exceto all_rows e col3_neg/nz que sao saldo/inversao)
+    chk = controle['check']
+    if chk not in ('all_rows',) and '_' in chk:
+        chk_idx = int(chk[3:chk.index('_')])
+        chk_col = df.columns[chk_idx]
+        if chk_col not in rename_map or rename_map.get(chk_col) == chk_col:
+            rename_map[chk_col] = 'DIFERENCA'
+
+    # Desambigua alvos duplicados (ex: dois C_N mapeados ao mesmo codigo de conta)
+    seen: dict = {}
+    dedup: dict = {}
+    for orig, novo in rename_map.items():
+        if novo not in seen:
+            seen[novo] = 1
+            dedup[orig] = novo
+        else:
+            seen[novo] += 1
+            dedup[orig] = f'{novo}_{seen[novo]}'
+    df.rename(columns=dedup, inplace=True)
 
     for col in df.columns:
         if col not in _COLS_ID:
@@ -347,6 +410,17 @@ def _fmt(v, col):
             return _brl(float(v))
         except (ValueError, TypeError):
             pass
+        return _esc(str(v))
+    # Colunas de identificacao: sem separador de milhar, inteiro se possivel
+    try:
+        iv = int(float(v))
+        if col in _UG_COLS:
+            return _esc(str(iv).zfill(6))
+        if col in _GESTAO_COLS:
+            return _esc(str(iv).zfill(5))
+        return _esc(str(iv))
+    except (ValueError, TypeError):
+        pass
     return _esc(str(v))
 
 
