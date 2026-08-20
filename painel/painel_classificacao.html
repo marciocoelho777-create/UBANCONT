@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitor de Classificação</title>
+<style>
+/* ── Design tokens ── */
+:root {
+  --brand:    #1A4A8F;
+  --pg:       #F1F4FB;
+  --s1:       #FFFFFF;
+  --s2:       #E8EDF7;
+  --bd:       #C8D5ED;
+  --t1:       #0D1829;
+  --t2:       #4C5C7A;
+  --t3:       #8A9BBD;
+  --err:      #BE1C1C;
+  --err-bg:   #FEF2F2;
+  --err-bd:   #FECACA;
+  --wrn:      #9A6100;
+  --wrn-bg:   #FFFBEB;
+  --wrn-bd:   #FDE68A;
+  --ok:       #156030;
+  --ok-bg:    #F0FDF4;
+  --ok-bd:    #BBF7D0;
+  --fn: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --fm: 'Cascadia Code', 'SF Mono', Consolas, 'Courier New', monospace;
+  --r: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand:   #4889D8;
+    --pg:      #080C18;
+    --s1:      #101827;
+    --s2:      #182035;
+    --bd:      #1D2C48;
+    --t1:      #D4DFF5;
+    --t2:      #6A7EA6;
+    --t3:      #3D5070;
+    --err:     #F87171;
+    --err-bg:  #170404;
+    --err-bd:  #7F1D1D;
+    --wrn:     #FBBA47;
+    --wrn-bg:  #140C00;
+    --wrn-bd:  #78350F;
+    --ok:      #4ADE80;
+    --ok-bg:   #031309;
+    --ok-bd:   #14532D;
+  }
+}
+
+:root[data-theme="dark"] {
+  --brand:   #4889D8;
+  --pg:      #080C18;
+  --s1:      #101827;
+  --s2:      #182035;
+  --bd:      #1D2C48;
+  --t1:      #D4DFF5;
+  --t2:      #6A7EA6;
+  --t3:      #3D5070;
+  --err:     #F87171;
+  --err-bg:  #170404;
+  --err-bd:  #7F1D1D;
+  --wrn:     #FBBA47;
+  --wrn-bg:  #140C00;
+  --wrn-bd:  #78350F;
+  --ok:      #4ADE80;
+  --ok-bg:   #031309;
+  --ok-bd:   #14532D;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fn);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--t1);
+  background: var(--pg);
+}
+
+/* ── Header ── */
+.hd {
+  background: var(--brand);
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hd-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.hd-sub   { font-size: 12px; opacity: .72; margin-top: 2px; }
+.hd-meta  { font-size: 11px; text-align: right; opacity: .75; line-height: 1.65; }
+.hd-meta strong { color: #fff; opacity: 1; }
+
+/* ── Page layout ── */
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Alert banner ── */
+.alert {
+  display: flex;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--err-bg);
+  border: 1px solid var(--err-bd);
+  border-left: 4px solid var(--err);
+  border-radius: var(--r);
+}
+.alert-ico { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+.alert strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--err);
+  margin-bottom: 5px;
+}
+.alert p { font-size: 13px; color: var(--t2); line-height: 1.55; }
+
+/* ── KPI row ── */
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+.kpi {
+  background: var(--s1);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 16px 18px;
+}
+.kpi-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--t3); margin-bottom: 7px; }
+.kpi-val { font-size: 22px; font-weight: 700; letter-spacing: -.025em; font-variant-numeric: tabular-nums; }
+.kpi-sub { font-size: 12px; color: var(--t2); margin-top: 5px; }
+
+/* ── Card ── */
+.card { background: var(--s1); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; }
+
+.card-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--bd);
+  font-size: 13px;
+  font-weight: 600;
+}
+.card-hd span { font-size: 11px; font-weight: 400; color: var(--t3); }
+
+.card-body { padding: 20px; }
+
+/* ── Bar chart ── */
+.barchart { display: flex; flex-direction: column; gap: 14px; }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 165px;
+  align-items: center;
+  gap: 12px;
+}
+.bar-lbl { font-size: 12px; color: var(--t2); text-align: right; }
+.bar-track {
+  background: var(--s2);
+  border-radius: 3px;
+  height: 20px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 3px;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: grow .55s ease-out forwards;
+}
+@keyframes grow { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .bar-fill { transform: scaleX(1); animation: none; } }
+.bar-amt { font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 500; }
+.bar-note { font-size: 11px; color: var(--t3); margin-top: 16px; }
+
+/* ── Table ── */
+.tbl-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+thead th {
+  padding: 9px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--t3);
+  font-weight: 600;
+  background: var(--s2);
+  border-bottom: 1px solid var(--bd);
+  white-space: nowrap;
+  text-align: left;
+}
+th.r { text-align: right; }
+
+tbody tr { border-bottom: 1px solid var(--bd); transition: background .12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--s2); }
+
+td { padding: 10px 14px; vertical-align: middle; }
+td.r { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+td.null { color: var(--err); font-weight: 600; font-size: 12px; }
+td.vl { color: var(--t2); font-family: var(--fm); font-size: 12px; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.b-err   { background: var(--err-bg); color: var(--err); border-color: var(--err-bd); }
+.b-wrn   { background: var(--wrn-bg); color: var(--wrn); border-color: var(--wrn-bd); }
+.b-ok    { background: var(--ok-bg);  color: var(--ok);  border-color: var(--ok-bd);  }
+.b-muted { background: var(--s2); color: var(--t3); border-color: var(--bd); }
+
+/* ── Code spans ── */
+code {
+  font-family: var(--fm);
+  font-size: 12px;
+  background: var(--s2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--brand);
+}
+
+/* ── Timeline ── */
+.tl { display: flex; flex-direction: column; }
+
+.tl-item {
+  display: grid;
+  grid-template-columns: 128px 16px 1fr;
+  gap: 0 14px;
+}
+.tl-ts {
+  font-size: 11px;
+  color: var(--t3);
+  padding-top: 3px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+.tl-axis { display: flex; flex-direction: column; align-items: center; }
+.tl-dot  {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--brand);
+  background: var(--s1);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.tl-dot.cur { background: var(--brand); }
+.tl-seg { width: 2px; background: var(--bd); flex: 1; min-height: 28px; }
+.tl-bd  { padding-bottom: 22px; }
+.tl-ttl { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.tl-desc { font-size: 12px; color: var(--t2); margin-top: 4px; line-height: 1.55; }
+
+/* ── Divider note ── */
+.note-box {
+  background: var(--s2);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--t2);
+  line-height: 1.6;
+}
+.note-box strong { color: var(--t1); }
+
+/* ── Accordion / details ── */
+details {
+  background: var(--s1);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+summary {
+  padding: 13px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '›'; font-size: 18px; color: var(--t3); transition: transform .2s; line-height: 1; }
+details[open] summary { border-bottom: 1px solid var(--bd); }
+details[open] summary::after { transform: rotate(90deg); }
+.acc-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--t2);
+  line-height: 1.65;
+}
+.acc-body h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--t1);
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.acc-body ul { padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+
+/* ── Action steps ── */
+.action-box {
+  background: var(--s2);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.action-box strong {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--brand);
+  margin-bottom: 10px;
+}
+.action-box ol { padding-left: 18px; display: flex; flex-direction: column; gap: 7px; color: var(--t1); font-size: 13px; }
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 14px;
+  font-size: 11px;
+  color: var(--t3);
+  border-top: 1px solid var(--bd);
+  margin-top: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .bar-row { grid-template-columns: 70px 1fr; }
+  .bar-amt { display: none; }
+  .tl-item { grid-template-columns: 80px 14px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="hd">
+  <div>
+    <div class="hd-title">Monitor de Classificação</div>
+    <div class="hd-sub">GDF · Demonstrativos Contábeis 2026</div>
+  </div>
+  <div id="hd-meta" class="hd-meta">
+    Competência: <strong>Agosto/2026</strong><br>
+    Gerado em 16/08/2026 às 08:51
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1 · Alerta -->
+  <div id="alert-box" class="alert" role="alert">
+    <span class="alert-ico">⚠️</span>
+    <div>
+      <strong>3 registros com classificação incompleta — R$ 3.186.751,68 ausente do BO</strong>
+      <p>O campo <code>INCATEGORIA</code> (GND) está zerado em todos os casos. Sem esse campo, os
+      registros não casam com nenhum item da Lista de Equações do Balanço Orçamentário e ficam
+      fora do total publicado.</p>
+    </div>
+  </div>
+
+  <!-- 2 · KPIs -->
+  <div id="kpi-row" class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-lbl">Valor ausente no BO</div>
+      <div class="kpi-val">R$ 3,19 M</div>
+      <div class="kpi-sub">R$ 3.186.751,68 total</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Registros afetados</div>
+      <div class="kpi-val">3</div>
+      <div class="kpi-sub">em 2 contas distintas</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Campo zerado</div>
+      <div class="kpi-val" style="font-size:15px;font-family:var(--fm);letter-spacing:0">INCATEGORIA</div>
+      <div class="kpi-sub">GND — em todos os 3 registros</div>
+    </div>
+  </div>
+
+  <!-- 3 · Gráfico de barras -->
+  <div class="card">
+    <div class="card-hd">
+      Impacto por período
+      <span>valor ausente no BO, por mês de competência</span>
+    </div>
+    <div id="barchart-wrap" class="card-body">
+      <div class="barchart">
+        <div class="bar-row">
+          <div class="bar-lbl">Jun/2026</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:100%"></div>
+          </div>
+          <div class="bar-amt">R$ 1.922.061,96</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl">Ago/2026</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:59%"></div>
+          </div>
+          <div class="bar-amt">R$ 1.134.760,68</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-lbl">Mai/2026</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:6.8%"></div>
+          </div>
+          <div class="bar-amt">R$ 129.929,04</div>
+        </div>
+      </div>
+      <p class="bar-note">Conta 622130300 em maio e junho (mesmo lançamento recorrente). Conta 622920104 em agosto.</p>
+    </div>
+  </div>
+
+  <!-- 4 · Tabela principal de achados -->
+  <div class="card">
+    <div class="card-hd">
+      Achados — por valor decrescente
+      <span>competência 08/2026, execução de 16/08</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Conta</th>
+            <th class="r">Valor</th>
+            <th>Campo zerado</th>
+            <th>Some de</th>
+            <th>Permanece em</th>
+            <th>Incerto em</th>
+          </tr>
+        </thead>
+        <tbody id="achados-tbody">
+          <tr>
+            <td>Jun/2026</td>
+            <td><code>622130300</code></td>
+            <td class="r">R$ 1.922.061,96</td>
+            <td><code>INCATEGORIA</code></td>
+            <td><span class="badge b-err">BO</span></td>
+            <td><span class="badge b-muted">—</span></td>
+            <td><span class="badge b-wrn">BF</span></td>
+          </tr>
+          <tr>
+            <td>Ago/2026</td>
+            <td><code>622920104</code></td>
+            <td class="r">R$ 1.134.760,68</td>
+            <td><code>INCATEGORIA</code></td>
+            <td><span class="badge b-err">BO</span></td>
+            <td><span class="badge b-muted">—</span></td>
+            <td><span class="badge b-wrn">BF</span>&ensp;<span class="badge b-wrn">DFC</span></td>
+          </tr>
+          <tr>
+            <td>Mai/2026</td>
+            <td><code>622130300</code></td>
+            <td class="r">R$ 129.929,04</td>
+            <td><code>INCATEGORIA</code></td>
+            <td><span class="badge b-err">BO</span></td>
+            <td><span class="badge b-muted">—</span></td>
+            <td><span class="badge b-wrn">BF</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5 · Campos de classificação por registro -->
+  <div class="card">
+    <div class="card-hd">
+      Campos de classificação por registro
+      <span>vermelho = nulo · código = valor preenchido</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Conta / Mês</th>
+            <th>INCATEGORIA (GND)</th>
+            <th>CONATUREZA</th>
+            <th>COFONTE</th>
+            <th>COUO</th>
+            <th>COFUNCAO</th>
+          </tr>
+        </thead>
+        <tbody id="campos-tbody">
+          <tr>
+            <td style="font-weight:600"><code>622130300</code> Jun</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="vl">80</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600"><code>622920104</code> Ago</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="vl">100000000</td>
+            <td class="null">nulo ✗</td>
+            <td class="vl">80</td>
+          </tr>
+          <tr>
+            <td style="font-weight:600"><code>622130300</code> Mai</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="null">nulo ✗</td>
+            <td class="vl">80</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid var(--bd)">
+      <p style="font-size:12px;color:var(--t2);line-height:1.55">
+        <strong>Armadilha de nomenclatura:</strong> <code>INCATEGORIA</code> na <code>BALANCOGERAL</code>
+        é o GND, não a categoria econômica — apesar do nome. Equivale a <code>COCATEGORIA</code>
+        no <code>ITEMBALANCO</code>. Confirmado com a área em 15/08/2026.
+      </p>
+    </div>
+  </div>
+
+  <!-- 6 · Histórico de execuções -->
+  <div class="card">
+    <div class="card-hd">
+      Histórico de execuções
+      <span>agosto/2026 · 5 execuções · refinamento do método</span>
+    </div>
+    <div class="card-body">
+      <div id="hist-timeline" class="tl">
+
+        <div class="tl-item">
+          <div class="tl-ts">15/08<br>09:55</div>
+          <div class="tl-axis">
+            <div class="tl-dot"></div>
+            <div class="tl-seg"></div>
+          </div>
+          <div class="tl-bd">
+            <div class="tl-ttl">Versão inicial — DFC ainda incluído</div>
+            <div class="tl-desc">37.252 achados no DFC (R$ 52,5 bi) + 7 no BO. O método testava apenas "campo zerado" sem verificar se o campo era realmente obrigatório para aquela conta naquele demonstrativo.</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-ts">15/08<br>18:49–19:09</div>
+          <div class="tl-axis">
+            <div class="tl-dot"></div>
+            <div class="tl-seg"></div>
+          </div>
+          <div class="tl-bd">
+            <div class="tl-ttl">3 execuções intermediárias — análise dos falsos positivos</div>
+            <div class="tl-desc">37.252 DFC · 7 BO. Análise confirmou: a maioria das despesas não pertence ao DFC — "campo zerado" não implica "classificação ausente" nesse demonstrativo. Método a ser corrigido.</div>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-ts" style="color:var(--brand);font-weight:600">16/08<br>08:51</div>
+          <div class="tl-axis">
+            <div class="tl-dot cur"></div>
+          </div>
+          <div class="tl-bd">
+            <div class="tl-ttl" style="color:var(--brand)">Versão atual — DFC excluído, BO preciso</div>
+            <div class="tl-desc">
+              <strong>3 achados no BO · R$ 3.186.751,68.</strong>
+              DFC excluído: exigiria saber quais registros deveriam pertencer ao fluxo de caixa,
+              informação que não está disponível na <code>BALANCOGERAL</code>.
+              BO confirmado: todos os 8 itens do <code>ITEMBALANCO</code> para essas contas exigem
+              <code>INCATEGORIA</code> → campo verdadeiramente obrigatório.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 · O que fazer -->
+  <details open>
+    <summary>O que fazer — ação recomendada</summary>
+    <div class="acc-body">
+      <p>Os 3 registros têm <code>INCATEGORIA</code> (GND) zerado. Sem esse campo, não casam com
+      nenhum dos 8 itens da Lista de Equações do BO e ficam fora do total publicado.
+      O BO está subreportando <strong>R$ 3.186.751,68</strong>.</p>
+
+      <div class="action-box">
+        <strong>Passos para correção</strong>
+        <ol>
+          <li>Identificar o lançamento origem de cada registro na <code>BALANCOGERAL</code>
+              (filtrar por conta + mês + valor).</li>
+          <li>Verificar por qual UG / sistema o lançamento entrou e por que o GND não foi informado.</li>
+          <li>Corrigir o lançamento com o GND correto (<code>INCATEGORIA</code> ≥ 1) no sistema de origem.</li>
+          <li>Re-executar <code>monitor_classificacao.py --mes 8 --ano 2026</code> para confirmar
+              que os 3 achados desapareceram.</li>
+        </ol>
+      </div>
+
+      <div class="note-box">
+        <strong>Atenção:</strong> a conta <code>622130300</code> aparece em dois meses consecutivos
+        (maio e junho) com os mesmos campos zerados — provável lançamento recorrente gerado pelo
+        mesmo sistema. Além de corrigir os lançamentos, investigar por que o sistema não está
+        informando o GND.
+      </div>
+    </div>
+  </details>
+
+  <!-- 8 · Como funciona -->
+  <details>
+    <summary>Como o monitor funciona</summary>
+    <div class="acc-body">
+      <div>
+        <h3>Por que um valor some do relatório publicado</h3>
+        <p>Os demonstrativos oficiais (PSIAG550/560) são montados sobre a <code>BALANCOGERAL</code>.
+        Cada item da Lista de Equações (<code>MIL{ano}.ITEMBALANCO</code>) casa registros por
+        igualdade de campos. Se o registro tem zerado um campo que o item exige, ele não casa
+        — e se não casar com nenhum item daquele demonstrativo, o valor simplesmente não aparece
+        no total publicado.</p>
+      </div>
+
+      <div>
+        <h3>O que cada demonstrativo exige (contas monitoradas)</h3>
+        <ul>
+          <li><strong>BF</strong> — COFONTE em 662 itens, mas existe um item sem COFONTE
+              ("Recursos Não Vinculados") → campo não universalmente obrigatório → BF excluído do monitor</li>
+          <li><strong>BO</strong> — INCATEGORIA/GND em 8 itens, todos exigem o campo
+              → obrigatório → o monitor detecta e reporta</li>
+          <li><strong>DFC</strong> — COFUNCAO + CONATUREZA, mas não toda despesa pertence
+              ao fluxo de caixa → 37.252 falsos positivos em 15/08 → excluído</li>
+          <li><strong>BP</strong> — sem filtro de campo → captura todos os registros
+              → não gera achados</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>A regra de obrigatoriedade</h3>
+        <p>Um campo é <em>obrigatório</em> num demonstrativo somente se ele aparece em
+        <strong>todos</strong> os itens daquela conta — sem exceção. Se existe ao menos um item
+        sem aquele campo, um registro sem o campo ainda pode casar com esse item. O monitor
+        reporta somente onde é demonstrável: campo zerado = valor perdido, sem ambiguidade.</p>
+      </div>
+
+      <div>
+        <h3>Armadilha de nomenclatura</h3>
+        <p><code>INCATEGORIA</code> na <code>BALANCOGERAL</code> é o <strong>GND</strong>
+        (Grupo de Natureza de Despesa), não a categoria econômica — apesar do nome.
+        O campo equivalente no <code>ITEMBALANCO</code> se chama <code>COCATEGORIA</code>.
+        Confirmado com a área em 15/08/2026.</p>
+      </div>
+    </div>
+  </details>
+
+</main>
+
+<footer>
+  Monitor de Classificação · GDF 2026 ·
+  <code>monitor_classificacao.py</code> ·
+  dados em <code>painel/dados/classificacao/</code>
+</footer>
+
+<script>
+/* AUTO-DATA-START */
+const CDATA = {
+  "gerado_em": "2026-08-20T13:25:56",
+  "mes": 8,
+  "ano": 2026,
+  "por_demonstrativo": {
+    "BO": {
+      "n": 2,
+      "valor": 2051991.0
+    }
+  },
+  "achados": [
+    {
+      "mes": 5,
+      "conta": 622130300,
+      "valor": 129929.04,
+      "registros": 1,
+      "campos": {
+        "INCATEGORIA": null,
+        "CONATUREZA": null,
+        "COFONTE": null,
+        "COUO": null,
+        "COFUNCAO": 80
+      },
+      "zerados": [
+        "INCATEGORIA"
+      ],
+      "some_de": [
+        "BO"
+      ],
+      "permanece_em": [],
+      "incerto_em": [
+        "BF"
+      ]
+    },
+    {
+      "mes": 6,
+      "conta": 622130300,
+      "valor": 1922061.96,
+      "registros": 1,
+      "campos": {
+        "INCATEGORIA": null,
+        "CONATUREZA": null,
+        "COFONTE": null,
+        "COUO": null,
+        "COFUNCAO": 80
+      },
+      "zerados": [
+        "INCATEGORIA"
+      ],
+      "some_de": [
+        "BO"
+      ],
+      "permanece_em": [],
+      "incerto_em": [
+        "BF"
+      ]
+    }
+  ],
+  "historico": [
+    {
+      "gerado_em": "2026-08-20T13:25:56",
+      "n": 2,
+      "por_dem": {
+        "BO": 2051991.0
+      }
+    },
+    {
+      "gerado_em": "2026-08-19T14:37:44",
+      "n": 2,
+      "por_dem": {
+        "BO": 2051991.0
+      }
+    },
+    {
+      "gerado_em": "2026-08-18T15:27:59",
+      "n": 3,
+      "por_dem": {
+        "BO": 3186751.6799999997
+      }
+    },
+    {
+      "gerado_em": "2026-08-17T14:05:48",
+      "n": 3,
+      "por_dem": {
+        "BO": 3186751.6799999997
+      }
+    },
+    {
+      "gerado_em": "2026-08-16T14:41:29",
+      "n": 3,
+      "por_dem": {
+        "BO": 3186751.6799999997
+      }
+    },
+    {
+      "gerado_em": "2026-08-16T08:51:36",
+      "n": 3,
+      "por_dem": {
+        "BO": 3186751.6799999997
+      }
+    }
+  ]
+};
+/* AUTO-DATA-END */
+
+(function(){
+  const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const CAMPOS_K = ['INCATEGORIA','CONATUREZA','COFONTE','COUO','COFUNCAO'];
+
+  function _dt(iso){
+    if(!iso) return '';
+    try{
+      const d=new Date(iso.replace('T',' '));
+      return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){ return iso; }
+  }
+
+  function _brl(v){
+    if(v===null||v===undefined) return '—';
+    return 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  const {gerado_em,mes,ano,por_demonstrativo={},achados=[],historico=[]} = CDATA;
+  const mesNome = MESES[mes]||String(mes);
+  const totalValor = Object.values(por_demonstrativo).reduce((s,d)=>s+(d.valor||0),0);
+  const dems = Object.keys(por_demonstrativo);
+
+  /* Header */
+  const hMeta=document.getElementById('hd-meta');
+  if(hMeta) hMeta.innerHTML=`Competência: <strong>${mesNome}/${ano}</strong><br>Gerado em ${_dt(gerado_em)}`;
+
+  /* Alert */
+  const alertEl=document.getElementById('alert-box');
+  if(alertEl){
+    alertEl.innerHTML=`<span class="alert-ico">⚠️</span><div>
+      <strong>${achados.length} registro(s) com classificação incompleta — ${_brl(totalValor)} ausente${dems.length?' do '+dems.join(', '):''}</strong>
+      <p>O campo <code>INCATEGORIA</code> (GND) está zerado em todos os casos. Sem esse campo, os
+      registros não casam com nenhum item da Lista de Equações do Balanço Orçamentário e ficam
+      fora do total publicado.</p></div>`;
+  }
+
+  /* KPI row */
+  const kpiRow=document.getElementById('kpi-row');
+  if(kpiRow){
+    const n_contas=new Set(achados.map(a=>a.conta)).size;
+    const campos_z=[...new Set(achados.flatMap(a=>a.zerados))];
+    const vM=totalValor>=1e6?'R$ '+(totalValor/1e6).toFixed(2).replace('.',',')+' M':_brl(totalValor);
+    kpiRow.innerHTML=`
+      <div class="kpi">
+        <div class="kpi-lbl">Valor ausente no BO</div>
+        <div class="kpi-val">${vM}</div>
+        <div class="kpi-sub">${_brl(totalValor)} total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Registros afetados</div>
+        <div class="kpi-val">${achados.length}</div>
+        <div class="kpi-sub">em ${n_contas} conta${n_contas>1?'s':''} distinta${n_contas>1?'s':''}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Campo zerado</div>
+        <div class="kpi-val" style="font-size:15px;font-family:var(--fm);letter-spacing:0">${campos_z[0]||'—'}</div>
+        <div class="kpi-sub">${campos_z[0]||'—'} — em todos os ${achados.length} registros</div>
+      </div>`;
+  }
+
+  /* Bar chart — agrupado por mês de competência */
+  const barchart=document.getElementById('barchart-wrap');
+  if(barchart){
+    const byMes={};
+    achados.forEach(a=>{ byMes[a.mes]=(byMes[a.mes]||0)+a.valor; });
+    const entries=Object.entries(byMes).sort((x,y)=>y[1]-x[1]);
+    const maxVal=entries[0]?.[1]||1;
+    barchart.innerHTML=`<div class="barchart">${entries.map(([m,v])=>`
+      <div class="bar-row">
+        <div class="bar-lbl">${MESES_ABV[parseInt(m)]||m}/${ano}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v/maxVal*100).toFixed(1)}%"></div></div>
+        <div class="bar-amt">${_brl(v)}</div>
+      </div>`).join('')}
+    </div>
+    <p class="bar-note">Agrupado por mês de competência · execução ${ano}-${String(mes).padStart(2,'0')}</p>`;
+  }
+
+  /* Achados table */
+  const achadosTbody=document.getElementById('achados-tbody');
+  if(achadosTbody){
+    const sorted=[...achados].sort((a,b)=>b.valor-a.valor);
+    achadosTbody.innerHTML=sorted.map(a=>`<tr>
+      <td>${MESES_ABV[a.mes]||a.mes}/${ano}</td>
+      <td><code>${a.conta}</code></td>
+      <td class="r">${_brl(a.valor)}</td>
+      <td>${a.zerados.map(z=>`<code>${z}</code>`).join(', ')}</td>
+      <td>${a.some_de.map(d=>`<span class="badge b-err">${d}</span>`).join(' ')}</td>
+      <td>${a.permanece_em?.length?a.permanece_em.map(d=>`<span class="badge b-ok">${d}</span>`).join(' '):'<span class="badge b-muted">—</span>'}</td>
+      <td>${a.incerto_em?.length?a.incerto_em.map(d=>`<span class="badge b-wrn">${d}</span>`).join('&ensp;'):'—'}</td>
+    </tr>`).join('');
+  }
+
+  /* Campos table */
+  const camposTbody=document.getElementById('campos-tbody');
+  if(camposTbody){
+    const sorted=[...achados].sort((a,b)=>b.valor-a.valor);
+    camposTbody.innerHTML=sorted.map(a=>`<tr>
+      <td style="font-weight:600"><code>${a.conta}</code> ${MESES_ABV[a.mes]||a.mes}</td>
+      ${CAMPOS_K.map(c=>{
+        const v=a.campos?.[c];
+        return (v===null||v===0)?'<td class="null">nulo ✗</td>':`<td class="vl">${v}</td>`;
+      }).join('')}
+    </tr>`).join('');
+  }
+
+  /* Histórico de execuções */
+  const histEl=document.getElementById('hist-timeline');
+  if(histEl&&historico.length){
+    histEl.innerHTML=historico.map((h,i)=>{
+      const dt=h.gerado_em?new Date(h.gerado_em.replace('T',' ')):null;
+      const ts=dt?dt.toLocaleDateString('pt-BR')+'<br>'+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+      const demStr=Object.entries(h.por_dem||{}).map(([d,v])=>`${d}: ${_brl(v)}`).join(' · ')||'—';
+      const isCur=i===0;
+      return `<div class="tl-item">
+        <div class="tl-ts"${isCur?' style="color:var(--brand);font-weight:600"':''}>${ts}</div>
+        <div class="tl-axis">
+          <div class="tl-dot${isCur?' cur':''}"></div>
+          ${i<historico.length-1?'<div class="tl-seg"></div>':''}
+        </div>
+        <div class="tl-bd">
+          <div class="tl-ttl"${isCur?' style="color:var(--brand)"':''}>${isCur?'Execução atual':'Execução anterior'} — ${h.n} achado(s)</div>
+          <div class="tl-desc">${demStr}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+})();
+</script>
+</body>
+</html>
