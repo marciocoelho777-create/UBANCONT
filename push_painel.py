@@ -114,12 +114,14 @@ def publicar(arquivos):
     for f in arquivos:
         print(f'  {f}')
 
-    # copia os HTMLs para temp ANTES de trocar de branch
+    # copia os HTMLs para temp e remove do disco se nao rastreados (evita bloqueio no checkout)
     tmp = Path(tempfile.mkdtemp())
     for arq in arquivos:
         src = Path(arq)
         if src.exists():
             shutil.copy2(src, tmp / src.name)
+            if run(f'git ls-files --error-unmatch "{arq}"', check=False).returncode != 0:
+                src.unlink()  # arquivo nao rastreado: remove para nao bloquear checkout
 
     run(f'git fetch {REMOTE} {REMOTE_BRANCH} -q')
 
@@ -133,7 +135,7 @@ def publicar(arquivos):
     index_novo = atualizar_index(index_atual, novos_hrefs) if index_atual else ''
     index_mudou = index_novo and index_novo != index_atual
 
-    stashed = run('git stash --include-untracked -q', check=False).returncode == 0
+    stashed = run('git stash -q', check=False).returncode == 0
     branch_orig = run('git branch --show-current', capture=True).stdout.strip()
 
     try:
