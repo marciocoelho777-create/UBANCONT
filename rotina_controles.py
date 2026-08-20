@@ -366,7 +366,7 @@ def executar_controle(conn, controle, ano):
     df.rename(columns=dedup, inplace=True)
 
     for col in df.columns:
-        if col not in _COLS_ID:
+        if col.upper() not in _COLS_ID:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
 
     # Determina linhas com problema
@@ -405,7 +405,8 @@ def _brl(v):
 def _fmt(v, col):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return '—'
-    if col not in _COLS_ID:
+    col_up = col.upper()
+    if col_up not in _COLS_ID:
         try:
             return _brl(float(v))
         except (ValueError, TypeError):
@@ -414,9 +415,9 @@ def _fmt(v, col):
     # Colunas de identificacao: sem separador de milhar, inteiro se possivel
     try:
         iv = int(float(v))
-        if col in _UG_COLS:
+        if col_up in _UG_COLS:
             return _esc(str(iv).zfill(6))
-        if col in _GESTAO_COLS:
+        if col_up in _GESTAO_COLS:
             return _esc(str(iv).zfill(5))
         return _esc(str(iv))
     except (ValueError, TypeError):
