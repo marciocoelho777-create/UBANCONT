@@ -26,6 +26,8 @@ saida_local/
 
 # ── Exceção: os dados do painel entram ────────────────────────────────────
 !painel/dados/*.json
+painel/rotina_controles_*.html
+painel/auditoria_*.html
 !Relatorio_Integridade_*.xlsx
 *.pdf
 # Relatório de integridade (relatorio_integridade.py) -- só é regravado
