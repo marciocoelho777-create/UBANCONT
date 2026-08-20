@@ -284,11 +284,22 @@ def conectar_oracle():
 _COLS_ID = {'E997027', 'E997028', 'E997036', 'E997038',
             'COGESTAO', 'COGESTAOCONTAB', 'COUGCONTAB', 'COUG',
             'ININVERSAOSALDO', 'NOCONTACONTABIL',
+            'COCONTACONTABIL', 'COCONTACORRENTE',
             'GESTAO', 'GESTAO CONTAB', 'UG CONTAB', 'UG'}
 
-# Colunas que devem ser zero-padded (UG = 6 digitos, GESTAO = 5 digitos)
+# Colunas que devem ser zero-padded (UG = 6 digitos, GESTAO = 5 digitos, CONTA = 9 digitos)
 _UG_COLS      = {'E997036', 'E997038', 'COUGCONTAB', 'COUG', 'UG CONTAB', 'UG'}
 _GESTAO_COLS  = {'E997027', 'E997028', 'COGESTAO', 'COGESTAOCONTAB', 'GESTAO', 'GESTAO CONTAB'}
+_CONTA_COLS   = {'COCONTACONTABIL', 'COCONTACORRENTE', 'NOCONTACONTABIL'}
+
+
+def _is_id_col(col):
+    """True se a coluna deve ser tratada como identificador (sem formato numerico)."""
+    col_up = col.upper()
+    if col_up in _COLS_ID:
+        return True
+    # Captura expressoes SUBSTR/TRIM sem alias que contenham CONTA ou CORRENTE
+    return 'CONTA' in col_up or 'CORRENTE' in col_up
 
 # Mapeamento de aliases de grouping Oracle → nome amigavel
 _ALIAS_AMIGAVEL = {
@@ -366,7 +377,7 @@ def executar_controle(conn, controle, ano):
     df.rename(columns=dedup, inplace=True)
 
     for col in df.columns:
-        if col.upper() not in _COLS_ID:
+        if not _is_id_col(col):
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
 
     # Determina linhas com problema
@@ -406,7 +417,7 @@ def _fmt(v, col):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return '—'
     col_up = col.upper()
-    if col_up not in _COLS_ID:
+    if not _is_id_col(col):
         try:
             return _brl(float(v))
         except (ValueError, TypeError):
@@ -419,6 +430,8 @@ def _fmt(v, col):
             return _esc(str(iv).zfill(6))
         if col_up in _GESTAO_COLS:
             return _esc(str(iv).zfill(5))
+        if col_up in _CONTA_COLS or 'CONTA' in col_up or 'CORRENTE' in col_up:
+            return _esc(str(iv).zfill(9))
         return _esc(str(iv))
     except (ValueError, TypeError):
         pass
