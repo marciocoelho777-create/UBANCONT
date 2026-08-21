@@ -303,6 +303,27 @@ def _is_id_col(col):
         return True
     return 'CONTA' in col_up or 'CORRENTE' in col_up
 
+
+def _col_priority(col):
+    """Prioridade de exibicao: 0=UG, 1=Gestao, 2=Conta, 3=outros IDs, 4=numericas."""
+    col_up = col.upper()
+    col_base = re.sub(r'_\d+$', '', col_up)
+    if col_up in _UG_COLS or col_base in _UG_COLS:
+        return 0
+    if col_up in _GESTAO_COLS or col_base in _GESTAO_COLS:
+        return 1
+    if col_up in _CONTA_COLS or col_base in _CONTA_COLS or 'CONTA' in col_up or 'CORRENTE' in col_up:
+        return 2
+    if _is_id_col(col):
+        return 3
+    return 4
+
+
+def _reordenar_colunas(df):
+    """Reordena colunas: UG → Gestao → Conta(s) → outros IDs → numericas."""
+    cols = sorted(df.columns, key=_col_priority)
+    return df[cols]
+
 # Mapeamento de aliases de grouping Oracle → nome amigavel
 _ALIAS_AMIGAVEL = {
     'E997027': 'Gestao',       'E997028': 'Gestao Contab',
@@ -398,6 +419,10 @@ def executar_controle(conn, controle, ano):
     df_erro = df[mask].copy()
     n_erro  = len(df_erro)
     n_total = len(df)
+
+    df      = _reordenar_colunas(df)
+    df_erro = _reordenar_colunas(df_erro)
+
     print(f"{n_total} linhas, {n_erro} com erro.")
     return df, df_erro, n_erro, n_total
 
