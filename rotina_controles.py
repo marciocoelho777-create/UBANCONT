@@ -258,6 +258,7 @@ CONTROLES = [
             'Saldo pendente nas contas de previsao adicional (521920500 e 821191201) ate o mes 6. '
             'Saldo != 0 indica previsao adicional ainda nao lancada.'
         ),
+        'subtotal_por': 'COCONTACONTABIL',
     },
 ]
 
@@ -296,9 +297,10 @@ _CONTA_COLS   = {'COCONTACONTABIL', 'COCONTACORRENTE', 'NOCONTACONTABIL'}
 def _is_id_col(col):
     """True se a coluna deve ser tratada como identificador (sem formato numerico)."""
     col_up = col.upper()
-    if col_up in _COLS_ID:
+    # Remove sufixo de deduplicacao (_2, _3 …) antes de checar os sets
+    col_base = re.sub(r'_\d+$', '', col_up)
+    if col_up in _COLS_ID or col_base in _COLS_ID:
         return True
-    # Captura expressoes SUBSTR/TRIM sem alias que contenham CONTA ou CORRENTE
     return 'CONTA' in col_up or 'CORRENTE' in col_up
 
 # Mapeamento de aliases de grouping Oracle → nome amigavel
@@ -424,13 +426,14 @@ def _fmt(v, col):
             pass
         return _esc(str(v))
     # Colunas de identificacao: sem separador de milhar, inteiro se possivel
+    col_base = re.sub(r'_\d+$', '', col_up)
     try:
         iv = int(float(v))
-        if col_up in _UG_COLS:
+        if col_up in _UG_COLS or col_base in _UG_COLS:
             return _esc(str(iv).zfill(6))
-        if col_up in _GESTAO_COLS:
+        if col_up in _GESTAO_COLS or col_base in _GESTAO_COLS:
             return _esc(str(iv).zfill(5))
-        if col_up in _CONTA_COLS or 'CONTA' in col_up or 'CORRENTE' in col_up:
+        if col_up in _CONTA_COLS or col_base in _CONTA_COLS or 'CONTA' in col_up or 'CORRENTE' in col_up:
             return _esc(str(iv).zfill(9))
         return _esc(str(iv))
     except (ValueError, TypeError):
@@ -504,6 +507,7 @@ table.tbl th{background:var(--s2);font-weight:700;font-family:var(--fn);position
 table.tbl td.num{text-align:right}
 table.tbl tr.err td{background:var(--err-bg)}
 table.tbl tfoot td{background:var(--s2);font-weight:700;font-family:var(--fn);border-top:2px solid var(--brand);position:sticky;bottom:0}
+table.tbl tr.subtot td{background:var(--s1);border-top:1px solid var(--brand);font-style:italic;color:var(--t2)}
 .ok-msg{color:var(--ok);font-size:13px;font-weight:600}
 .stats{font-size:12px;color:var(--t2)}
 .trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
@@ -519,7 +523,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:14px}
 # ─────────────────────────────────────────────────────────────────────────────
 #  GERACAO DO HTML
 # ─────────────────────────────────────────────────────────────────────────────
-def _tabela_html(df, df_erro, cid=''):
+def _tabela_html(df, df_erro, cid='', subtotal_por=None):
     erro_idx = set(df_erro.index)
     cols = list(df.columns)
 
@@ -528,8 +532,10 @@ def _tabela_html(df, df_erro, cid=''):
     exibir = df if len(df) <= MAX_LINHAS else df.iloc[:MAX_LINHAS]
     truncado = len(df) > MAX_LINHAS
 
-    linhas = []
-    for idx, row in exibir.iterrows():
+    num_cols = [c for c in cols if not _is_id_col(c)]
+    use_subtot = subtotal_por and subtotal_por in cols
+
+    def _build_row(idx, row):
         cls = ' class="err"' if idx in erro_idx else ''
         cells = []
         for c in cols:
@@ -541,7 +547,49 @@ def _tabela_html(df, df_erro, cid=''):
                 except Exception:
                     pass
             cells.append(f'<td>{_fmt(v, c)}</td>')
-        linhas.append(f'<tr{cls}>{"".join(cells)}</tr>')
+        return f'<tr{cls}>{"".join(cells)}</tr>'
+
+    def _build_subtot_row(key, gtotais):
+        fcs = []
+        labeled = False
+        for c in cols:
+            if _is_id_col(c):
+                if c == subtotal_por:
+                    fcs.append(f'<td>Subtotal {_fmt(key, c)}</td>')
+                elif not labeled:
+                    fcs.append('<td>Subtotal</td>')
+                    labeled = True
+                else:
+                    fcs.append('<td></td>')
+            else:
+                v = gtotais.get(c, 0.0)
+                fcs.append(f'<td class="num"><strong>{_brl(v)}</strong></td>')
+        return f'<tr class="subtot">{"".join(fcs)}</tr>'
+
+    linhas = []
+    if use_subtot:
+        prev_key = None
+        first_row = True
+        gtotais = {c: 0.0 for c in num_cols}
+        for idx, row in exibir.iterrows():
+            key = row[subtotal_por]
+            if not first_row and key != prev_key:
+                linhas.append(_build_subtot_row(prev_key, gtotais))
+                gtotais = {c: 0.0 for c in num_cols}
+            prev_key = key
+            first_row = False
+            for c in num_cols:
+                try:
+                    val = pd.to_numeric(row[c], errors='coerce')
+                    gtotais[c] = gtotais.get(c, 0.0) + (float(val) if not pd.isna(val) else 0.0)
+                except Exception:
+                    pass
+            linhas.append(_build_row(idx, row))
+        if not first_row:
+            linhas.append(_build_subtot_row(prev_key, gtotais))
+    else:
+        for idx, row in exibir.iterrows():
+            linhas.append(_build_row(idx, row))
 
     # Linha de totais (apenas colunas numéricas com soma != 0)
     tfoot = ''
@@ -633,14 +681,14 @@ def gerar_html(resultados, mes, ano, saida):
             status = '<span class="chip c-err">ERRO</span>'
             corpo  = (f'<div class="tbl-toolbar"><p class="stats">{n_erro} de {n_total} linhas com divergencia</p>'
                       f'{btn_xls}</div>'
-                      + _tabela_html(df, df_erro, cid))
+                      + _tabela_html(df, df_erro, cid, subtotal_por=controle.get('subtotal_por')))
             aberto = ' open'
         else:
             status = '<span class="chip c-ok">OK</span>'
             corpo  = (f'<div class="tbl-toolbar">'
                       f'<p class="ok-msg">&#10003; Nenhuma divergencia encontrada ({n_total} linhas verificadas).</p>'
                       f'{btn_xls}</div>'
-                      + _tabela_html(df, df_erro, cid))
+                      + _tabela_html(df, df_erro, cid, subtotal_por=controle.get('subtotal_por')))
             aberto = ''
 
         tipo = f'<span class="chip c-inf">{_esc(controle["tipo"])}</span>'
