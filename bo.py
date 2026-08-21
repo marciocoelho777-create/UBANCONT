@@ -477,6 +477,20 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
     }
 
 
+def buscar_saldo_521920500(conn, mes, ano):
+    """Saldo SD da conta 521920500 (Previsao Adicional a Lancar) em VSALDOCONTABIL
+    ate INMES=mes. Se != 0, explica o gap do equilibrio orcamentario (C18)."""
+    cur = conn.cursor()
+    cur.execute(f"""
+        SELECT NVL(SUM(VADEBITO - VACREDITO), 0)
+        FROM MIL{ano}.VSALDOCONTABIL
+        WHERE COCONTACONTABIL = 521920500 AND INMES <= {mes}
+    """)
+    val = float(cur.fetchone()[0] or 0)
+    cur.close()
+    return val
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  DESPESAS — QUADRO PRINCIPAL
 #  As contas 622130100/300/400 (Empenhada/Liquidada) usam conta corrente
@@ -1187,7 +1201,7 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
 # ─────────────────────────────────────────────────────────────────────────────
 #  AUDITORIA DE INTEGRIDADE  (mesmo espirito do Balanco Financeiro)
 # ─────────────────────────────────────────────────────────────────────────────
-def auditoria_integridade(t):
+def auditoria_integridade(t, saldo_521920500=0.0):
     achados = []
     rec = t['receitas']; des = t['despesas']
 
@@ -1214,6 +1228,12 @@ def auditoria_integridade(t):
                          f'igualou a Dotação Atualizada. Recursos Arrecadados em '
                          f'Exercícios Anteriores é excluído desta conta por ser '
                          f'rubrica informativa (não financia dotação adicional).'))
+        if saldo_521920500 != 0.0 and abs(dif + saldo_521920500) < 1.00:
+            achados.append(('INFO', 'C18 — Previsão Adicional a Lançar (521920500)',
+                             f'Saldo 521920500 = {saldo_521920500:,.2f} corresponde '
+                             f'exatamente à diferença acima. Quando os lançamentos '
+                             f'pendentes forem reclassificados ao fim do mês a '
+                             f'diferença zerará automaticamente (ver C18).'))
 
     # Controle 2: Despesa Empenhada >= Liquidada >= Paga (cada GND)
     seq_erro = False
@@ -2483,12 +2503,13 @@ def main():
     rpnp_raw      = buscar_rp_nao_processados(conn, a.mes, a.ano, a.ug)
     rpp_raw       = buscar_rp_processados(conn, a.mes, a.ano, a.ug)
     achado_defasagem = auditoria_defasagem_balancogeral(conn, a.ano, a.mes, a.ug)
+    saldo_521920500  = buscar_saldo_521920500(conn, a.mes, a.ano)
     conn.close()
 
     print("\n[3/4] Calculando totais derivados...")
     t = calcular_tudo(receitas_raw, opcred_raw, saldos_raw, despesas_raw,
                        creditos_raw, rpnp_raw, rpp_raw)
-    achados = auditoria_integridade(t)
+    achados = auditoria_integridade(t, saldo_521920500=saldo_521920500)
     achados.append(achado_defasagem)
 
     print("\n[4/4] Gerando arquivo(s) de saida...")

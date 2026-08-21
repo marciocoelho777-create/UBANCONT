@@ -32,7 +32,7 @@ O cruzamentos.py não muda: lê pelas chaves DESPESA_PAGA/PAG_RPNP/PAG_RPP.
 """
 from __future__ import annotations
 from . import (Achado, query_one, query_all, D,
-               achado_ok, achado_erro, achado_alerta, checa_gap)
+               achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
 
 SQL_BO = """
 SELECT
@@ -241,5 +241,37 @@ def auditar(conn, mes, ano):
                 f"mês/conta — este valor existe na contabilidade mas NÃO entra "
                 f"no Balanço Orçamentário (itens 2.01.01.0X filtram por GND "
                 f"1..9) nem na abertura por UO.  {det}", valor=total))
+
+    # BO-04: Previsão Adicional a Lançar (C18 / 521920500) ──────────────────
+    # Conta de trânsito onde créditos adicionais ficam registrados antes de
+    # serem reclassificados às dotações definitivas. Saldo != 0 indica que
+    # há dotação aprovada que ainda não entrou nas contas de despesa normais
+    # e explica o eventual gap no equilíbrio orçamentário (Previsão Atualizada
+    # + Superávit Financeiro ≠ Dotação Atualizada). Deve zerar ao fim do mês.
+    SQL_C18 = f"""
+        SELECT NVL(SUM(VADEBITO - VACREDITO), 0) AS SALDO_521
+        FROM   MIL{ano}.VSALDOCONTABIL
+        WHERE  COCONTACONTABIL = 521920500 AND INMES <= {mes}
+    """
+    try:
+        row_c18 = query_one(conn, SQL_C18)
+        saldo_521 = D(str(row_c18['SALDO_521']))
+        t['SALDO_521920500'] = saldo_521
+        if abs(saldo_521) < D('1.00'):
+            achados.append(achado_ok("BO", "BO-04",
+                "Previsão Adicional a Lançar (521920500) zerada",
+                f"Saldo INMES ≤ {mes}: {saldo_521:,.2f} — nenhuma previsão pendente",
+                valor=saldo_521))
+        else:
+            achados.append(achado_info("BO", "BO-04",
+                "Previsão Adicional a Lançar pendente (C18)",
+                f"Saldo 521920500 = {saldo_521:,.2f} — dotação aprovada ainda não "
+                f"reclassificada às contas definitivas. Quando lançada, zerará "
+                f"o gap do equilíbrio orçamentário. Veja rotina C18.",
+                valor=abs(saldo_521)))
+    except Exception as e:
+        achados.append(achado_alerta("BO", "BO-04",
+            "Não foi possível verificar 521920500 (C18)",
+            f"{type(e).__name__}: {e}"))
 
     return achados, t
