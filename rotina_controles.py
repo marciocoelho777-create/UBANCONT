@@ -503,10 +503,14 @@ table.tbl th,table.tbl td{padding:4px 9px;border-bottom:1px solid var(--bd);whit
 table.tbl th{background:var(--s2);font-weight:700;font-family:var(--fn);position:sticky;top:0;z-index:1}
 table.tbl td.num{text-align:right}
 table.tbl tr.err td{background:var(--err-bg)}
+table.tbl tfoot td{background:var(--s2);font-weight:700;font-family:var(--fn);border-top:2px solid var(--brand);position:sticky;bottom:0}
 .ok-msg{color:var(--ok);font-size:13px;font-weight:600}
 .stats{font-size:12px;color:var(--t2)}
 .trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
 .falha{color:var(--err);font-size:13px}
+.tbl-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-xls{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 11px;border-radius:5px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-family:var(--fn);transition:color .15s,border-color .15s}
+.btn-xls:hover{color:var(--t1);border-color:var(--t2)}
 footer{font-size:11px;color:var(--t3);text-align:center;padding:14px}
 @media(max-width:680px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
 """
@@ -515,7 +519,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:14px}
 # ─────────────────────────────────────────────────────────────────────────────
 #  GERACAO DO HTML
 # ─────────────────────────────────────────────────────────────────────────────
-def _tabela_html(df, df_erro):
+def _tabela_html(df, df_erro, cid=''):
     erro_idx = set(df_erro.index)
     cols = list(df.columns)
 
@@ -530,7 +534,7 @@ def _tabela_html(df, df_erro):
         cells = []
         for c in cols:
             v = row[c]
-            if c not in _COLS_ID:
+            if not _is_id_col(c):
                 try:
                     cells.append(f'<td class="num">{_fmt(v, c)}</td>')
                     continue
@@ -539,10 +543,34 @@ def _tabela_html(df, df_erro):
             cells.append(f'<td>{_fmt(v, c)}</td>')
         linhas.append(f'<tr{cls}>{"".join(cells)}</tr>')
 
+    # Linha de totais (apenas colunas numéricas com soma != 0)
+    tfoot = ''
+    totais = {}
+    for c in cols:
+        if not _is_id_col(c):
+            try:
+                totais[c] = float(pd.to_numeric(df[c], errors='coerce').fillna(0).sum())
+            except Exception:
+                totais[c] = 0.0
+    if totais and any(abs(v) > 0.005 for v in totais.values()):
+        fcs = []
+        primeiro_texto = True
+        for c in cols:
+            if _is_id_col(c):
+                fcs.append(f'<td>{"<strong>TOTAL</strong>" if primeiro_texto else ""}</td>')
+                primeiro_texto = False
+            else:
+                v = totais.get(c, 0.0)
+                fcs.append(f'<td class="num"><strong>{_brl(v)}</strong></td>')
+                primeiro_texto = False
+        tfoot = f'<tfoot><tr>{"".join(fcs)}</tr></tfoot>'
+
+    tbl_id = f' id="tbl-{cid}"' if cid else ''
     tbl = (
-        f'<div class="tbl-wrap"><table class="tbl">'
+        f'<div class="tbl-wrap"><table class="tbl"{tbl_id}>'
         f'<thead><tr>{ths}</tr></thead>'
         f'<tbody>{"".join(linhas)}</tbody>'
+        f'{tfoot}'
         f'</table></div>'
     )
     nota = (f'<p class="trunc">Exibindo {MAX_LINHAS} de {len(df)} linhas.</p>'
@@ -593,18 +621,26 @@ def gerar_html(resultados, mes, ano, saida):
     for controle, df, df_erro, n_erro, n_total in resultados:
         cid = controle['id']
 
+        btn_xls = (f'<button class="btn-xls" '
+                   f'onclick="exportarExcel(\'tbl-{cid}\',\'C{cid}\')" '
+                   f'title="Exportar tabela para Excel">&#8595; Excel</button>')
+
         if df is None:
             status = '<span class="chip c-err">FALHA</span>'
             corpo  = '<p class="falha">Falha ao executar o SQL deste controle.</p>'
             aberto = ' open'
         elif n_erro > 0:
             status = '<span class="chip c-err">ERRO</span>'
-            corpo  = (f'<p class="stats">{n_erro} de {n_total} linhas com divergencia</p>'
-                      + _tabela_html(df, df_erro))
+            corpo  = (f'<div class="tbl-toolbar"><p class="stats">{n_erro} de {n_total} linhas com divergencia</p>'
+                      f'{btn_xls}</div>'
+                      + _tabela_html(df, df_erro, cid))
             aberto = ' open'
         else:
             status = '<span class="chip c-ok">OK</span>'
-            corpo  = f'<p class="ok-msg">&#10003; Nenhuma divergencia encontrada ({n_total} linhas verificadas).</p>'
+            corpo  = (f'<div class="tbl-toolbar">'
+                      f'<p class="ok-msg">&#10003; Nenhuma divergencia encontrada ({n_total} linhas verificadas).</p>'
+                      f'{btn_xls}</div>'
+                      + _tabela_html(df, df_erro, cid))
             aberto = ''
 
         tipo = f'<span class="chip c-inf">{_esc(controle["tipo"])}</span>'
@@ -647,6 +683,38 @@ def gerar_html(resultados, mes, ano, saida):
   {"".join(cards)}
 </div>
 <footer>Gerado por rotina_controles.py &middot; {agora}</footer>
+<script>
+function exportarExcel(tblId, nome) {{
+  var tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  var esc = function(s) {{ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }};
+  var xml = '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
+  xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
+  xml += 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+  xml += '<Worksheet ss:Name="Dados"><Table>';
+  var rows = tbl.rows;
+  for (var i = 0; i < rows.length; i++) {{
+    xml += '<Row>';
+    var cells = rows[i].cells;
+    for (var j = 0; j < cells.length; j++) {{
+      var t = cells[j].innerText.trim();
+      if (cells[j].classList.contains('num') && t !== '—' && t !== '') {{
+        var n = parseFloat(t.replace(/\./g,'').replace(',','.'));
+        if (!isNaN(n)) {{ xml += '<Cell><Data ss:Type="Number">' + n + '</Data></Cell>'; continue; }}
+      }}
+      xml += '<Cell><Data ss:Type="String">' + esc(t) + '</Data></Cell>';
+    }}
+    xml += '</Row>';
+  }}
+  xml += '</Table></Worksheet></Workbook>';
+  var blob = new Blob(['﻿' + xml], {{type:'application/vnd.ms-excel;charset=utf-8'}});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nome + '.xls';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){{ URL.revokeObjectURL(url); a.remove(); }}, 800);
+}}
+</script>
 </body>
 </html>"""
 
