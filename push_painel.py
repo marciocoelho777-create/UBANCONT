@@ -175,6 +175,41 @@ footer{background:var(--navy);color:#6b88a8;font-size:11px;padding:14px 48px;
 }
 """
 
+def _nav_historico_html(rotinas_sorted, href_atual):
+    """Gera barra de navegação de meses (MM/AAAA) para injetar na página de rotina."""
+    if len(rotinas_sorted) <= 1:
+        return ''
+    links = []
+    for href, _ in rotinas_sorted:
+        m = re.match(r'rotina_controles_(\d{4})_(\d{2})\.html', Path(href).name)
+        if not m:
+            continue
+        label = f'{m.group(2)}/{m.group(1)}'
+        nome_arq = Path(href).name
+        if href == href_atual:
+            links.append(f'<a href="{nome_arq}" style="background:var(--brand);color:#fff;border-color:var(--brand)">{label}</a>')
+        else:
+            links.append(f'<a href="{nome_arq}">{label}</a>')
+    if not links:
+        return ''
+    return ('<div class="nav nav-hist" '
+            'style="background:var(--s2);border-color:var(--bd);margin-bottom:0">'
+            'Hist&oacute;rico: ' + ''.join(links) + '</div>\n')
+
+
+def _injetar_nav_historico(html_texto, rotinas_sorted, href_atual):
+    """Injeta/atualiza barra de histórico logo após <div class="wrap">."""
+    nav_html = _nav_historico_html(rotinas_sorted, href_atual)
+    # Remove barra anterior se existir
+    html_texto = re.sub(
+        r'<div class="nav nav-hist"[^>]*>.*?</div>\n?', '',
+        html_texto, flags=re.S
+    )
+    if not nav_html:
+        return html_texto
+    return html_texto.replace('<div class="wrap">', '<div class="wrap">\n' + nav_html, 1)
+
+
 def _gerar_index_completo(links_existentes: dict) -> str:
     """Gera o index.html completo em estilo card-grid."""
     rotinas, outros = [], []
@@ -204,9 +239,34 @@ def _gerar_index_completo(links_existentes: dict) -> str:
         html += '</div>'
         return html
 
+    def _card_rotina_unico(lista):
+        """Um único card para todos os meses; link aponta para o mais recente."""
+        if not lista:
+            return ''
+        href_latest, _ = lista[0]  # sorted descending → mais recente
+        m = re.match(r'rotina_controles_(\d{4})_(\d{2})\.html', Path(href_latest).name)
+        mes_tag = f'<span class="tag">{m.group(2)}/{m.group(1)}</span>' if m else ''
+        card = f"""
+<a class="card" href="{href_latest}">
+  <div class="card-inner">
+    <div class="card-icon">&#9881;</div>
+    <div class="card-info">
+      <h3>Controles de Rotina</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
+    </div>
+  </div>
+  <div class="card-tags">
+    {mes_tag}
+    <span class="tag">Controles</span>
+    <span class="tag">SIGGO</span>
+  </div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a>"""
+        return '<div class="cards-grid">' + card + '</div>'
+
     secoes = ''
     if rotinas:
-        secoes += '<div class="group-label">Controles de Rotina</div>' + _cards(rotinas)
+        secoes += '<div class="group-label">Controles de Rotina</div>' + _card_rotina_unico(rotinas)
     if outros:
         secoes += '<div class="group-label" style="margin-top:8px">Outros Pain&eacute;is</div>' + _cards(outros)
 
@@ -300,6 +360,16 @@ def publicar(arquivos):
     index_novo = atualizar_index(index_atual, novos_hrefs) if index_atual else ''
     index_mudou = index_novo and index_novo != index_atual
 
+    # coleta todos os hrefs de rotina (existentes no remoto + novos)
+    hrefs_idx = set(re.findall(r'href="([^"#][^"]*\.html)"', index_atual or ''))
+    hrefs_idx.discard('index.html')
+    for h in novos_hrefs:
+        hrefs_idx.add(h)
+    rotinas_all = sorted(
+        [(h, nome_amigavel(h)) for h in hrefs_idx if 'rotina_controles_' in h],
+        key=lambda x: x[0], reverse=True
+    )
+
     stashed = run('git stash -q', check=False).returncode == 0
     branch_orig = run('git branch --show-current', capture=True).stdout.strip()
 
@@ -312,6 +382,27 @@ def publicar(arquivos):
             if src_tmp.exists():
                 shutil.copy2(src_tmp, Path(arq))
             run(f'git add "{arq}"')
+
+        # injeta nav de histórico em TODAS as rotinas publicadas (novas e existentes)
+        if len(rotinas_all) > 1:
+            for href_rot, _ in rotinas_all:
+                arq_rot = Path(href_rot)
+                # tenta pegar do temp (recém publicado) ou do remoto
+                src_tmp = tmp / arq_rot.name
+                if src_tmp.exists():
+                    conteudo = src_tmp.read_text(encoding='utf-8', errors='replace')
+                else:
+                    r_rot = run(f'git show {REMOTE}/{REMOTE_BRANCH}:{href_rot}',
+                                capture=True, check=False)
+                    if r_rot.returncode != 0:
+                        continue
+                    conteudo = r_rot.stdout
+                conteudo_novo = _injetar_nav_historico(conteudo, rotinas_all, href_rot)
+                if conteudo_novo != conteudo:
+                    arq_rot.parent.mkdir(parents=True, exist_ok=True)
+                    arq_rot.write_text(conteudo_novo, encoding='utf-8')
+                    run(f'git add "{href_rot}"')
+                    print(f'  nav de histórico atualizado: {arq_rot.name}')
 
         if index_mudou:
             Path('index.html').write_text(index_novo, encoding='utf-8')
