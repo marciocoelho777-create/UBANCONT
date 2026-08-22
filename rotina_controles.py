@@ -467,20 +467,22 @@ def _fmt(v, col):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  CSS (mesmo padrao visual de auditoria_consolidada.html)
+#  CSS
 # ─────────────────────────────────────────────────────────────────────────────
 _CSS = """
 :root{
-  --brand:#1A4A8F;--pg:#F1F4FB;--s1:#FFF;--s2:#E8EDF7;--bd:#C8D5ED;
-  --t1:#0D1829;--t2:#4C5C7A;--t3:#8A9BBD;
-  --err:#BE1C1C;--err-bg:#FEF2F2;--err-bd:#FECACA;
-  --ok:#156030;--ok-bg:#F0FDF4;--ok-bd:#BBF7D0;
-  --inf:#1547A0;--inf-bg:#EFF6FF;--inf-bd:#BFDBFE;
+  --navy:#0D1F3C;--navy2:#132039;
+  --brand:#1255CC;--pg:#EEF1F8;--s1:#FFF;--s2:#F4F6FB;--bd:#CDD5E8;
+  --t1:#0D1829;--t2:#455268;--t3:#8A96B0;
+  --err:#C81E1E;--err-bg:#FEF2F2;--err-bd:#FCA5A5;
+  --ok:#15803D;--ok-bg:#F0FDF4;--ok-bd:#86EFAC;
+  --inf:#1D4ED8;--inf-bg:#EFF6FF;--inf-bd:#BFDBFE;
   --fn:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
   --fm:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
   --r:8px;
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --navy:#050E1F;--navy2:#0A1628;
   --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
   --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
   --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
@@ -488,6 +490,7 @@ _CSS = """
   --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
 }}
 :root[data-theme="dark"]{
+  --navy:#050E1F;--navy2:#0A1628;
   --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
   --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
   --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
@@ -496,52 +499,94 @@ _CSS = """
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);background:var(--pg)}
-.hd{background:var(--brand);color:#fff;padding:14px 24px;display:flex;align-items:center;
-    justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}
+
+/* ── Cabeçalho institucional ── */
+.hd{background:var(--navy);color:#fff;padding:0;position:sticky;top:0;z-index:20}
+.hd-top{font-size:10.5px;opacity:.55;padding:5px 24px;border-bottom:1px solid rgba(255,255,255,.08);
+        letter-spacing:.02em}
+.hd-main{padding:10px 24px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hd-icon{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.12);
+         display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hd-text{display:flex;flex-direction:column;gap:1px}
 .hd-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
-.hd-sub{font-size:12px;opacity:.72;margin-top:2px}
-.wrap{max-width:1100px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:14px}
-.nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;background:var(--s1);
+.hd-sub{font-size:11.5px;opacity:.6}
+.hd-ts{font-size:11px;opacity:.5;white-space:nowrap}
+
+/* ── Layout ── */
+.wrap{max-width:1180px;margin:0 auto;padding:22px 20px;display:flex;flex-direction:column;gap:16px}
+
+/* ── Nav rápida ── */
+.nav{display:flex;flex-wrap:wrap;gap:5px;padding:10px 14px;background:var(--s1);
      border:1px solid var(--bd);border-radius:var(--r)}
 .nav a{font-size:11px;font-weight:600;color:var(--brand);text-decoration:none;
-       padding:3px 9px;border-radius:100px;border:1px solid var(--bd)}
+       padding:2px 9px;border-radius:100px;border:1px solid var(--bd);transition:border-color .12s}
 .nav a:hover{border-color:var(--brand)}
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.nav a.c-nav-err{color:var(--err);border-color:var(--err-bd);background:var(--err-bg)}
+
+/* ── KPIs ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .kpi{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
-     padding:13px 15px;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+     padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
              background:var(--kpi-stripe,var(--bd))}
-.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:5px}
-.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.025em;color:var(--kpi-color,var(--t1))}
+.kpi-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px}
+.kpi-val{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--kpi-color,var(--t1));line-height:1}
+
+/* ── Seção de controle ── */
 details.ctrl{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
-details.ctrl summary{padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;
-                     list-style:none;display:flex;align-items:center;gap:10px;background:var(--s2)}
+details.ctrl summary{padding:12px 18px;font-size:13px;font-weight:600;cursor:pointer;
+                     list-style:none;display:flex;align-items:center;gap:10px;
+                     background:var(--navy2);color:#fff;user-select:none}
 details.ctrl summary::-webkit-details-marker{display:none}
-details.ctrl summary::after{content:'+';font-size:15px;color:var(--t3);margin-left:auto}
-details.ctrl[open] summary::after{content:'\2212'}
+.sum-chevron{font-size:13px;opacity:.55;margin-left:auto;transition:transform .2s;flex-shrink:0}
+details.ctrl[open] .sum-chevron{transform:rotate(90deg)}
+.sum-nome{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ctrl-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
-.ctrl-desc{font-size:12.5px;color:var(--t2);line-height:1.55}
-.chip{font-size:10px;font-weight:700;padding:1px 8px;border-radius:100px;border:1px solid;white-space:nowrap}
+.ctrl-desc{font-size:12px;color:var(--t2);line-height:1.6;padding:8px 12px;
+           background:var(--s2);border-radius:5px;border-left:3px solid var(--bd)}
+
+/* ── Chips ── */
+.chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;border:1px solid;white-space:nowrap}
 .c-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
 .c-err{background:var(--err-bg);color:var(--err);border-color:var(--err-bd)}
 .c-inf{background:var(--inf-bg);color:var(--inf);border-color:var(--inf-bd)}
-.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:6px;max-height:420px;overflow-y:auto}
-table.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--fm)}
-table.tbl th,table.tbl td{padding:4px 9px;border-bottom:1px solid var(--bd);white-space:nowrap}
-table.tbl th{background:var(--s2);font-weight:700;font-family:var(--fn);position:sticky;top:0;z-index:1}
-table.tbl td.num{text-align:right}
-table.tbl tr.err td{background:var(--err-bg)}
-table.tbl tfoot td{background:var(--s2);font-weight:700;font-family:var(--fn);border-top:2px solid var(--brand);position:sticky;bottom:0}
-table.tbl tr.subtot td{background:var(--s1);border-top:1px solid var(--brand);font-style:italic;color:var(--t2)}
-.ok-msg{color:var(--ok);font-size:13px;font-weight:600}
-.stats{font-size:12px;color:var(--t2)}
-.trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
+
+/* ── Barra de ferramentas da tabela ── */
+.tbl-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0 4px}
+.stats{font-size:12px;color:var(--t2);flex:1;min-width:0}
+.ok-msg{color:var(--ok);font-size:12.5px;font-weight:600;flex:1}
 .falha{color:var(--err);font-size:13px}
-.tbl-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.btn-xls{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 11px;border-radius:5px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;font-family:var(--fn);transition:color .15s,border-color .15s}
-.btn-xls:hover{color:var(--t1);border-color:var(--t2)}
-footer{font-size:11px;color:var(--t3);text-align:center;padding:14px}
-@media(max-width:680px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.search-box{padding:4px 10px;border:1px solid var(--bd);border-radius:5px;font-size:12px;
+            font-family:var(--fn);background:var(--s1);color:var(--t1);min-width:190px;
+            outline:none;transition:border-color .15s}
+.search-box:focus{border-color:var(--brand)}
+.btn-xls{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+         padding:4px 12px;border-radius:5px;border:1px solid var(--bd);background:var(--s2);
+         color:var(--t2);cursor:pointer;font-family:var(--fn);transition:color .15s,border-color .15s,background .15s}
+.btn-xls:hover{color:var(--t1);border-color:var(--brand);background:var(--inf-bg)}
+
+/* ── Tabela ── */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:6px;max-height:460px;overflow-y:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--fm)}
+table.tbl th,table.tbl td{padding:5px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+table.tbl th{background:var(--navy2);color:#fff;font-weight:600;font-family:var(--fn);
+             position:sticky;top:0;z-index:1;border-bottom:none}
+table.tbl tbody tr:nth-child(even) td{background:var(--s2)}
+table.tbl tbody tr:hover td{background:rgba(18,85,204,.06)}
+table.tbl td.num{text-align:right}
+table.tbl tr.err td{background:var(--err-bg)!important;color:var(--err)}
+table.tbl tr.err td.num{font-weight:600}
+table.tbl tfoot td{background:var(--s2);font-weight:700;font-family:var(--fn);
+                   border-top:2px solid var(--brand);position:sticky;bottom:0}
+table.tbl tr.subtot td{background:rgba(18,85,204,.05)!important;
+                       border-top:1px solid var(--bd);font-style:italic;color:var(--t2)}
+.trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
+
+/* ── Rodapé ── */
+footer{font-size:11px;color:var(--t3);text-align:center;padding:18px}
+
+@media(max-width:720px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr}.search-box{min-width:120px}}
 """
 
 
@@ -658,14 +703,14 @@ def gerar_html(resultados, mes, ano, saida):
     n_falhou = sum(1 for _, df, _, _, _ in resultados if df is None)
     tot_err  = sum((ne or 0) for _, _, _, ne, _ in resultados)
 
-    mes_label = f'{mes:02d}/{ano} — {MESES[mes]}/{ano}'
+    mes_label = f'{MESES[mes]}/{ano}'
     agora     = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
     # KPIs
-    kpi_cor   = 'var(--err)' if n_err else 'var(--ok)'
+    kpi_err_cor  = 'var(--err)' if n_err else 'var(--ok)'
     kpis = f"""
 <div class="kpi-row">
-  <div class="kpi" style="--kpi-stripe:{kpi_cor};--kpi-color:{kpi_cor}">
+  <div class="kpi" style="--kpi-stripe:{kpi_err_cor};--kpi-color:{kpi_err_cor}">
     <div class="kpi-lbl">Controles com Erro</div>
     <div class="kpi-val">{n_err}</div>
   </div>
@@ -677,26 +722,29 @@ def gerar_html(resultados, mes, ano, saida):
     <div class="kpi-lbl">Total de Controles</div>
     <div class="kpi-val">{len(resultados)}</div>
   </div>
-  <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:{'var(--err)' if tot_err else 'var(--t1)'}">
-    <div class="kpi-lbl">Linhas com Erro</div>
+  <div class="kpi" style="--kpi-stripe:{'var(--err)' if tot_err else 'var(--bd)'};--kpi-color:{'var(--err)' if tot_err else 'var(--t1)'}">
+    <div class="kpi-lbl">Linhas com Divergencia</div>
     <div class="kpi-val">{tot_err:,}</div>
   </div>
 </div>"""
 
-    # Nav
-    nav = '<div class="nav">' + ''.join(
-        f'<a href="#ctrl-{c["id"]}">{c["id"]}</a>'
-        for c, _, _, _, _ in resultados
-    ) + '</div>'
+    # Nav rápida — destaca controles com erro
+    nav_links = []
+    for c, df, _, ne, _ in resultados:
+        cls = ' class="c-nav-err"' if df is not None and ne > 0 else ''
+        nav_links.append(f'<a href="#ctrl-{c["id"]}"{cls}>{c["id"]}</a>')
+    nav = '<div class="nav">' + ''.join(nav_links) + '</div>'
 
-    # Cards
+    # Seções de controle
     cards = []
     for controle, df, df_erro, n_erro, n_total in resultados:
         cid = controle['id']
 
         btn_xls = (f'<button class="btn-xls" '
                    f'onclick="exportarExcel(\'tbl-{cid}\',\'C{cid}\')" '
-                   f'title="Exportar tabela para Excel">&#8595; Excel</button>')
+                   f'title="Exportar para Excel">&#8595;&nbsp;Excel</button>')
+        search  = (f'<input class="search-box" type="search" placeholder="Buscar na tabela..." '
+                   f'oninput="filtrarTabela(this,\'tbl-{cid}\')">')
 
         if df is None:
             status = '<span class="chip c-err">FALHA</span>'
@@ -704,15 +752,16 @@ def gerar_html(resultados, mes, ano, saida):
             aberto = ' open'
         elif n_erro > 0:
             status = '<span class="chip c-err">ERRO</span>'
-            corpo  = (f'<div class="tbl-toolbar"><p class="stats">{n_erro} de {n_total} linhas com divergencia</p>'
-                      f'{btn_xls}</div>'
+            corpo  = (f'<div class="tbl-toolbar">'
+                      f'<p class="stats"><strong>{n_erro}</strong> de {n_total} linhas com divergencia</p>'
+                      f'{btn_xls}{search}</div>'
                       + _tabela_html(df, df_erro, cid, subtotal_por=controle.get('subtotal_por')))
             aberto = ' open'
         else:
             status = '<span class="chip c-ok">OK</span>'
             corpo  = (f'<div class="tbl-toolbar">'
-                      f'<p class="ok-msg">&#10003; Nenhuma divergencia encontrada ({n_total} linhas verificadas).</p>'
-                      f'{btn_xls}</div>'
+                      f'<p class="ok-msg">&#10003; Nenhuma divergencia &mdash; {n_total} linhas verificadas</p>'
+                      f'{btn_xls}{search}</div>'
                       + _tabela_html(df, df_erro, cid, subtotal_por=controle.get('subtotal_por')))
             aberto = ''
 
@@ -720,18 +769,17 @@ def gerar_html(resultados, mes, ano, saida):
 
         cards.append(f"""
 <details class="ctrl"{aberto} id="ctrl-{cid}">
-  <summary>{status} {tipo} {_esc(controle["nome"])}</summary>
+  <summary>{status}&nbsp;{tipo}&nbsp;<span class="sum-nome">{_esc(controle["nome"])}</span><span class="sum-chevron">&#9654;</span></summary>
   <div class="ctrl-body">
     <p class="ctrl-desc">{_esc(controle["descricao"])}</p>
     {corpo}
   </div>
 </details>""")
 
-    resultado_geral = (
-        f'<span style="color:#fff;font-weight:700;opacity:.9">'
-        f'{n_err} controle(s) com ERRO</span>'
+    status_geral = (
+        f'<span style="color:#ffb3b3;font-weight:700">{n_err} controle(s) com ERRO</span>'
         if n_err else
-        '<span style="color:#a7f3d0;font-weight:700">Todos os controles OK</span>'
+        '<span style="color:#86efac;font-weight:700">&#10003; Todos os controles OK</span>'
     )
 
     page = f"""<!DOCTYPE html>
@@ -739,23 +787,30 @@ def gerar_html(resultados, mes, ano, saida):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Controles de Rotina GDF {mes_label}</title>
+<title>Controles de Rotina — GDF {mes_label}</title>
 <style>{_CSS}</style>
 </head>
 <body>
 <div class="hd">
-  <div>
-    <div class="hd-title">Controles de Rotina &#8212; GDF</div>
-    <div class="hd-sub">{_esc(mes_label)} &middot; Emitido em {agora}</div>
+  <div class="hd-top">Governo do Distrito Federal &middot; Contadoria Geral do Distrito Federal &middot; SEEC/SEFIN/CONTDF</div>
+  <div class="hd-main">
+    <div class="hd-icon">&#127963;</div>
+    <div class="hd-text">
+      <div class="hd-title">Controles Cont&aacute;beis de Rotina &mdash; GDF</div>
+      <div class="hd-sub">SIGGO &middot; {_esc(mes_label)}</div>
+    </div>
+    <div style="margin-left:auto;text-align:right">
+      {status_geral}
+      <div class="hd-ts">Gerado em {agora}</div>
+    </div>
   </div>
-  <div>{resultado_geral}</div>
 </div>
 <div class="wrap">
-  {nav}
   {kpis}
+  {nav}
   {"".join(cards)}
 </div>
-<footer>Gerado por rotina_controles.py &middot; {agora}</footer>
+<footer>rotina_controles.py &middot; {agora}</footer>
 <script>
 function exportarExcel(tblId, nome) {{
   var tbl = document.getElementById(tblId);
@@ -767,6 +822,7 @@ function exportarExcel(tblId, nome) {{
   xml += '<Worksheet ss:Name="Dados"><Table>';
   var rows = tbl.rows;
   for (var i = 0; i < rows.length; i++) {{
+    if (rows[i].style.display === 'none') continue;
     xml += '<Row>';
     var cells = rows[i].cells;
     for (var j = 0; j < cells.length; j++) {{
@@ -786,6 +842,15 @@ function exportarExcel(tblId, nome) {{
   a.href = url; a.download = nome + '.xls';
   document.body.appendChild(a); a.click();
   setTimeout(function(){{ URL.revokeObjectURL(url); a.remove(); }}, 800);
+}}
+function filtrarTabela(inp, tblId) {{
+  var q = inp.value.toLowerCase();
+  var tbl = document.getElementById(tblId);
+  if (!tbl) return;
+  var rows = tbl.tBodies[0] ? tbl.tBodies[0].rows : [];
+  for (var i = 0; i < rows.length; i++) {{
+    rows[i].style.display = (!q || rows[i].innerText.toLowerCase().includes(q)) ? '' : 'none';
+  }}
 }}
 </script>
 </body>
