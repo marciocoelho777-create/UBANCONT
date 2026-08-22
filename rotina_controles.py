@@ -498,7 +498,7 @@ _CSS = """
   --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);background:var(--pg)}
+body{font-family:var(--fn);font-size:13px;line-height:1.5;color:var(--t1);background:var(--pg)}
 
 /* ── Cabeçalho institucional ── */
 .hd{background:var(--navy);color:#fff;padding:0;position:sticky;top:0;z-index:20}
@@ -529,8 +529,8 @@ body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);backgr
      padding:16px 18px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
              background:var(--kpi-stripe,var(--bd))}
-.kpi-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:6px}
-.kpi-val{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--kpi-color,var(--t1));line-height:1}
+.kpi-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:6px;font-weight:700}
+.kpi-val{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--kpi-color,var(--t1));line-height:1}
 
 /* ── Seção de controle ── */
 details.ctrl{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
