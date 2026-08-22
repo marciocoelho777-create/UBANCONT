@@ -3,104 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pain&eacute;is de Controles Cont&aacute;beis — GDF</title>
+<title>Pain&eacute;is de Controles Cont&aacute;beis &mdash; GDF</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;font-size:14px;
-     line-height:1.5;color:#0d1829;background:#eef1f8}
-.hd{background:#0d1f3c;color:#fff;padding:0}
-.hd-top{font-size:10.5px;opacity:.55;padding:5px 24px;
-        border-bottom:1px solid rgba(255,255,255,.08);letter-spacing:.02em}
-.hd-main{padding:12px 24px 14px;display:flex;align-items:center;gap:14px}
-.hd-icon{width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.13);
-         display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.hd-title{font-size:16px;font-weight:700}
-.hd-sub{font-size:12px;opacity:.6}
-.wrap{max-width:1180px;margin:0 auto;padding:30px 20px}
-.intro{margin-bottom:8px}
-.intro h2{font-size:20px;font-weight:700;color:#0d1829;margin-bottom:4px}
-.intro p{font-size:13px;color:#455268;max-width:700px;line-height:1.65;margin-bottom:18px}
-.badge{display:inline-block;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;
-       border-radius:100px;font-size:11px;font-weight:600;padding:2px 12px;margin-bottom:20px}
-.sec-lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-         color:#8a96b0;margin-bottom:14px;border-bottom:1px solid #d1d9e8;padding-bottom:8px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:32px}
-.card{background:#fff;border:1px solid #cdd5e8;border-radius:10px;padding:20px;
-      display:flex;flex-direction:column;gap:12px;
-      transition:box-shadow .18s,border-color .18s}
-.card:hover{box-shadow:0 4px 18px rgba(18,85,204,.12);border-color:#a0b4dc}
-.card-icon{width:40px;height:40px;border-radius:10px;background:#eff6ff;color:#1255cc;
-           display:flex;align-items:center;justify-content:center;font-size:20px}
-.card-title{font-size:14px;font-weight:700;color:#0d1829;line-height:1.35}
-.card-desc{font-size:12.5px;color:#455268;line-height:1.6;flex:1}
-.card-tags{display:flex;flex-wrap:wrap;gap:5px}
-.tag{font-size:10.5px;background:#f4f6fb;color:#455268;border:1px solid #cdd5e8;
-     border-radius:100px;padding:2px 9px}
-.card-link{display:flex;align-items:center;justify-content:space-between;
-           color:#1255cc;font-size:12.5px;font-weight:600;text-decoration:none;
-           border-top:1px solid #eef1f8;padding-top:12px;margin-top:4px;
-           transition:color .15s}
-.card-link:hover{color:#0a3ea0}
-footer{font-size:11px;color:#8a96b0;text-align:center;padding:20px}
-@media(max-width:600px){.cards{grid-template-columns:1fr}}
+:root{
+  --navy:#0d1b3e;--navy-mid:#162550;--navy-light:#1e3267;
+  --teal:#0090a8;--teal-light:#00b8d4;--teal-pale:#e6f7fb;
+  --surface:#fff;--bg:#f2f5f9;--border:#dce3ed;
+  --text:#1a2033;--muted:#6b7a99;
+  --radius:12px;
+  --shadow-card:0 2px 14px rgba(13,27,62,.09);
+  --shadow-hover:0 8px 28px rgba(13,27,62,.17);
+}
+body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);
+     color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.top-bar{background:var(--navy);color:#a8c0d8;font-size:11px;letter-spacing:.4px;
+         padding:6px 48px;display:flex;align-items:center;gap:8px}
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+       color:#fff;padding:24px 48px 22px;display:flex;align-items:center;gap:20px;
+       box-shadow:0 4px 20px rgba(13,27,62,.35)}
+.header-brasao{width:60px;height:60px;flex-shrink:0;background:rgba(255,255,255,.10);
+               border:2px solid rgba(255,255,255,.18);border-radius:50%;
+               display:flex;align-items:center;justify-content:center;font-size:28px}
+.header-text h1{font-size:18px;font-weight:700;letter-spacing:.4px;line-height:1.2}
+.header-text .subtitle{font-size:12px;color:#9ab0cc;margin-top:4px;letter-spacing:.2px}
+.section-intro{background:var(--surface);border-bottom:1px solid var(--border);
+               padding:32px 48px 28px}
+.section-intro h2{font-size:20px;font-weight:700;color:var(--navy);
+                  display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.section-intro h2 .badge-ano{font-size:12px;font-weight:700;background:var(--teal-pale);
+  color:var(--teal);border:1px solid var(--teal-light);border-radius:20px;
+  padding:2px 12px;letter-spacing:.3px}
+.section-intro p{font-size:13px;color:var(--muted);max-width:680px;line-height:1.65}
+.instrucao{margin-top:16px;font-size:12.5px;color:var(--navy);font-weight:600;
+           letter-spacing:.2px;display:flex;align-items:center;gap:6px}
+.instrucao::before{content:'↓';color:var(--teal);font-size:14px}
+.cards-area{padding:32px 48px 48px;flex:1}
+.group-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
+             letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.group-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+            gap:14px;margin-bottom:40px}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);
+      box-shadow:var(--shadow-card);overflow:hidden;text-decoration:none;color:var(--text);
+      display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s;
+      position:relative}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--teal)}
+.card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+             background:linear-gradient(90deg,var(--teal),var(--teal-light));
+             opacity:0;transition:opacity .18s}
+.card:hover::after{opacity:1}
+.card-inner{padding:16px 18px 12px;display:flex;gap:14px;flex:1}
+.card-icon{width:40px;height:40px;flex-shrink:0;background:var(--teal-pale);
+           border-radius:10px;display:flex;align-items:center;justify-content:center;
+           font-size:20px;transition:background .18s}
+.card:hover .card-icon{background:#cceef5}
+.card-info{flex:1;min-width:0}
+.card-info h3{font-size:13px;font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:4px}
+.card-info p{font-size:11.5px;color:var(--muted);line-height:1.5}
+.card-tags{padding:0 18px 10px;display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;
+     background:var(--bg);border:1px solid var(--border);color:var(--muted);letter-spacing:.2px}
+.card-link{border-top:1px solid var(--border);padding:9px 18px;display:flex;
+           justify-content:space-between;align-items:center;font-size:11.5px;
+           font-weight:600;color:var(--teal);background:var(--bg);transition:background .15s}
+.card:hover .card-link{background:var(--teal-pale)}
+.card-link .arrow{font-size:15px;transition:transform .18s}
+.card:hover .card-link .arrow{transform:translateX(4px)}
+footer{background:var(--navy);color:#6b88a8;font-size:11px;padding:14px 48px;
+       display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media(max-width:640px){
+  .top-bar,header,.section-intro,.cards-area,footer{padding-left:18px;padding-right:18px}
+  .cards-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="hd">
-  <div class="hd-top">Governo do Distrito Federal &middot; Contadoria Geral do Distrito Federal &middot; SEEC/SEFIN/CONTDF</div>
-  <div class="hd-main">
-    <div class="hd-icon">&#127963;</div>
-    <div>
-      <div class="hd-title">Controles Cont&aacute;beis</div>
-      <div class="hd-sub">CONTDF &middot; Contadoria Geral do Distrito Federal &middot; SIGGO</div>
+<div class="top-bar">Governo do Distrito Federal &middot; Contadoria Geral do Distrito Federal &middot; SEEC/SEFIN/CONTDF</div>
+<header>
+  <div class="header-brasao">&#127963;</div>
+  <div class="header-text">
+    <h1>Controles Cont&aacute;beis</h1>
+    <div class="subtitle">CONTDF &middot; Contadoria Geral do Distrito Federal &middot; SIGGO</div>
+  </div>
+</header>
+<div class="section-intro">
+  <h2>Pain&eacute;is de Controles Cont&aacute;beis
+    <span class="badge-ano">Exerc&iacute;cio 2026</span>
+  </h2>
+  <p>Pain&eacute;is de controles cont&aacute;beis criados com vistas a subsidiar a atua&ccedil;&atilde;o dos usu&aacute;rios.
+     Os dados s&atilde;o extra&iacute;dos do SIGGO com o aux&iacute;lio do Oracle SQL e passam por atualiza&ccedil;&otilde;es
+     periodicamente. Cada painel permite filtrar, analisar e exportar os dados de interesse.</p>
+  <div class="instrucao">Selecione o controle que deseja consultar</div>
+</div>
+<div class="cards-area">
+  <div class="group-label">Controles de Rotina</div><div class="cards-grid">
+<a class="card" href="painel/rotina_controles_2026_08.html">
+  <div class="card-inner">
+    <div class="card-icon">&#9881;</div>
+    <div class="card-info">
+      <h3>Controles de Rotina -- Agosto/2026</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
     </div>
   </div>
-</div>
-<div class="wrap">
-  <div class="intro">
-    <h2>Pain&eacute;is de Controles Cont&aacute;beis <span class="badge">Exerc&iacute;cio 2026</span></h2>
-    <p>Pain&eacute;is de controles cont&aacute;beis criados com vistas a subsidiar a atua&ccedil;&atilde;o dos usu&aacute;rios.
-       Os dados s&atilde;o extra&iacute;dos do SIGGO com o aux&iacute;lio do Oracle SQL e passam por atualiza&ccedil;&otilde;es
-       periodicamente. Cada painel permite filtrar, analisar e exportar os dados de interesse.</p>
-    <p style="font-size:12.5px;color:#8a96b0">&#8595; Selecione o controle que deseja consultar</p>
-  </div>
-  <div class="sec-lbl">Controles de Rotina</div><div class="cards">
-<div class="card">
-  <div class="card-icon">&#9881;</div>
-  <div class="card-title">Controles de Rotina -- Agosto/2026</div>
-  <div class="card-desc">Dados extraidos do SIGGO via Oracle SQL. Atualizado periodicamente.</div>
   <div class="card-tags"><span class="tag">08/2026</span><span class="tag">Controles</span><span class="tag">SIGGO</span></div>
-  <a class="card-link" href="painel/rotina_controles_2026_08.html">Abrir painel <span>&#8594;</span></a>
-</div>
-<div class="card">
-  <div class="card-icon">&#9881;</div>
-  <div class="card-title">Controles de Rotina -- Julho/2026</div>
-  <div class="card-desc">Dados extraidos do SIGGO via Oracle SQL. Atualizado periodicamente.</div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a>
+<a class="card" href="painel/rotina_controles_2026_07.html">
+  <div class="card-inner">
+    <div class="card-icon">&#9881;</div>
+    <div class="card-info">
+      <h3>Controles de Rotina -- Julho/2026</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
+    </div>
+  </div>
   <div class="card-tags"><span class="tag">07/2026</span><span class="tag">Controles</span><span class="tag">SIGGO</span></div>
-  <a class="card-link" href="painel/rotina_controles_2026_07.html">Abrir painel <span>&#8594;</span></a>
-</div></div><div class="sec-lbl" style="margin-top:8px">Outros Pain&eacute;is</div><div class="cards">
-<div class="card">
-  <div class="card-icon">&#128202;</div>
-  <div class="card-title">Painel de Diagnostico (33 controles de integridade)</div>
-  <div class="card-desc">Dados extraidos do SIGGO via Oracle SQL. Atualizado periodicamente.</div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a></div><div class="group-label" style="margin-top:8px">Outros Pain&eacute;is</div><div class="cards-grid">
+<a class="card" href="painel/painel_diag.html">
+  <div class="card-inner">
+    <div class="card-icon">&#128202;</div>
+    <div class="card-info">
+      <h3>Painel de Diagnostico (33 controles de integridade)</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
+    </div>
+  </div>
   <div class="card-tags"><span class="tag">Diagnostico</span><span class="tag">33 controles</span><span class="tag">Integridade</span></div>
-  <a class="card-link" href="painel/painel_diag.html">Abrir painel <span>&#8594;</span></a>
-</div>
-<div class="card">
-  <div class="card-icon">&#128203;</div>
-  <div class="card-title">Monitor de Classificacao</div>
-  <div class="card-desc">Dados extraidos do SIGGO via Oracle SQL. Atualizado periodicamente.</div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a>
+<a class="card" href="painel/painel_classificacao.html">
+  <div class="card-inner">
+    <div class="card-icon">&#128203;</div>
+    <div class="card-info">
+      <h3>Monitor de Classificacao</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
+    </div>
+  </div>
   <div class="card-tags"><span class="tag">Classificacao</span><span class="tag">Monitor</span></div>
-  <a class="card-link" href="painel/painel_classificacao.html">Abrir painel <span>&#8594;</span></a>
-</div>
-<div class="card">
-  <div class="card-icon">&#128196;</div>
-  <div class="card-title">Auditoria Consolidada</div>
-  <div class="card-desc">Dados extraidos do SIGGO via Oracle SQL. Atualizado periodicamente.</div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a>
+<a class="card" href="painel/auditoria_consolidada.html">
+  <div class="card-inner">
+    <div class="card-icon">&#128196;</div>
+    <div class="card-info">
+      <h3>Auditoria Consolidada</h3>
+      <p>Dados extra&iacute;dos do SIGGO via Oracle SQL. Atualizado periodicamente.</p>
+    </div>
+  </div>
   
-  <a class="card-link" href="painel/auditoria_consolidada.html">Abrir painel <span>&#8594;</span></a>
-</div></div>
+  <div class="card-link">Abrir painel <span class="arrow">&#8594;</span></div>
+</a></div>
 </div>
-<footer>CONTDF &middot; Controles Cont&aacute;beis SIGGO</footer>
+<footer>
+  <span>CONTDF &middot; Controles Cont&aacute;beis SIGGO</span>
+</footer>
 </body>
 </html>
