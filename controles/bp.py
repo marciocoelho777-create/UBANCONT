@@ -10,6 +10,19 @@ Contas:
   PL                 : 231..237XXXXXX + Resultado do Exercício (calculado)
   Caixa              : 111XXXXXX
 
+MIGRAÇÃO 21/08/2026 — RESULTADO_EXERCICIO via LANCAMENTOCONTABIL
+----------------------------------------------------------------
+O campo RESULTADO_EXERCICIO foi separado do SQL_BP (VSALDOCONTABIL) para
+uma query própria em LANCAMENTOCONTABIL, mesma fonte do DVP e do DMPL.
+
+Consequência esperada: BP-01 (Ativo = Passivo + PL) pode falhar intraday
+quando VSALDOCONTABIL ainda não foi refrescado pelo batch — esse gap expõe
+exatamente a diferença entre as duas fontes para as classes 3 e 4, que é
+R$ 0 no run noturno (quando VSALDOCONTABIL está atualizado) e pode chegar
+a alguns milhões durante o dia. Esse comportamento é DESEJADO: o BP-01
+passa a ser o detector do lag entre VSALDOCONTABIL e LANCAMENTOCONTABIL,
+em vez de uma verificação puramente tautológica dentro de uma fonte só.
+
 CORREÇÃO 13/08/2026 — BP-02 era tautológico
 -------------------------------------------
     ativo = ATIVO_CIRC + ATIVO_NCIRC
@@ -62,14 +75,6 @@ SELECT
               AND v.COCONTACONTABIL BETWEEN 200000000 AND 299999999
          THEN v.VACREDITO - v.VADEBITO ELSE 0 END)   AS CLASSE2_TOTAL,
 
-    -- Resultado do Exercício: 4XXXXXXXX(SC) - 3XXXXXXXX(SD)
-    SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
-              AND v.COCONTACONTABIL BETWEEN 400000000 AND 499999999
-         THEN v.VACREDITO - v.VADEBITO ELSE 0 END)
-  - SUM(CASE WHEN v.INMES BETWEEN 1 AND {mes}
-              AND v.COCONTACONTABIL BETWEEN 300000000 AND 399999999
-         THEN v.VADEBITO - v.VACREDITO ELSE 0 END)   AS RESULTADO_EXERCICIO,
-
     -- Caixa e Equivalentes (111XXXXXX)
     SUM(CASE WHEN v.INMES BETWEEN 0 AND {mes}
               AND v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
@@ -78,9 +83,26 @@ SELECT
 FROM MIL{ano}.VSALDOCONTABIL v
 """
 
+# Resultado do Exercício via LANCAMENTOCONTABIL — mesma fonte que DVP e DMPL,
+# evita lag de refresh intraday do VSALDOCONTABIL (ver dvp.py, migração 21/08/2026).
+SQL_BP_RESULTADO = """
+SELECT
+    SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
+              AND o.COCONTACONTABIL BETWEEN 400000000 AND 499999999
+         THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0)
+         ELSE 0 END)
+  - SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
+              AND o.COCONTACONTABIL BETWEEN 300000000 AND 399999999
+         THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
+         ELSE 0 END)   AS RESULTADO_EXERCICIO
+FROM MIL{ano}.LANCAMENTOCONTABIL o
+"""
+
 
 def extrair(conn, mes: int, ano: int) -> dict:
-    return query_one(conn, SQL_BP.format(mes=mes, ano=ano))
+    t = query_one(conn, SQL_BP.format(mes=mes, ano=ano))
+    t.update(query_one(conn, SQL_BP_RESULTADO.format(mes=mes, ano=ano)))
+    return t
 
 
 def auditar(conn, mes: int, ano: int) -> tuple[list[Achado], dict]:

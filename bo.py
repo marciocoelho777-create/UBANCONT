@@ -126,26 +126,39 @@ MESES = {1:'Janeiro',2:'Fevereiro',3:'Marco',4:'Abril',5:'Maio',
 # ─────────────────────────────────────────────────────────────────────────────
 ANOS_NOTAEMPENHO = None  # preenchido por descobrir_anos_notaempenho()
 
+#  Janela de anos para tras que o UNION ALL do ne_union() cobre, a partir do
+#  ano corrente. Verificado empiricamente em 21/08/2026 (mes 8/2026): dos 24
+#  anos disponiveis (2003..2026), somente 2020..2026 (ano-6..ano) tinham
+#  algum lancamento de RP/paga casado com NOTAEMPENHO -- 2003..2019 davam
+#  zero matches e zero valor. ano-8 mantem 2 anos de folga sobre o que foi
+#  observado, sem precisar manter todo o historico desde 2003. Se algum mes
+#  futuro passar a exigir empenhos mais antigos que isso, aumentar este
+#  numero (nao ha garantia formal de prescricao de RP embutida aqui).
+JANELA_ANOS_NOTAEMPENHO = 8
+
+
 def descobrir_anos_notaempenho(conn, ano):
     """Descobre os schemas MIL{aaaa} que existem e tem NOTAEMPENHO, com
-    aaaa <= ano. Preenche a global ANOS_NOTAEMPENHO. Chamar uma vez no
-    inicio da execucao (main/diagnostico), antes de qualquer busca."""
+    ano-JANELA_ANOS_NOTAEMPENHO <= aaaa <= ano. Preenche a global
+    ANOS_NOTAEMPENHO. Chamar uma vez no inicio da execucao (main/diagnostico),
+    antes de qualquer busca."""
     global ANOS_NOTAEMPENHO
     cur = conn.cursor()
     cur.execute("""SELECT owner FROM all_tables
                    WHERE table_name = 'NOTAEMPENHO' AND owner LIKE 'MIL%'""")
     owners = [r[0] for r in cur.fetchall()]
     cur.close()
+    ano_min = ano - JANELA_ANOS_NOTAEMPENHO
     anos_validos = []
     for o in owners:
         sufixo = o.replace('MIL', '')
-        if sufixo.isdigit() and int(sufixo) <= ano:
+        if sufixo.isdigit() and ano_min <= int(sufixo) <= ano:
             anos_validos.append(int(sufixo))
     anos_validos.sort()
     if not anos_validos:
-        anos_validos = list(range(2023, ano + 1))
+        anos_validos = list(range(max(2023, ano_min), ano + 1))
     ANOS_NOTAEMPENHO = anos_validos
-    print(f"  [NOTAEMPENHO] Schemas detectados (<= {ano}): "
+    print(f"  [NOTAEMPENHO] Schemas detectados ({ano_min}..{ano}): "
           f"{anos_validos[0]}..{anos_validos[-1]} ({len(anos_validos)} anos)")
     return anos_validos
 
@@ -341,9 +354,13 @@ def _sql_receita_item(prefixos, mes):
 
 def buscar_receitas(conn, mes, ano, coug):
     """
-    Executa uma consulta por item de receita (uma chamada por item, no
-    mesmo espirito de buscar_caixa do DFC -- mais simples de depurar
-    item a item do que um unico SELECT com centenas de SUM(CASE)).
+    Uma unica consulta cobrindo todos os itens de receita -- antes eram
+    ~51 queries separadas (uma por item, escolhido originalmente para
+    facilitar depuracao item a item), cada uma um full-scan de
+    LANCAMENTOCONTABIL; agora os blocos de 3 colunas (inicial/atualizada/
+    realizada) de cada item ficam na mesma SELECT, preservando as mesmas
+    expressoes CASE, para varrer a tabela uma unica vez. Era o maior
+    gargalo de bo.py (mais itens que qualquer outra busca do script).
     Retorna dict {nome_item: {'inicial':v,'atualizada':v,'realizada':v}}.
     """
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
@@ -351,22 +368,26 @@ def buscar_receitas(conn, mes, ano, coug):
     resultado = {}
 
     itens = [r for r in RECEITAS if r[2] == "item"]
-    print(f"  [receitas] MIL{ano}.LANCAMENTOCONTABIL — {len(itens)} itens...")
+    print(f"  [receitas] MIL{ano}.LANCAMENTOCONTABIL — {len(itens)} itens em 1 consulta...")
+
+    selects = []
     for nome, nivel, tipo, prefixos in itens:
-        p_ini, p_atu, p_rea = _sql_receita_item(prefixos, mes)
-        sql = f"""
-            SELECT {p_ini} AS INICIAL,
-                   {p_atu} AS ATUALIZADA,
-                   {p_rea} AS REALIZADA
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql)
-        row = cur.fetchone()
+        selects.extend(_sql_receita_item(prefixos, mes))
+
+    sql = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql)
+    row = cur.fetchone()
+
+    for idx, (nome, nivel, tipo, prefixos) in enumerate(itens):
+        p_ini, p_atu, p_rea = row[idx*3:idx*3+3]
         resultado[nome] = {
-            'inicial':    float(row[0] or 0),
-            'atualizada': float(row[1] or 0),
-            'realizada':  float(row[2] or 0),
+            'inicial':    float(p_ini or 0),
+            'atualizada': float(p_atu or 0),
+            'realizada':  float(p_rea or 0),
         }
 
     cur.close()
@@ -375,23 +396,30 @@ def buscar_receitas(conn, mes, ano, coug):
 
 def buscar_op_credito_refinanciamento(conn, mes, ano, coug):
     """Operações de Crédito Internas/Externas (linha IV, Subtotal c/
-    Refinanciamento), mesma logica de coluna das receitas."""
+    Refinanciamento), mesma logica de coluna das receitas -- 1 consulta
+    para os itens de OP_CREDITO_REFIN em vez de uma por item."""
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
     cur = conn.cursor()
     resultado = {}
+
+    selects = []
     for nome, prefixos in OP_CREDITO_REFIN:
-        p_ini, p_atu, p_rea = _sql_receita_item(prefixos, mes)
-        sql = f"""
-            SELECT {p_ini} AS INICIAL, {p_atu} AS ATUALIZADA, {p_rea} AS REALIZADA
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql)
-        row = cur.fetchone()
+        selects.extend(_sql_receita_item(prefixos, mes))
+
+    sql = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql)
+    row = cur.fetchone()
+
+    for idx, (nome, prefixos) in enumerate(OP_CREDITO_REFIN):
+        p_ini, p_atu, p_rea = row[idx*3:idx*3+3]
         resultado[nome] = {
-            'inicial':    float(row[0] or 0),
-            'atualizada': float(row[1] or 0),
-            'realizada':  float(row[2] or 0),
+            'inicial':    float(p_ini or 0),
+            'atualizada': float(p_atu or 0),
+            'realizada':  float(p_rea or 0),
         }
     cur.close()
     return resultado
@@ -420,8 +448,10 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
 
     cond_999 = "SUBSTR(TO_CHAR(o.COCONTACORRENTE),1,3) = '999'"
     cond_fonte4 = "SUBSTR(TO_CHAR(o.COCONTACORRENTE),24,1) = '4'"
+    # Consolidado em 1 consulta (antes eram 3) -- mesmas expressoes CASE de
+    # cada bloco, so reunidas na mesma SELECT para varrer a tabela 1 vez.
     sql = f"""
-        SELECT
+        SELECT /*+ PARALLEL(o, 4) */ 
           SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
                     AND o.COCONTACONTABIL BETWEEN 521100000 AND 521299999
                     AND {cond_999}
@@ -439,35 +469,23 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
         - SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
                     AND o.COCONTACONTABIL BETWEEN 621300000 AND 621399999 AND {cond_999}
                THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
-               ELSE 0 END) AS REALIZADA
+               ELSE 0 END) AS REALIZADA,
+          SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
+                          AND o.COCONTACONTABIL BETWEEN 522130100 AND 522130199
+                     THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
+                     ELSE 0 END) AS SUPERAVIT_FINANCEIRO,
+          SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
+                          AND o.COCONTACONTABIL = 522120202
+                     THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
+                     ELSE 0 END) AS REABERTURA_CREDITOS
         FROM MIL{ano}.LANCAMENTOCONTABIL o
         WHERE 1=1 {filtro_o}
     """
     cur.execute(sql)
     row = cur.fetchone()
     recursos_arrecadados = {'atualizada': float(row[0] or 0), 'realizada': float(row[1] or 0)}
-
-    sql = f"""
-        SELECT SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-                          AND o.COCONTACONTABIL BETWEEN 522130100 AND 522130199
-                     THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
-                     ELSE 0 END)
-        FROM MIL{ano}.LANCAMENTOCONTABIL o
-        WHERE 1=1 {filtro_o}
-    """
-    cur.execute(sql)
-    superavit_financeiro = float(cur.fetchone()[0] or 0)
-
-    sql = f"""
-        SELECT SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-                          AND o.COCONTACONTABIL = 522120202
-                     THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
-                     ELSE 0 END)
-        FROM MIL{ano}.LANCAMENTOCONTABIL o
-        WHERE 1=1 {filtro_o}
-    """
-    cur.execute(sql)
-    reabertura_creditos = float(cur.fetchone()[0] or 0)
+    superavit_financeiro = float(row[2] or 0)
+    reabertura_creditos  = float(row[3] or 0)
 
     cur.close()
     return {
@@ -617,49 +635,42 @@ def _sql_despesa_item(gnd, mes, ano, reserva=False):
 
 def buscar_despesas(conn, mes, ano, coug):
     """
-    Uma consulta por GND (Pessoal/Juros/Outras Correntes/Investimentos/
-    Inversoes/Amortizacao/Reserva). Retorna dict {nome: {dotacao_inicial,
-    dotacao_atualizada, empenhada, liquidada, paga}}.
+    Uma unica consulta cobrindo todos os GNDs (Pessoal/Juros/Outras Correntes/
+    Investimentos/Inversoes/Amortizacao/Reserva de Contingencia/Reserva RPPS)
+    — cada grupo vira um bloco de 5 colunas agregadas na mesma SELECT, em vez
+    de uma query por grupo, para varrer LANCAMENTOCONTABIL uma unica vez.
+    Retorna dict {nome: {dotacao_inicial, dotacao_atualizada, empenhada,
+    liquidada, paga}}.
     """
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
     cur = conn.cursor()
     resultado = {}
 
-    grupos = DESPESAS_CORRENTES + DESPESAS_CAPITAL
-    print(f"  [despesas] MIL{ano}.LANCAMENTOCONTABIL — {len(grupos)} grupos (GND)...")
-    for nome, gnd in grupos:
-        d_ini, d_atu, emp, liq, pag = _sql_despesa_item(gnd, mes, ano)
-        sql = f"""
-            SELECT {d_ini} AS DOT_INICIAL, {d_atu} AS DOT_ATUALIZADA,
-                   {emp} AS EMPENHADA, {liq} AS LIQUIDADA, {pag} AS PAGA
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql)
-        row = cur.fetchone()
-        resultado[nome] = {
-            'dotacao_inicial':    float(row[0] or 0),
-            'dotacao_atualizada': float(row[1] or 0),
-            'empenhada':          float(row[2] or 0),
-            'liquidada':          float(row[3] or 0),
-            'paga':               float(row[4] or 0),
-        }
+    itens = ([(nome, gnd, False) for nome, gnd in DESPESAS_CORRENTES + DESPESAS_CAPITAL]
+             + [("Reserva de Contingência", GND_RESERVA, True),
+                ("Reserva do RPPS", GND_RESERVA_RPPS, True)])
+    print(f"  [despesas] MIL{ano}.LANCAMENTOCONTABIL — {len(itens)} grupos (GND) em 1 consulta...")
 
-    # Reserva de Contingencia (GND=9) e Reserva do RPPS (GND=7), sem empenho
-    for nome, gnd_reserva in (("Reserva de Contingência", GND_RESERVA),
-                               ("Reserva do RPPS", GND_RESERVA_RPPS)):
-        d_ini, d_atu, emp, liq, pag = _sql_despesa_item(gnd_reserva, mes, ano, reserva=True)
-        sql = f"""
-            SELECT {d_ini} AS DOT_INICIAL, {d_atu} AS DOT_ATUALIZADA
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql)
-        row = cur.fetchone()
+    selects = []
+    for _, gnd, reserva in itens:
+        selects.extend(_sql_despesa_item(gnd, mes, ano, reserva=reserva))
+
+    sql = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql)
+    row = cur.fetchone()
+
+    for idx, (nome, _, _) in enumerate(itens):
+        d_ini, d_atu, emp, liq, pag = row[idx*5:idx*5+5]
         resultado[nome] = {
-            'dotacao_inicial':    float(row[0] or 0),
-            'dotacao_atualizada': float(row[1] or 0),
-            'empenhada': 0.0, 'liquidada': 0.0, 'paga': 0.0,
+            'dotacao_inicial':    float(d_ini or 0),
+            'dotacao_atualizada': float(d_atu or 0),
+            'empenhada':          float(emp or 0),
+            'liquidada':          float(liq or 0),
+            'paga':               float(pag or 0),
         }
 
     cur.close()
@@ -706,26 +717,35 @@ def _sql_creditos_item(gnd, mes, ano):
 
 
 def buscar_creditos_adicionais(conn, mes, ano, coug):
+    """
+    Uma unica consulta para todos os grupos (GND) — mesma logica de antes,
+    so que os 7 blocos de 7 colunas ficam na mesma SELECT em vez de uma
+    query por grupo, para varrer LANCAMENTOCONTABIL uma unica vez.
+    """
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
     cur = conn.cursor()
     resultado = {}
 
     grupos = DESPESAS_CORRENTES + DESPESAS_CAPITAL + [("Reserva de Contingência", GND_RESERVA)]
-    print(f"  [creditos adicionais] MIL{ano} — {len(grupos)} grupos...")
-    for nome, gnd in grupos:
-        cols = _sql_creditos_item(gnd, mes, ano)
-        sql = f"""
-            SELECT {cols[0]} A, {cols[1]} B, {cols[2]} C, {cols[3]} D,
-                   {cols[4]} E, {cols[5]} F, {cols[6]} G
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql)
-        row = cur.fetchone()
-        resultado[nome] = {k: float(v or 0) for k, v in
-                            zip(['suplementar','esp_abertos','esp_reabertos',
-                                 'extraord_reabertos','cancel_suplementar',
-                                 'remanej_veto','cancel_especial'], row)}
+    print(f"  [creditos adicionais] MIL{ano} — {len(grupos)} grupos em 1 consulta...")
+
+    selects = []
+    for _, gnd in grupos:
+        selects.extend(_sql_creditos_item(gnd, mes, ano))
+
+    sql = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql)
+    row = cur.fetchone()
+
+    chaves = ['suplementar','esp_abertos','esp_reabertos','extraord_reabertos',
+              'cancel_suplementar','remanej_veto','cancel_especial']
+    for idx, (nome, _) in enumerate(grupos):
+        vals = row[idx*7:idx*7+7]
+        resultado[nome] = {k: float(v or 0) for k, v in zip(chaves, vals)}
     cur.close()
     return resultado
 
@@ -783,37 +803,49 @@ def _sql_rpnp_item(gnd, mes, ano):
 
 
 def buscar_rp_nao_processados(conn, mes, ano, coug):
+    """
+    Duas consultas no total (uma por tabela-fonte) em vez de uma por grupo:
+    os 4 grupos (GND) viram blocos de colunas na mesma SELECT, preservando
+    exatamente as mesmas expressoes CASE/EXISTS de antes.
+    """
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
     filtro_b = f"AND b.COUG = {coug}" if coug else ""
     cur = conn.cursor()
     resultado = {}
 
-    print(f"  [RP nao processados] MIL{ano} — {len(RP_GRUPOS)} grupos...")
-    for nome, gnd, _cat in RP_GRUPOS:
-        sld = _sql_rpnp_saldo_anterior(gnd, mes)
-        sql_saldo = f"""
-            SELECT {sld[0]} A, {sld[1]} B
-            FROM MIL{ano}.BALANCOGERAL b
-            WHERE 1=1 {filtro_b}
-        """
-        cur.execute(sql_saldo)
-        row_saldo = cur.fetchone()
+    print(f"  [RP nao processados] MIL{ano} — {len(RP_GRUPOS)} grupos em 2 consultas...")
 
-        cols = _sql_rpnp_item(gnd, mes, ano)
-        sql_exec = f"""
-            SELECT {cols[0]} C, {cols[1]} D, {cols[2]} E
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql_exec)
-        row_exec = cur.fetchone()
+    selects_saldo = []
+    for _, gnd, _cat in RP_GRUPOS:
+        selects_saldo.extend(_sql_rpnp_saldo_anterior(gnd, mes))
+    sql_saldo = f"""
+        SELECT /*+ PARALLEL(b, 4) */  {', '.join(selects_saldo)}
+        FROM MIL{ano}.BALANCOGERAL b
+        WHERE 1=1 {filtro_b}
+    """
+    cur.execute(sql_saldo)
+    row_saldo = cur.fetchone()
 
+    selects_exec = []
+    for _, gnd, _cat in RP_GRUPOS:
+        selects_exec.extend(_sql_rpnp_item(gnd, mes, ano))
+    sql_exec = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects_exec)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql_exec)
+    row_exec = cur.fetchone()
+
+    for idx, (nome, gnd, _cat) in enumerate(RP_GRUPOS):
+        inscritos_ant, em_dez_ant = row_saldo[idx*2:idx*2+2]
+        liquidados, pagos, cancelados = row_exec[idx*3:idx*3+3]
         resultado[nome] = {
-            'inscritos_ant': float(row_saldo[0] or 0),
-            'em_dez_ant':    float(row_saldo[1] or 0),
-            'liquidados':    float(row_exec[0] or 0),
-            'pagos':         float(row_exec[1] or 0),
-            'cancelados':    float(row_exec[2] or 0),
+            'inscritos_ant': float(inscritos_ant or 0),
+            'em_dez_ant':    float(em_dez_ant or 0),
+            'liquidados':    float(liquidados or 0),
+            'pagos':         float(pagos or 0),
+            'cancelados':    float(cancelados or 0),
         }
     cur.close()
     return resultado
@@ -865,31 +897,38 @@ def buscar_rp_processados(conn, mes, ano, coug):
     cur = conn.cursor()
     resultado = {}
 
-    print(f"  [RP processados] MIL{ano} — {len(RP_GRUPOS)} grupos...")
-    for nome, gnd, _cat in RP_GRUPOS:
-        sld = _sql_rpp_saldo_anterior(gnd, mes)
-        sql_saldo = f"""
-            SELECT {sld[0]} A, {sld[1]} B
-            FROM MIL{ano}.BALANCOGERAL b
-            WHERE 1=1 {filtro_b}
-        """
-        cur.execute(sql_saldo)
-        row_saldo = cur.fetchone()
+    print(f"  [RP processados] MIL{ano} — {len(RP_GRUPOS)} grupos em 2 consultas...")
 
-        cols = _sql_rpp_item(gnd, mes, ano)
-        sql_exec = f"""
-            SELECT {cols[0]} C, {cols[1]} D
-            FROM MIL{ano}.LANCAMENTOCONTABIL o
-            WHERE 1=1 {filtro_o}
-        """
-        cur.execute(sql_exec)
-        row_exec = cur.fetchone()
+    selects_saldo = []
+    for _, gnd, _cat in RP_GRUPOS:
+        selects_saldo.extend(_sql_rpp_saldo_anterior(gnd, mes))
+    sql_saldo = f"""
+        SELECT /*+ PARALLEL(b, 4) */  {', '.join(selects_saldo)}
+        FROM MIL{ano}.BALANCOGERAL b
+        WHERE 1=1 {filtro_b}
+    """
+    cur.execute(sql_saldo)
+    row_saldo = cur.fetchone()
 
+    selects_exec = []
+    for _, gnd, _cat in RP_GRUPOS:
+        selects_exec.extend(_sql_rpp_item(gnd, mes, ano))
+    sql_exec = f"""
+        SELECT /*+ PARALLEL(o, 4) */  {', '.join(selects_exec)}
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql_exec)
+    row_exec = cur.fetchone()
+
+    for idx, (nome, gnd, _cat) in enumerate(RP_GRUPOS):
+        inscritos_ant, em_dez_ant = row_saldo[idx*2:idx*2+2]
+        pagos, cancelados = row_exec[idx*2:idx*2+2]
         resultado[nome] = {
-            'inscritos_ant': float(row_saldo[0] or 0),
-            'em_dez_ant':    float(row_saldo[1] or 0),
-            'pagos':         float(row_exec[0] or 0),
-            'cancelados':    float(row_exec[1] or 0),
+            'inscritos_ant': float(inscritos_ant or 0),
+            'em_dez_ant':    float(em_dez_ant or 0),
+            'pagos':         float(pagos or 0),
+            'cancelados':    float(cancelados or 0),
         }
     cur.close()
     return resultado
