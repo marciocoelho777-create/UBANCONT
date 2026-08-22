@@ -582,6 +582,20 @@ table.tbl tr.subtot td{background:rgba(18,85,204,.05)!important;
                        border-top:1px solid var(--bd);font-style:italic;color:var(--t2)}
 .trunc{font-size:11px;color:var(--t3);font-style:italic;margin-top:4px}
 
+/* ── Barra de histórico de meses ── */
+.hist-bar{background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.08);
+          padding:5px 24px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hist-lbl{font-size:10.5px;color:rgba(255,255,255,.45);letter-spacing:.04em;margin-right:4px}
+.hist-link{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);text-decoration:none;
+           padding:2px 10px;border-radius:100px;border:1px solid rgba(255,255,255,.15);
+           transition:color .12s,border-color .12s,background .12s;white-space:nowrap}
+.hist-link:hover{color:#fff;border-color:rgba(255,255,255,.45)}
+.hist-link.ativo{color:#fff;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.35);
+                 pointer-events:none}
+.hist-idx{font-size:11px;font-weight:600;color:var(--teal,#00b8d4);text-decoration:none;
+          margin-left:auto;opacity:.8;transition:opacity .12s}
+.hist-idx:hover{opacity:1}
+
 /* ── Rodapé ── */
 footer{font-size:11px;color:var(--t3);text-align:center;padding:18px}
 
@@ -696,6 +710,18 @@ def _tabela_html(df, df_erro, cid='', subtotal_por=None):
     return tbl + nota
 
 
+def _outros_meses(saida: Path, mes: int, ano: int):
+    """Descobre outros arquivos rotina_controles_*.html na mesma pasta."""
+    pat = re.compile(r'rotina_controles_(\d{4})_(\d{2})\.html')
+    resultado = []
+    for f in sorted(saida.parent.glob('rotina_controles_*.html'), reverse=True):
+        m = pat.match(f.name)
+        if m:
+            a, mm = int(m.group(1)), int(m.group(2))
+            resultado.append((a, mm, f.name, (a, mm) == (ano, mes)))
+    return resultado
+
+
 def gerar_html(resultados, mes, ano, saida):
     """resultados: list of (controle, df|None, df_erro|None, n_erro, n_total)"""
     n_err    = sum(1 for _, df, _, ne, _ in resultados if df is not None and ne > 0)
@@ -782,6 +808,23 @@ def gerar_html(resultados, mes, ano, saida):
         '<span style="color:#86efac;font-weight:700">&#10003; Todos os controles OK</span>'
     )
 
+    # Barra de histórico: descobre outros meses disponíveis
+    meses_disp = _outros_meses(saida, mes, ano)
+    if len(meses_disp) > 1:
+        links_hist = ''
+        for a, mm, fname, ativo in meses_disp:
+            label = f'{MESES[mm][:3]}/{a}'
+            cls   = ' ativo' if ativo else ''
+            links_hist += f'<a class="hist-link{cls}" href="{fname}">{label}</a>'
+        hist_bar = (f'<div class="hist-bar">'
+                    f'<span class="hist-lbl">MÊS:</span>{links_hist}'
+                    f'<a class="hist-idx" href="../index.html">&#8592; Painel inicial</a>'
+                    f'</div>')
+    else:
+        hist_bar = (f'<div class="hist-bar">'
+                    f'<a class="hist-idx" href="../index.html">&#8592; Painel inicial</a>'
+                    f'</div>')
+
     page = f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -804,6 +847,7 @@ def gerar_html(resultados, mes, ano, saida):
       <div class="hd-ts">Gerado em {agora}</div>
     </div>
   </div>
+  {hist_bar}
 </div>
 <div class="wrap">
   {kpis}
