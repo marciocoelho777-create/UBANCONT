@@ -82,12 +82,13 @@ def conectar() -> oracledb.Connection:
 # ─────────────────────────────────────────────────────────────────────────────
 #  Mapa de módulos disponíveis
 # ─────────────────────────────────────────────────────────────────────────────
-from controles import bf   as _bf
-from controles import bo   as _bo
-from controles import dfc  as _dfc
-from controles import dvp  as _dvp
-from controles import dmpl as _dmpl
-from controles import bp   as _bp
+from controles import bf        as _bf
+from controles import bo        as _bo
+from controles import dfc       as _dfc
+from controles import dvp       as _dvp
+from controles import dmpl      as _dmpl
+from controles import bp        as _bp
+from controles import balancete as _bal
 from controles import cruzamentos as _x
 
 # Registrar módulos — adicione novos aqui conforme forem criados
@@ -98,6 +99,7 @@ MODULOS = {
     "dvp":  (_dvp.auditar,  "Variações Patrimoniais"),
     "dmpl": (_dmpl.auditar, "Mutações do Patrimônio Líquido"),
     "bp":   (_bp.auditar,   "Balanço Patrimonial"),
+    "bal":  (_bal.auditar,  "Balancete Contábil"),
 }
 TODOS = list(MODULOS.keys()) + ["x"]
 

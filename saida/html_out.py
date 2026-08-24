@@ -64,6 +64,37 @@ def _ler_historico(pasta: Path, n: int = 6, tipo: str = "diag") -> list[dict]:
     return hist
 
 
+def _ler_historico_full(pasta: Path, n: int = 24) -> list[dict]:
+    """Últimas n execuções completas (achados + indicadores) para o seletor de datas."""
+    if not pasta.exists():
+        return []
+    arquivos = sorted(pasta.glob("*.json"), reverse=True)[:n]
+    result: list[dict] = []
+    for arq in arquivos:
+        try:
+            d = json.loads(arq.read_text(encoding="utf-8"))
+            result.append({
+                "gerado_em":   d.get("gerado_em", ""),
+                "mes":         d.get("mes", 0),
+                "ano":         d.get("ano", 0),
+                "escopo":      d.get("escopo", "Consolidado"),
+                "totais":      d.get("totais", {}),
+                "indicadores": {
+                    k: (float(v) if v is not None else None)
+                    for k, v in (d.get("indicadores") or {}).items()
+                },
+                "achados": [
+                    {"s": a.get("status", ""), "m": a.get("modulo", ""),
+                     "c": a.get("codigo", ""),  "t": a.get("titulo", ""),
+                     "d": a.get("detalhe", "")}
+                    for a in d.get("achados", [])
+                ],
+            })
+        except Exception:
+            pass
+    return result
+
+
 def gerar_diag(doc: dict, destino: Path | None = None) -> None:
     """Atualiza painel_diag.html com os dados do run atual."""
     destino = destino or (PAINEL / "painel_diag.html")
@@ -93,9 +124,11 @@ def gerar_diag(doc: dict, destino: Path | None = None) -> None:
         }
         for a in doc.get("achados", [])
     ]
+    hist_full = _ler_historico_full(PAINEL / "dados", n=24)
     js = (
         f"const META = {json.dumps(meta, ensure_ascii=False, indent=2)};\n"
-        f"const ACHADOS = {json.dumps(achados, ensure_ascii=False, indent=2)};"
+        f"const ACHADOS = {json.dumps(achados, ensure_ascii=False, indent=2)};\n"
+        f"var HISTORICO_FULL = {json.dumps(hist_full, ensure_ascii=False, indent=2)};"
     )
     _update(destino, js)
 
