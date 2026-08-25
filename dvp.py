@@ -35,17 +35,21 @@
   RESULTADO PATRIMONIAL DO PERÍODO (III) = (I - II)
 
   GRUPO 38 (Custo de Mercadorias/Produtos Vendidos e Serviços Prestados):
-  existe como item na Lista de Equações (COITEMBALANCO 20800000000) mas SEM
-  máscara de conta associada (COCONTACONTABIL em branco) -- não tem
-  categoria própria de exibição. Ainda assim seus valores (quando existem)
-  fazem parte da faixa 3XXXXXXXX/4XXXXXXXX do TOTAL oficial. Confirmado em
-  17/08/2026 (mês 07/2026): a soma das 8 categorias de VPD nomeadas dá
-  108.458.651.150,25, mas o TOTAL oficial (I) é 108.458.701.490,25 -- gap
-  de R$ 50.340,00, IDÊNTICO no PDF oficial da pasta 13 (o próprio relatório
-  do PSIAG550 também não soma exato às categorias exibidas, pela mesma
-  razão). Por isso TOTAL_VPA/TOTAL_VPD SEMPRE vêm da faixa direta da classe
-  inteira (300000000-399999999 / 400000000-499999999), nunca da soma das
-  categorias nomeadas -- mesmo padrão já validado em controles/dvp.py.
+  até 24/08/2026 existia como item na Lista de Equações (COITEMBALANCO
+  20800000000) mas SEM máscara de conta associada (COCONTACONTABIL em
+  branco) -- não tinha categoria própria de exibição, apesar de seus
+  valores (quando existiam) já fazerem parte da faixa 3XXXXXXXX do TOTAL
+  oficial. Confirmado em 17/08/2026 (mês 07/2026): a soma das 8 categorias
+  de VPD nomeadas dava 108.458.651.150,25, mas o TOTAL oficial (I) era
+  108.458.701.490,25 -- gap de R$ 50.340,00, IDÊNTICO no PDF oficial da
+  pasta 13. Em 25/08/2026 a Lista de Equações passou a trazer a conta
+  381110000 associada ao item 2.08.00.00.00.00 ("CUSTO DAS MERC. E PROD.
+  VENDIDOS..."), então o grupo 38 ganhou categoria própria (ver
+  CATEGORIAS_VPD abaixo) e o gap de R$ 50.340,00 fecha. TOTAL_VPA/TOTAL_VPD
+  continuam vindo SEMPRE da faixa direta da classe inteira
+  (300000000-399999999 / 400000000-499999999), nunca da soma das
+  categorias nomeadas -- mesmo padrão já validado em controles/dvp.py; a
+  categoria nova só melhora a abertura exibida, não muda o total.
 
   VARIAÇÕES PATRIMONIAIS QUALITATIVAS (Anexo da DVP, contas de controle 95/96):
     96131XXXX  Incorporação de Ativo               (SC)
@@ -139,6 +143,7 @@ CATEGORIAS_VPD = [
     ("TRANSF_CONC",     "Transferências e Delegações Concedidas",                  "35XXXXXXX"),
     ("DESVALOR_PERDA",  "Desvalorização e Perda de Ativos e Incorporação de Passivos", "36XXXXXXX"),
     ("TRIBUTARIAS",     "Tributárias",                                              "37XXXXXXX"),
+    ("CUSTO_MERC_PROD", "Custo de Mercadorias, Prod. Vendidos e Serviços Prestados", "381110000"),
     ("OUTRAS_VPD",      "Outras Variações Patrimoniais Diminutivas",               "39XXXXXXX"),
 ]
 QUALITATIVAS = [
