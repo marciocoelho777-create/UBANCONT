@@ -501,7 +501,34 @@ footer {
     </div>
   </div>
 
-  <!-- 5 · Campos de classificação por registro -->
+  <!-- 4b — GND errado: INCATEGORIA ≠ natureza de despesa -->
+  <div class="card" id="card-gnd-errado">
+    <div class="card-hd">
+      GND errado — valor em linha incorreta do BO
+      <span id="gnd-errado-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="gnd-errado-wrap">
+      <table id="tbl-gnd-errado">
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Conta</th>
+            <th>UO</th>
+            <th>Natureza</th>
+            <th>GND atual</th>
+            <th>GND esperado</th>
+            <th class="r">Valor</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-gnd-errado"></tbody>
+      </table>
+      <p id="gnd-errado-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Nenhum GND incorreto detectado
+      </p>
+    </div>
+  </div>
+
+  <!-- 5· Campos de classificação por registro -->
   <div class="card">
     <div class="card-hd">
       Campos de classificação por registro
@@ -695,12 +722,18 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-08-27T14:26:15",
+  "gerado_em": "2026-08-27T16:06:58",
   "mes": 8,
   "ano": 2026,
   "por_demonstrativo": {},
   "achados": [],
+  "gnd_errado": [],
   "historico": [
+    {
+      "gerado_em": "2026-08-27T16:06:58",
+      "n": 0,
+      "por_dem": {}
+    },
     {
       "gerado_em": "2026-08-27T14:26:15",
       "n": 0,
@@ -727,17 +760,17 @@ const CDATA = {
       "por_dem": {
         "BO": 2051991.0
       }
-    },
-    {
-      "gerado_em": "2026-08-25T13:35:41",
-      "n": 2,
-      "por_dem": {
-        "BO": 2051991.0
-      }
     }
   ]
 };
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-08-27T16:06:58",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
   {
     "gerado_em": "2026-08-27T14:26:15",
     "mes": 8,
@@ -1723,6 +1756,34 @@ function renderRun(data){
       <td>${a.permanece_em?.length?a.permanece_em.map(d=>`<span class="badge b-ok">${d}</span>`).join(' '):'<span class="badge b-muted">—</span>'}</td>
       <td>${a.incerto_em?.length?a.incerto_em.map(d=>`<span class="badge b-wrn">${d}</span>`).join('&ensp;'):'—'}</td>
     </tr>`).join('');
+  }
+
+  /* GND errado table */
+  const gndErrado = data.gnd_errado || [];
+  const tbodyGnd  = document.getElementById('tbody-gnd-errado');
+  const okGnd     = document.getElementById('gnd-errado-ok');
+  const badgeGnd  = document.getElementById('gnd-errado-badge');
+  if(tbodyGnd){
+    if(gndErrado.length === 0){
+      tbodyGnd.innerHTML = '';
+      if(okGnd) okGnd.style.display = '';
+      if(badgeGnd) badgeGnd.textContent = '✅ nenhum';
+    } else {
+      if(okGnd) okGnd.style.display = 'none';
+      const totalGnd = gndErrado.reduce((s,x)=>s+Math.abs(x.valor),0);
+      if(badgeGnd) badgeGnd.innerHTML =
+        `<span style="color:var(--wrn);font-weight:600">${gndErrado.length} registro(s) — ${_brl(totalGnd)}</span>`;
+      const GND_NOME = {1:'Pessoal',2:'Juros',3:'Outras DC',4:'Investimentos',5:'Inversões',6:'Amortização'};
+      tbodyGnd.innerHTML = gndErrado.map(x=>`<tr>
+        <td>${MESES_ABV[x.mes]||x.mes}/${ano}</td>
+        <td><code>${x.conta}</code></td>
+        <td>${x.couo||'—'}</td>
+        <td><code>${x.conatureza}</code></td>
+        <td><span class="badge b-err">GND ${x.incategoria} — ${GND_NOME[x.incategoria]||'?'}</span></td>
+        <td><span class="badge b-ok">GND ${x.gnd_esperado} — ${x.gnd_desc}</span></td>
+        <td class="r">${_brl(x.valor)}</td>
+      </tr>`).join('');
+    }
   }
 
   /* Campos table */
