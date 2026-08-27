@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Balancete Contábil</title>
+<style>
+:root {
+  --brand:#1A4A8F; --pg:#F1F4FB; --s1:#FFF; --s2:#E8EDF7; --bd:#C8D5ED;
+  --t1:#0D1829; --t2:#4C5C7A; --t3:#8A9BBD;
+  --err:#BE1C1C; --err-bg:#FEF2F2; --err-bd:#FECACA;
+  --wrn:#9A6100; --wrn-bg:#FFFBEB; --wrn-bd:#FDE68A;
+  --ok:#156030;  --ok-bg:#F0FDF4;  --ok-bd:#BBF7D0;
+  --inf:#1547A0; --inf-bg:#EFF6FF; --inf-bd:#BFDBFE;
+  --fn:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --brand:#4889D8; --pg:#080C18; --s1:#101827; --s2:#182035; --bd:#1D2C48;
+  --t1:#D4DFF5; --t2:#6A7EA6; --t3:#3D5070;
+  --err:#F87171; --err-bg:#170404; --err-bd:#7F1D1D;
+  --wrn:#FBBA47; --wrn-bg:#140C00; --wrn-bd:#78350F;
+  --ok:#4ADE80;  --ok-bg:#031309;  --ok-bd:#14532D;
+  --inf:#93C5FD; --inf-bg:#0C1A35; --inf-bd:#1E3A5F;
+}}
+:root[data-theme="dark"]{
+  --brand:#4889D8; --pg:#080C18; --s1:#101827; --s2:#182035; --bd:#1D2C48;
+  --t1:#D4DFF5; --t2:#6A7EA6; --t3:#3D5070;
+  --err:#F87171; --err-bg:#170404; --err-bd:#7F1D1D;
+  --wrn:#FBBA47; --wrn-bg:#140C00; --wrn-bd:#78350F;
+  --ok:#4ADE80;  --ok-bg:#031309;  --ok-bd:#14532D;
+  --inf:#93C5FD; --inf-bg:#0C1A35; --inf-bd:#1E3A5F;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);background:var(--pg)}
+.hd{background:var(--brand);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}
+.hd-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.hd-sub{font-size:12px;opacity:.72;margin-top:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:20px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r)}
+.nav a{font-size:12px;font-weight:600;color:var(--brand);text-decoration:none;padding:4px 10px;border-radius:100px;border:1px solid var(--bd)}
+.nav a:hover{border-color:var(--brand)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kpi-stripe,var(--bd))}
+.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-.025em;color:var(--kpi-color,var(--t1))}
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--bd);font-size:14px;font-weight:700}
+.card-hd span{font-size:11px;font-weight:400;color:var(--t3)}
+.chip{font-size:10px;font-weight:600;padding:1px 8px;border-radius:100px;border:1px solid;display:inline-block;white-space:nowrap}
+.c-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.c-err{background:var(--err-bg);color:var(--err);border-color:var(--err-bd)}
+.c-alr{background:var(--wrn-bg);color:var(--wrn);border-color:var(--wrn-bd)}
+.c-inf{background:var(--inf-bg);color:var(--inf);border-color:var(--inf-bd)}
+table.resumo{width:100%;border-collapse:collapse;font-size:13px}
+table.resumo th,table.resumo td{padding:8px 20px;text-align:right;border-bottom:1px solid var(--bd)}
+table.resumo th:first-child,table.resumo td:first-child{text-align:left}
+table.resumo thead th{background:var(--s2);font-size:11px;text-transform:uppercase;color:var(--t2)}
+details.dem{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+details.dem summary{padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;background:var(--s2)}
+details.dem summary::-webkit-details-marker{display:none}
+details.dem summary::after{content:'+';font-size:16px;color:var(--t3)}
+details.dem[open] summary::after{content:'\2212'}
+.dem-body{padding:16px 20px;display:flex;flex-direction:column;gap:18px}
+.tbl-titulo{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:6px}
+table.tbl-oficial{width:100%;border-collapse:collapse;font-size:12.5px;font-family:var(--fm)}
+table.tbl-oficial th,table.tbl-oficial td{padding:5px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+table.tbl-oficial th{background:var(--s2);font-weight:700;font-family:var(--fn)}
+table.tbl-oficial td:first-child,table.tbl-oficial th:first-child{white-space:normal;font-family:var(--fn)}
+.aud-list{display:flex;flex-direction:column;gap:8px}
+.aud-item{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--bd);border-radius:6px}
+.aud-txt{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.aud-txt span{color:var(--t2);font-size:12.5px}
+.aud-vazio{color:var(--t3);font-size:12.5px;font-style:italic}
+footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
+.run-wrap{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--s1);border:1px solid var(--bd);border-radius:var(--r)}
+.run-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);white-space:nowrap;flex-shrink:0}
+#run-select{flex:1;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--s2);color:var(--t1);font-size:12px;font-family:var(--fn);cursor:pointer;max-width:520px}
+#run-select:focus{outline:2px solid var(--brand);outline-offset:1px}
+.run-note{font-size:11.5px;color:var(--t3);font-style:italic}
+
+table.bal{width:100%;border-collapse:collapse;font-size:13px}
+table.bal th,table.bal td{padding:8px 20px;border-bottom:1px solid var(--bd)}
+table.bal th{background:var(--s2);font-size:11px;text-transform:uppercase;color:var(--t2);text-align:left}
+table.bal td:first-child{text-align:left}
+table.bal td{text-align:right;font-variant-numeric:tabular-nums}
+table.bal tr.row-dev td:first-child{border-left:3px solid var(--ok)}
+table.bal tr.row-cred td:first-child{border-left:3px solid var(--inf)}
+table.bal tr.tot td{font-weight:700;background:var(--s2)}
+table.bal tr.dif.c-ok td{color:var(--ok)}
+table.bal tr.dif.c-err td{color:var(--err)}
+</style>
+</head>
+<body>
+<header class="hd">
+  <div><div class="hd-title">Balancete Contábil — GDF</div>
+  <div class="hd-sub">Agosto/2026 · Consolidado</div></div>
+  <div class="hd-sub">Gerado em 27/08/2026 04:32:41</div>
+</header>
+<main class="wrap">
+  <div class="run-wrap">
+    <span class="run-lbl">Execução</span>
+    <select id="run-select" onchange="loadRun(this.selectedIndex)"></select>
+    <span class="run-note">seletor troca tabela e auditoria pela execução escolhida</span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:var(--err)"><div class="kpi-lbl">Erros</div><div class="kpi-val" id="kpi-err">0</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--wrn);--kpi-color:var(--wrn)"><div class="kpi-lbl">Alertas</div><div class="kpi-val" id="kpi-alr">0</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)"><div class="kpi-lbl">OK</div><div class="kpi-val" id="kpi-ok">1</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--inf);--kpi-color:var(--inf)"><div class="kpi-lbl">Informativos</div><div class="kpi-val" id="kpi-inf">0</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">Balancete <span id="resultado-geral">RESULTADO: nenhum erro ou alerta</span></div>
+    <table class="bal">
+      <thead><tr><th>Classe / Descrição</th><th style="text-align:center">Natureza</th><th style="text-align:right">Saldo (R$)</th></tr></thead>
+      <tbody id="bal-tbody"><tr class="row-dev"><td>Cl. 1 — Ativo</td><td style="text-align:center">DEV</td><td>69.496.471.542,65</td></tr><tr class="row-cred"><td>Cl. 2 — Passivo e Patrimônio Líquido</td><td style="text-align:center">CRED</td><td>83.702.017.617,32</td></tr><tr class="row-dev"><td>Cl. 3 — Variações Patrimoniais Diminutivas (VPD)</td><td style="text-align:center">DEV</td><td>113.776.716.555,75</td></tr><tr class="row-cred"><td>Cl. 4 — Variações Patrimoniais Aumentativas (VPA)</td><td style="text-align:center">CRED</td><td>99.571.170.481,08</td></tr><tr class="row-dev"><td>Cl. 5 — Controles Orçamentários — Aprovação</td><td style="text-align:center">DEV</td><td>263.297.176.073,78</td></tr><tr class="row-cred"><td>Cl. 6 — Controles Orçamentários — Execução</td><td style="text-align:center">CRED</td><td>263.297.176.073,78</td></tr><tr class="row-dev"><td>Cl. 7 — Controles Devedores</td><td style="text-align:center">DEV</td><td>627.774.188.251,79</td></tr><tr class="row-cred"><td>Cl. 8 — Controles Credores</td><td style="text-align:center">CRED</td><td>627.774.188.251,79</td></tr><tr class="row-cred"><td>Cl. 9 — Resultado do Exercício (Encerramento)</td><td style="text-align:center">CRED</td><td>0,00</td></tr><tr class="tot"><td>TOTAL DEVEDORES (1+3+5+7)</td><td style="text-align:center">DEV</td><td>1.074.344.552.423,97</td></tr><tr class="tot"><td>TOTAL CREDORES (2+4+6+8+9)</td><td style="text-align:center">CRED</td><td>1.074.344.552.423,97</td></tr><tr class="tot dif c-ok"><td>DIFERENÇA (Devedores − Credores)</td><td></td><td>0,00</td></tr></tbody>
+    </table>
+  </div>
+
+  <details class="dem" open>
+    <summary>Auditoria de Integridade</summary>
+    <div class="dem-body"><div class="aud-list" id="aud-body"><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>BAL-01 — Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)</strong><span>Devedores 1,074,344,552,423.97  =  Cl.1 69,496,471,542.65  +  Cl.3 113,776,716,555.75  +  Cl.5 263,297,176,073.78  +  Cl.7 627,774,188,251.79  |  Credores 1,074,344,552,423.97  =  Cl.2 83,702,017,617.32  +  Cl.4 99,571,170,481.08  +  Cl.6 263,297,176,073.78  +  Cl.8 627,774,188,251.79  +  Cl.9 0.00</span></div></div></div></div>
+  </details>
+
+  <footer>Balancete Contábil — gerado automaticamente por gerar_balancete.py.</footer>
+</main>
+<script>
+const CHIP_CLASS = {"OK": "c-ok", "ERRO": "c-err", "ALERTA": "c-alr", "INFO": "c-inf"};
+const ICONES = {"OK": "✔", "ERRO": "✘", "ALERTA": "⚠", "INFO": "ℹ"};
+const MESES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const CLASSES = [["CL1_ATIVO", "Cl. 1 — Ativo", "DEV"], ["CL2_PASSIVO_PL", "Cl. 2 — Passivo e Patrimônio Líquido", "CRED"], ["CL3_VPD", "Cl. 3 — Variações Patrimoniais Diminutivas (VPD)", "DEV"], ["CL4_VPA", "Cl. 4 — Variações Patrimoniais Aumentativas (VPA)", "CRED"], ["CL5_CONTROR_APROV", "Cl. 5 — Controles Orçamentários — Aprovação", "DEV"], ["CL6_CONTROR_EXEC", "Cl. 6 — Controles Orçamentários — Execução", "CRED"], ["CL7_CONTRDEV", "Cl. 7 — Controles Devedores", "DEV"], ["CL8_CONTRCRED", "Cl. 8 — Controles Credores", "CRED"], ["CL9_RESULTADO", "Cl. 9 — Resultado do Exercício (Encerramento)", "CRED"]];
+var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-08-27T04:32:41",
+    "mes": 8,
+    "ano": 2026,
+    "t": {
+      "CL1_ATIVO": 69496471542.65,
+      "CL3_VPD": 113776716555.75,
+      "CL5_CONTROR_APROV": 263297176073.78,
+      "CL7_CONTRDEV": 627774188251.79,
+      "CL2_PASSIVO_PL": 83702017617.32,
+      "CL4_VPA": 99571170481.08,
+      "CL6_CONTROR_EXEC": 263297176073.78,
+      "CL8_CONTRCRED": 627774188251.79,
+      "CL9_RESULTADO": 0.0,
+      "DEVEDORES_TOTAL": 1074344552423.97,
+      "CREDORES_TOTAL": 1074344552423.97
+    },
+    "achados": [
+      {
+        "codigo": "BAL-01",
+        "status": "OK",
+        "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
+        "detalhe": "Devedores 1,074,344,552,423.97  =  Cl.1 69,496,471,542.65  +  Cl.3 113,776,716,555.75  +  Cl.5 263,297,176,073.78  +  Cl.7 627,774,188,251.79  |  Credores 1,074,344,552,423.97  =  Cl.2 83,702,017,617.32  +  Cl.4 99,571,170,481.08  +  Cl.6 263,297,176,073.78  +  Cl.8 627,774,188,251.79  +  Cl.9 0.00"
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-26T09:36:30",
+    "mes": 8,
+    "ano": 2026,
+    "t": {
+      "CL1_ATIVO": 69411168094.17,
+      "CL3_VPD": 113265662973.34,
+      "CL5_CONTROR_APROV": 258794752885.44,
+      "CL7_CONTRDEV": 620253607878.0,
+      "CL2_PASSIVO_PL": 83331253976.13,
+      "CL4_VPA": 99345577091.38,
+      "CL6_CONTROR_EXEC": 258794752885.44,
+      "CL8_CONTRCRED": 620253607878.0,
+      "CL9_RESULTADO": 0.0,
+      "DEVEDORES_TOTAL": 1061725191830.95,
+      "CREDORES_TOTAL": 1061725191830.95
+    },
+    "achados": [
+      {
+        "codigo": "BAL-01",
+        "status": "OK",
+        "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
+        "detalhe": "Devedores 1,061,725,191,830.95  =  Cl.1 69,411,168,094.17  +  Cl.3 113,265,662,973.34  +  Cl.5 258,794,752,885.44  +  Cl.7 620,253,607,878.00  |  Credores 1,061,725,191,830.95  =  Cl.2 83,331,253,976.13  +  Cl.4 99,345,577,091.38  +  Cl.6 258,794,752,885.44  +  Cl.8 620,253,607,878.00  +  Cl.9 0.00"
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-26T09:39:51",
+    "mes": 7,
+    "ano": 2026,
+    "t": {
+      "CL1_ATIVO": 69920399167.59,
+      "CL3_VPD": 108458701490.25,
+      "CL5_CONTROR_APROV": 249671416108.28,
+      "CL7_CONTRDEV": 583227407120.31,
+      "CL2_PASSIVO_PL": 84943919833.72,
+      "CL4_VPA": 93435180824.12,
+      "CL6_CONTROR_EXEC": 249671416108.28,
+      "CL8_CONTRCRED": 583227407120.31,
+      "CL9_RESULTADO": 0.0,
+      "DEVEDORES_TOTAL": 1011277923886.43,
+      "CREDORES_TOTAL": 1011277923886.43
+    },
+    "achados": [
+      {
+        "codigo": "BAL-01",
+        "status": "OK",
+        "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
+        "detalhe": "Devedores 1,011,277,923,886.43  =  Cl.1 69,920,399,167.59  +  Cl.3 108,458,701,490.25  +  Cl.5 249,671,416,108.28  +  Cl.7 583,227,407,120.31  |  Credores 1,011,277,923,886.43  =  Cl.2 84,943,919,833.72  +  Cl.4 93,435,180,824.12  +  Cl.6 249,671,416,108.28  +  Cl.8 583,227,407,120.31  +  Cl.9 0.00"
+      }
+    ]
+  }
+];
+
+function fmtBRL(n){
+  const neg = n < 0;
+  let s = Math.abs(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return (neg?'-':'') + s;
+}
+
+function renderRun(h){
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v||0;};
+  const cont={OK:0,ALERTA:0,ERRO:0,INFO:0};
+  (h.achados||[]).forEach(a=>{cont[a.status]=(cont[a.status]||0)+1;});
+  set('kpi-err',cont.ERRO); set('kpi-alr',cont.ALERTA); set('kpi-ok',cont.OK); set('kpi-inf',cont.INFO);
+  const rg=document.getElementById('resultado-geral');
+  if(rg){
+    rg.textContent='RESULTADO: '+((cont.ERRO||cont.ALERTA)?`${cont.ERRO} erro(s), ${cont.ALERTA} alerta(s)`:'nenhum erro ou alerta');
+  }
+  const tb=document.getElementById('bal-tbody');
+  if(tb){
+    const t=h.t||{};
+    let rows = CLASSES.map(([chave,desc,nat])=>{
+      const cls = nat==='DEV' ? 'row-dev' : 'row-cred';
+      return `<tr class="${cls}"><td>${desc}</td><td style="text-align:center">${nat}</td><td>${fmtBRL(t[chave]||0)}</td></tr>`;
+    }).join('');
+    const dif = (t.DEVEDORES_TOTAL||0) - (t.CREDORES_TOTAL||0);
+    const difCls = Math.abs(dif) < 0.05 ? 'c-ok' : 'c-err';
+    rows += `<tr class="tot"><td>TOTAL DEVEDORES (1+3+5+7)</td><td style="text-align:center">DEV</td><td>${fmtBRL(t.DEVEDORES_TOTAL||0)}</td></tr>`;
+    rows += `<tr class="tot"><td>TOTAL CREDORES (2+4+6+8+9)</td><td style="text-align:center">CRED</td><td>${fmtBRL(t.CREDORES_TOTAL||0)}</td></tr>`;
+    rows += `<tr class="tot dif ${difCls}"><td>DIFERENÇA (Devedores − Credores)</td><td></td><td>${fmtBRL(dif)}</td></tr>`;
+    tb.innerHTML = rows;
+  }
+  const ab=document.getElementById('aud-body');
+  if(ab){
+    ab.innerHTML=(h.achados||[]).map(a=>{
+      const chip=CHIP_CLASS[a.status]||'c-inf';
+      const icone=ICONES[a.status]||'•';
+      return `<div class="aud-item"><span class="chip ${chip}">${icone} ${a.status}</span>`+
+             `<div class="aud-txt"><strong>${a.codigo} — ${a.titulo}</strong><span>${a.detalhe}</span></div></div>`;
+    }).join('');
+  }
+}
+
+function buildSelector(){
+  const sel=document.getElementById('run-select');
+  if(!sel||!HISTORICO_FULL.length) return;
+  sel.innerHTML=HISTORICO_FULL.map((h,i)=>{
+    const nErr=(h.achados||[]).filter(a=>a.status==='ERRO').length;
+    let lbl='';
+    try{
+      const d=new Date(h.gerado_em.replace('T',' '));
+      lbl=`${MESES[h.mes]||h.mes}/${h.ano} — ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    }catch(e){lbl=h.gerado_em||String(i);}
+    if(nErr) lbl+=' ⚠ '+nErr+' erro(s)';
+    return `<option value="${i}">${lbl}</option>`;
+  }).join('');
+}
+
+function loadRun(idx){
+  const h=HISTORICO_FULL[idx];
+  if(!h) return;
+  const sel=document.getElementById('run-select');
+  if(sel) sel.selectedIndex=idx;
+  renderRun(h);
+}
+
+buildSelector();
+</script>
+</body>
+</html>
