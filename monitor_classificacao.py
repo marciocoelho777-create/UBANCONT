@@ -66,6 +66,26 @@ DIR_DADOS = RAIZ / "painel" / "dados" / "classificacao"
 TIPO_BALANCO = {1: "BF", 2: "BP", 3: "DVP", 4: "BO", 5: "DRE",
                 6: "BP-Empresa", 7: "DFC", 8: "DMPL"}
 
+# Mapeamento natureza → GND esperado: (nat_ini, nat_fim, gnd, descricao)
+# Baseado no prefixo de 2 dígitos da natureza de despesa (6 dígitos no SIGGO).
+GND_NATUREZA = [
+    (310000, 319999, 1, "Pessoal e Encargos Sociais"),
+    (320000, 329999, 2, "Juros e Encargos da Dívida"),
+    (330000, 399999, 3, "Outras Despesas Correntes"),
+    (440000, 449999, 4, "Investimentos"),
+    (450000, 459999, 5, "Inversões Financeiras"),
+    (460000, 469999, 6, "Amortização da Dívida"),
+]
+
+def _gnd_por_nat(nat):
+    """Retorna (gnd_int, descricao) pelo prefixo da natureza, ou None."""
+    if not nat:
+        return None
+    for ini, fim, gnd, desc in GND_NATUREZA:
+        if ini <= nat <= fim:
+            return (gnd, desc)
+    return None
+
 # ITEMBALANCO (o que o item exige)  ->  BALANCOGERAL (o que o registro tem).
 # COGESTAO e CORECEITA existem no ITEMBALANCO mas NÃO na BALANCOGERAL, então
 # não são verificáveis aqui — itens que dependam só deles entram na lista de
@@ -324,6 +344,67 @@ def varrer(conn, mes, ano, regras):
     return achados
 
 
+SQL_BG_GND = """
+SELECT b.INMES, b.COCONTACONTABIL,
+       b.INCATEGORIA, b.CONATUREZA, b.COFONTE, b.COUO, b.COFUNCAO,
+       SUM(b.VACREDITO - b.VADEBITO) AS VLR, COUNT(*) AS QTD
+FROM   MIL{ano}.BALANCOGERAL b
+WHERE  b.INMES BETWEEN 1 AND {mes}
+  AND  ({faixas})
+  AND  b.CONATUREZA > 0
+  AND  b.INCATEGORIA > 0
+GROUP  BY b.INMES, b.COCONTACONTABIL, b.INCATEGORIA, b.CONATUREZA,
+          b.COFONTE, b.COUO, b.COFUNCAO
+HAVING ABS(SUM(b.VACREDITO - b.VADEBITO)) > 0.01
+"""
+
+
+def varrer_gnd_errado(conn, mes, ano, regras):
+    """Registros onde INCATEGORIA (GND) diverge do GND implícito pela natureza.
+
+    Detecta classificações incorretas onde o valor APARECE no BO mas na linha
+    errada — diferente do varrer() que detecta valores que SOMEM do BO.
+    Exemplo: natureza 319011 (GND 1 Pessoal) com INCATEGORIA=3 (Outras DC).
+    """
+    faixas = sorted({(ini, fim) for (dem, ini, fim) in regras if dem == "BO"})
+    if not faixas:
+        return []
+    pred = " OR ".join(f"b.COCONTACONTABIL BETWEEN {a} AND {z}" for a, z in faixas)
+
+    cur = conn.cursor()
+    cur.execute(SQL_BG_GND.format(ano=ano, mes=mes, faixas=pred))
+    cols = [d[0] for d in cur.description]
+    linhas = [dict(zip(cols, r)) for r in cur.fetchall()]
+    cur.close()
+    print(f"  GND-cruzado: {len(linhas)} agregados analisados")
+
+    achados = []
+    for l in linhas:
+        nat = _norm(l["CONATUREZA"])
+        inc = _norm(l["INCATEGORIA"])
+        if nat is None or inc is None:
+            continue
+        esp = _gnd_por_nat(nat)
+        if esp is None:
+            continue
+        gnd_esp, desc_esp = esp
+        if inc != gnd_esp:
+            achados.append({
+                "mes":              int(l["INMES"]),
+                "conta":            int(l["COCONTACONTABIL"]),
+                "valor":            float(l["VLR"]),
+                "registros":        int(l["QTD"]),
+                "incategoria":      inc,
+                "gnd_esperado":     gnd_esp,
+                "gnd_desc":         desc_esp,
+                "conatureza":       nat,
+                "cofonte":          _norm(l["COFONTE"]),
+                "couo":             _norm(l["COUO"]),
+                "cofuncao":         _norm(l["COFUNCAO"]),
+            })
+    return sorted(achados, key=lambda x: -abs(x["valor"]))
+
+
 def _brl(v):
     if v is None:
         return "—"
@@ -333,28 +414,49 @@ def _brl(v):
 
 def markdown(doc):
     L = ["# Monitor de Classificação — valores ausentes dos demonstrativos", ""]
-    if not doc["achados"]:
+    achados    = doc.get("achados", [])
+    gnd_errado = doc.get("gnd_errado", [])
+
+    if not achados:
         L += [f"✅ Nenhum valor perdido até {doc['mes']:02d}/{doc['ano']}.", ""]
-        return "\n".join(L)
-    L += [f"❌ **{len(doc['achados'])} agregado(s)** com classificação "
-          f"incompleta até {doc['mes']:02d}/{doc['ano']}.", "",
-          "## Impacto por demonstrativo", "",
-          "| Demonstrativo | Agregados | Valor que não aparece |",
-          "|---|---:|---:|"]
-    for dem, t in sorted(doc["por_demonstrativo"].items(),
-                         key=lambda x: -abs(x[1]["valor"])):
-        L.append(f"| **{dem}** | {t['n']} | {_brl(t['valor'])} |")
-    L += ["", "## Detalhe", "",
-          "| Mês | Conta | Valor | Campos zerados | Some de | Permanece em |",
-          "|---|---|---:|---|---|---|"]
-    for a in sorted(doc["achados"], key=lambda x: -abs(x["valor"])):
-        L.append(f"| {a['mes']} | {a['conta']} | {_brl(a['valor'])} | "
-                 f"{', '.join(a['zerados']) or '—'} | "
-                 f"**{', '.join(a['some_de'])}** | "
-                 f"{', '.join(a['permanece_em']) or '—'} |")
-    L += ["", "Um item captura o registro quando todos os campos que ele exige "
-              "batem por igualdade; o valor sobrevive num demonstrativo se ao "
-              "menos um item o capturar. `INCATEGORIA` é o GND, apesar do nome.", ""]
+    else:
+        L += [f"❌ **{len(achados)} agregado(s)** com classificação "
+              f"incompleta até {doc['mes']:02d}/{doc['ano']}.", "",
+              "## Impacto por demonstrativo", "",
+              "| Demonstrativo | Agregados | Valor que não aparece |",
+              "|---|---:|---:|"]
+        for dem, t in sorted(doc["por_demonstrativo"].items(),
+                             key=lambda x: -abs(x[1]["valor"])):
+            L.append(f"| **{dem}** | {t['n']} | {_brl(t['valor'])} |")
+        L += ["", "## Detalhe — campo zerado (valor some do demonstrativo)", "",
+              "| Mês | Conta | Valor | Campos zerados | Some de | Permanece em |",
+              "|---|---|---:|---|---|---|"]
+        for a in sorted(achados, key=lambda x: -abs(x["valor"])):
+            L.append(f"| {a['mes']} | {a['conta']} | {_brl(a['valor'])} | "
+                     f"{', '.join(a['zerados']) or '—'} | "
+                     f"**{', '.join(a['some_de'])}** | "
+                     f"{', '.join(a['permanece_em']) or '—'} |")
+        L += ["", "Um item captura o registro quando todos os campos que ele exige "
+                  "batem por igualdade; o valor sobrevive num demonstrativo se ao "
+                  "menos um item o capturar. `INCATEGORIA` é o GND, apesar do nome.", ""]
+
+    if not gnd_errado:
+        L += ["", f"✅ Nenhum GND incorreto (INCATEGORIA ≠ natureza) até "
+                  f"{doc['mes']:02d}/{doc['ano']}.", ""]
+    else:
+        total_gnd = sum(abs(x["valor"]) for x in gnd_errado)
+        L += ["", f"⚠️ **{len(gnd_errado)} registro(s)** com GND incorreto "
+                  f"(INCATEGORIA ≠ natureza) — valor em linha errada do BO: "
+                  f"{_brl(total_gnd)}", "",
+              "## GND errado — valor em linha incorreta do BO", "",
+              "| Mês | Conta | UO | Natureza | GND atual | GND esperado | Valor |",
+              "|---|---|---|---|---|---|---:|"]
+        for a in gnd_errado:
+            L.append(f"| {a['mes']} | {a['conta']} | {a['couo'] or '—'} | "
+                     f"{a['conatureza']} | **{a['incategoria']}** | "
+                     f"{a['gnd_esperado']} ({a['gnd_desc']}) | {_brl(a['valor'])} |")
+        L += [""]
+
     return "\n".join(L)
 
 
@@ -367,8 +469,9 @@ def main():
     print(f"\n== Monitor de Classificação — {a.mes:02d}/{a.ano} ==")
     conn = conectar()
     try:
-        regras = carregar_itens(conn, a.ano)
-        achados = varrer(conn, a.mes, a.ano, regras)
+        regras     = carregar_itens(conn, a.ano)
+        achados    = varrer(conn, a.mes, a.ano, regras)
+        gnd_errado = varrer_gnd_errado(conn, a.mes, a.ano, regras)
     finally:
         conn.close(); print("  Conexão Oracle encerrada.")
 
@@ -378,6 +481,7 @@ def main():
             por_dem[dem]["n"] += 1
             por_dem[dem]["valor"] += x["valor"]
 
+    # --- campo zerado ---
     for x in sorted(achados, key=lambda y: -abs(y["valor"])):
         print(f"  !! mes {x['mes']:>2}  conta {x['conta']}  {x['valor']:>18,.2f}  "
               f"zerado: {','.join(x['zerados']) or '-'}")
@@ -387,9 +491,22 @@ def main():
     for dem, t in sorted(por_dem.items(), key=lambda x: -abs(x[1]["valor"])):
         print(f"  {dem:<12} {t['n']:>3} agregado(s)   {_brl(t['valor'])}")
 
+    # --- GND errado ---
+    if gnd_errado:
+        print(f"\n  GND ERRADO — {len(gnd_errado)} registro(s) com INCATEGORIA ≠ natureza:")
+        for x in gnd_errado:
+            print(f"  !! mes {x['mes']:>2}  conta {x['conta']}  UO {x['couo']}  "
+                  f"nat {x['conatureza']}  "
+                  f"GND atual={x['incategoria']} esperado={x['gnd_esperado']} "
+                  f"({x['gnd_desc']})  {x['valor']:>14,.2f}")
+    else:
+        print("\n  GND-cruzado: nenhuma divergência INCATEGORIA × natureza.")
+
     doc = {"gerado_em": datetime.now().isoformat(timespec="seconds"),
            "mes": a.mes, "ano": a.ano,
-           "por_demonstrativo": dict(por_dem), "achados": achados}
+           "por_demonstrativo": dict(por_dem),
+           "achados":    achados,
+           "gnd_errado": gnd_errado}
     DIR_DADOS.mkdir(parents=True, exist_ok=True)
     dest = DIR_DADOS / f"{a.ano}-{a.mes:02d}_{datetime.now():%Y%m%d_%H%M%S}.json"
     dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -397,7 +514,7 @@ def main():
     from saida import html_out
     html_out.gerar_classificacao(doc, RAIZ / "painel" / "painel_classificacao.html")
     print(f"\n  JSON: {dest}")
-    sys.exit(1 if achados else 0)
+    sys.exit(1 if (achados or gnd_errado) else 0)
 
 
 if __name__ == "__main__":

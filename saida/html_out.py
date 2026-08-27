@@ -179,6 +179,7 @@ def gerar_classificacao(doc: dict, destino: Path | None = None) -> None:
         "ano":               doc.get("ano"),
         "por_demonstrativo": doc.get("por_demonstrativo", {}),
         "achados":           doc.get("achados", []),
+        "gnd_errado":        doc.get("gnd_errado", []),
         "historico":         _ler_historico(pasta_classif, n=6, tipo="classif"),
     }
     hist_full = _ler_historico_full_classif(pasta_classif, n=24)
