@@ -107,6 +107,12 @@ body {
   gap: 20px;
 }
 
+/* ── Run selector ── */
+.run-wrap { display:flex; align-items:center; gap:10px; padding:10px 16px; background:var(--s1); border:1px solid var(--bd); border-radius:var(--r); }
+.run-lbl { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); white-space:nowrap; flex-shrink:0; }
+#run-select { flex:1; padding:6px 10px; border:1px solid var(--bd); border-radius:6px; background:var(--s2); color:var(--t1); font-size:12px; font-family:var(--fn); cursor:pointer; max-width:520px; }
+#run-select:focus { outline:2px solid var(--brand); outline-offset:1px; }
+
 /* ── Alert banner ── */
 .alert {
   display: flex;
@@ -372,6 +378,12 @@ footer {
 </header>
 
 <main class="wrap">
+
+  <!-- 0 · Seletor de execução -->
+  <div class="run-wrap">
+    <span class="run-lbl">Execução</span>
+    <select id="run-select" onchange="loadRun(this.selectedIndex)"></select>
+  </div>
 
   <!-- 1 · Alerta -->
   <div id="alert-box" class="alert" role="alert">
@@ -683,12 +695,27 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-08-27T07:46:14",
+  "gerado_em": "2026-08-27T14:26:15",
   "mes": 8,
   "ano": 2026,
   "por_demonstrativo": {},
   "achados": [],
   "historico": [
+    {
+      "gerado_em": "2026-08-27T14:26:15",
+      "n": 0,
+      "por_dem": {}
+    },
+    {
+      "gerado_em": "2026-08-27T14:15:35",
+      "n": 0,
+      "por_dem": {}
+    },
+    {
+      "gerado_em": "2026-08-27T13:49:29",
+      "n": 0,
+      "por_dem": {}
+    },
     {
       "gerado_em": "2026-08-27T07:46:14",
       "n": 0,
@@ -707,51 +734,923 @@ const CDATA = {
       "por_dem": {
         "BO": 2051991.0
       }
-    },
-    {
-      "gerado_em": "2026-08-24T13:51:51",
-      "n": 2,
-      "por_dem": {
-        "BO": 2051991.0
-      }
-    },
-    {
-      "gerado_em": "2026-08-24T13:38:49",
-      "n": 2,
-      "por_dem": {
-        "BO": 2051991.0
-      }
-    },
-    {
-      "gerado_em": "2026-08-22T09:36:23",
-      "n": 2,
-      "por_dem": {
-        "BO": 2051991.0
-      }
     }
   ]
 };
+var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-08-27T14:26:15",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T14:15:35",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T13:49:29",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T07:46:14",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-26T09:20:05",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-25T13:35:41",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-24T13:51:51",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-24T13:38:49",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-22T09:36:23",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-21T14:02:33",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-20T19:13:26",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-20T13:25:56",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-19T14:37:44",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 2,
+        "valor": 2051991.0
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-18T15:27:59",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 3,
+        "valor": 3186751.6799999997
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 8,
+        "conta": 622920104,
+        "valor": 1134760.68,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": 100000000,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF",
+          "DFC"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-17T14:05:48",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 3,
+        "valor": 3186751.6799999997
+      }
+    },
+    "achados": [
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 8,
+        "conta": 622920104,
+        "valor": 1134760.68,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": 100000000,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF",
+          "DFC"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-16T14:41:29",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 3,
+        "valor": 3186751.6799999997
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 8,
+        "conta": 622920104,
+        "valor": 1134760.68,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": 100000000,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF",
+          "DFC"
+        ]
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-08-16T08:51:36",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {
+      "BO": {
+        "n": 3,
+        "valor": 3186751.6799999997
+      }
+    },
+    "achados": [
+      {
+        "mes": 6,
+        "conta": 622130300,
+        "valor": 1922061.96,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 5,
+        "conta": 622130300,
+        "valor": 129929.04,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": null,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF"
+        ]
+      },
+      {
+        "mes": 8,
+        "conta": 622920104,
+        "valor": 1134760.68,
+        "registros": 1,
+        "campos": {
+          "INCATEGORIA": null,
+          "CONATUREZA": null,
+          "COFONTE": 100000000,
+          "COUO": null,
+          "COFUNCAO": 80
+        },
+        "zerados": [
+          "INCATEGORIA"
+        ],
+        "some_de": [
+          "BO"
+        ],
+        "permanece_em": [],
+        "incerto_em": [
+          "BF",
+          "DFC"
+        ]
+      }
+    ]
+  }
+];
 /* AUTO-DATA-END */
 
-(function(){
-  const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const CAMPOS_K = ['INCATEGORIA','CONATUREZA','COFONTE','COUO','COFUNCAO'];
+const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const CAMPOS_K = ['INCATEGORIA','CONATUREZA','COFONTE','COUO','COFUNCAO'];
 
-  function _dt(iso){
-    if(!iso) return '';
-    try{
-      const d=new Date(iso.replace('T',' '));
-      return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    }catch(e){ return iso; }
-  }
+function _dt(iso){
+  if(!iso) return '';
+  try{
+    const d=new Date(iso.replace('T',' '));
+    return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return iso; }
+}
 
-  function _brl(v){
-    if(v===null||v===undefined) return '—';
-    return 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  }
+function _brl(v){
+  if(v===null||v===undefined) return '—';
+  return 'R$ '+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
 
-  const {gerado_em,mes,ano,por_demonstrativo={},achados=[],historico=[]} = CDATA;
+function renderRun(data){
+  const {gerado_em,mes,ano,por_demonstrativo={},achados=[],historico=[]} = data;
   const mesNome = MESES[mes]||String(mes);
   const totalValor = Object.values(por_demonstrativo).reduce((s,d)=>s+(d.valor||0),0);
   const dems = Object.keys(por_demonstrativo);
@@ -860,7 +1759,38 @@ const CDATA = {
       </div>`;
     }).join('');
   }
-})();
+}
+
+/* ── Seletor de execução ── */
+function buildSelector(){
+  const sel=document.getElementById('run-select');
+  if(!sel||!HISTORICO_FULL.length) return;
+  sel.innerHTML=HISTORICO_FULL.map((h,i)=>{
+    let lbl='';
+    try{
+      const d=new Date(h.gerado_em.replace('T',' '));
+      lbl=`${MESES[h.mes]||h.mes}/${h.ano} — ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    }catch(e){lbl=h.gerado_em||String(i);}
+    const n=(h.achados||[]).length;
+    if(n) lbl+=' ⚠ '+n+' achado(s)';
+    return `<option value="${i}">${lbl}</option>`;
+  }).join('');
+}
+
+function loadRun(idx){
+  const h=HISTORICO_FULL[idx];
+  if(!h) return;
+  const sel=document.getElementById('run-select');
+  if(sel) sel.selectedIndex=idx;
+  renderRun(Object.assign({}, h, { historico: idx===0 ? (CDATA.historico||[]) : [] }));
+}
+
+if(HISTORICO_FULL.length){
+  buildSelector();
+  loadRun(0);
+} else {
+  renderRun(CDATA);
+}
 </script>
 </body>
 </html>
