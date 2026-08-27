@@ -95,6 +95,38 @@ def _ler_historico_full(pasta: Path, n: int = 24) -> list[dict]:
     return result
 
 
+def _ler_historico_full_classif(pasta: Path, n: int = 24,
+                                 tamanho_max: int = 2_000_000) -> list[dict]:
+    """Últimas n execuções completas (achados completos) para o seletor de datas.
+
+    Ignora snapshots maiores que tamanho_max: as 4 primeiras execuções de
+    15/08/2026 (~14 MB cada) vêm da versão inicial do monitor, que incluía o
+    DFC por engano e gerava 37 mil falsos positivos — não fazem sentido no
+    seletor e travariam a página se entrassem no HTML.
+    """
+    if not pasta.exists():
+        return []
+    arquivos = sorted(pasta.glob("*.json"), reverse=True)
+    result: list[dict] = []
+    for arq in arquivos:
+        if len(result) >= n:
+            break
+        try:
+            if arq.stat().st_size > tamanho_max:
+                continue
+            d = json.loads(arq.read_text(encoding="utf-8"))
+            result.append({
+                "gerado_em":         d.get("gerado_em", ""),
+                "mes":               d.get("mes"),
+                "ano":               d.get("ano"),
+                "por_demonstrativo": d.get("por_demonstrativo", {}),
+                "achados":           d.get("achados", []),
+            })
+        except Exception:
+            pass
+    return result
+
+
 def gerar_diag(doc: dict, destino: Path | None = None) -> None:
     """Atualiza painel_diag.html com os dados do run atual."""
     destino = destino or (PAINEL / "painel_diag.html")
@@ -140,14 +172,18 @@ def gerar_classificacao(doc: dict, destino: Path | None = None) -> None:
         print(f"  [html] {destino.name} não encontrado — painel não atualizado")
         return
 
+    pasta_classif = PAINEL / "dados" / "classificacao"
     cdata = {
         "gerado_em":         doc.get("gerado_em", ""),
         "mes":               doc.get("mes"),
         "ano":               doc.get("ano"),
         "por_demonstrativo": doc.get("por_demonstrativo", {}),
         "achados":           doc.get("achados", []),
-        "historico":         _ler_historico(PAINEL / "dados" / "classificacao",
-                                            n=6, tipo="classif"),
+        "historico":         _ler_historico(pasta_classif, n=6, tipo="classif"),
     }
-    js = f"const CDATA = {json.dumps(cdata, ensure_ascii=False, indent=2)};"
+    hist_full = _ler_historico_full_classif(pasta_classif, n=24)
+    js = (
+        f"const CDATA = {json.dumps(cdata, ensure_ascii=False, indent=2)};\n"
+        f"var HISTORICO_FULL = {json.dumps(hist_full, ensure_ascii=False, indent=2)};"
+    )
     _update(destino, js)
