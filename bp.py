@@ -103,7 +103,7 @@
   encerramento, igual ao bf.py ja documentava ("13 = encerramento
   (ajustes, reclassif., inscricao de RP)") mas que havia sido mal
   interpretado neste modulo):
-    SALDO (Ativo/Passivo, contas 1/2, natureza permanente) -> VSALDOCONTABIL
+    SALDO (Ativo/Passivo, contas 1/2, natureza permanente) -> SALDOCONTABIL
       Exercicio Atual    -> INMES BETWEEN 0 AND :mes   (saldo acumulado ate o
                              mes de referencia, ano corrente MIL{ano})
       Exercicio Anterior -> INMES = 0 do MESMO schema MIL{ano} (NAO
@@ -286,7 +286,7 @@ PASSIVO_NCIRC_ITENS = [
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  ITENS DO PATRIMONIO LIQUIDO
-#  Resultado do Exercicio NAO vem de VSALDOCONTABIL (contas 23X) -- vem do
+#  Resultado do Exercicio NAO vem de SALDOCONTABIL (contas 23X) -- vem do
 #  MOVIMENTO classes 3/4 do periodo (mesma fonte/logica de dvp.py e dmpl.py).
 #  Resultado Acumulado (237) e exibido em 3 sub-linhas no modelo oficial:
 #    "Resultado Acumulado" (saldo de 237 EXCLUINDO 2371/2372, normalmente
@@ -412,11 +412,11 @@ def _executar_um(conn, sql):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  BUSCA -- SALDOS DE ATIVO/PASSIVO/PL  (VSALDOCONTABIL, mesmo padrao bf.py)
+#  BUSCA -- SALDOS DE ATIVO/PASSIVO/PL  (SALDOCONTABIL, mesmo padrao bf.py)
 # ─────────────────────────────────────────────────────────────────────────────
 def _saldo_contas_exatas(conn, schema, contas, inmes_clause, coug, natureza):
     """Soma o saldo de uma LISTA EXATA de contas completas (9 dígitos,
-    via SQL IN) na VSALDOCONTABIL -- diferente de _saldo_contas_maes, que
+    via SQL IN) na SALDOCONTABIL -- diferente de _saldo_contas_maes, que
     usa BETWEEN para cobrir toda a árvore filha de uma conta-mãe. Usado
     quando a fonte oficial (equação do GDF) lista contas específicas que
     NÃO formam uma faixa contígua simples. natureza: 'SD' (D-C) ou
@@ -426,7 +426,7 @@ def _saldo_contas_exatas(conn, schema, contas, inmes_clause, coug, natureza):
     lista = ", ".join(str(int(c)) for c in contas)
     q = f"""
         SELECT SUM({sinal})
-        FROM   {schema}.VSALDOCONTABIL v
+        FROM   {schema}.SALDOCONTABIL v
         WHERE  {inmes_clause}
           AND  v.COCONTACONTABIL IN ({lista})
           {filtro_ug}
@@ -436,7 +436,7 @@ def _saldo_contas_exatas(conn, schema, contas, inmes_clause, coug, natureza):
 
 def _saldo_conta_mae(conn, schema, conta_mae, inmes_clause, coug, natureza):
     """Soma o saldo (VACREDITO/VADEBITO) de uma conta-mae (e seus filhos,
-    mesmo prefixo) na VSALDOCONTABIL. natureza: 'SD' (D-C, Ativo) ou
+    mesmo prefixo) na SALDOCONTABIL. natureza: 'SD' (D-C, Ativo) ou
     'SC' (C-D, Passivo/PL)."""
     return _saldo_contas_maes(conn, schema, [conta_mae], inmes_clause, coug, natureza)
 
@@ -482,7 +482,7 @@ def _saldo_contas_maes(conn, schema, contas_mae, inmes_clause, coug, natureza,
         filtro_excluir = f"AND v.COCONTACONTABIL NOT IN ({lista})"
     q = f"""
         SELECT SUM({sinal})
-        FROM   {schema}.VSALDOCONTABIL v
+        FROM   {schema}.SALDOCONTABIL v
         WHERE  {inmes_clause}
           AND  {cond}
           {filtro_excluir}
@@ -494,7 +494,7 @@ def _saldo_contas_maes(conn, schema, contas_mae, inmes_clause, coug, natureza,
 def _caixa_hibrido(conn, schema, mes, coug):
     """
     Caixa e Equivalentes (111XXXXXX) para o EXERCICIO ATUAL -- NAO usa
-    VSALDOCONTABIL puro (v.INMES BETWEEN 0 AND mes) como as demais contas
+    SALDOCONTABIL puro (v.INMES BETWEEN 0 AND mes) como as demais contas
     de saldo desta pagina, porque essa view e recalculada em lote (ciclo
     de consolidacao periodico) enquanto o mes corrente ainda esta aberto.
 
@@ -520,7 +520,7 @@ def _caixa_hibrido(conn, schema, mes, coug):
 
     abertura = _executar_um(conn, f"""
         SELECT SUM(v.VADEBITO - v.VACREDITO)
-        FROM   {schema}.VSALDOCONTABIL v
+        FROM   {schema}.SALDOCONTABIL v
         WHERE  v.INMES = 0
           AND  v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
           {filtro_v}
@@ -541,7 +541,7 @@ def buscar_saldos_patrimoniais(conn, mes, ano, coug, schema, inmes_clause):
     schema (MIL{ano} ou MIL{ano-1}) e clausula de INMES (acumulado atual ou
     encerramento anterior). Devolve dict chave -> valor."""
     t = {}
-    print(f"  [saldos patrimoniais] {schema}.VSALDOCONTABIL ({inmes_clause})...")
+    print(f"  [saldos patrimoniais] {schema}.SALDOCONTABIL ({inmes_clause})...")
 
     for _, chave, conta_mae, _ in ATIVO_CIRC_ITENS + ATIVO_NCIRC_ITENS:
         t[chave] = _saldo_conta_mae(conn, schema, conta_mae, inmes_clause, coug, 'SD')
@@ -568,12 +568,12 @@ def buscar_saldos_patrimoniais(conn, mes, ano, coug, schema, inmes_clause):
 
 def buscar_pl_pre_encerramento(conn, schema_ant, coug, mes_encerramento=14):
     """Le o bloco PATRIMONIO LIQUIDO do Exercicio Anterior na fonte
-    PRE-ENCERRAMENTO: MIL{ano-1}.VSALDOCONTABIL com INMES BETWEEN 0 AND
+    PRE-ENCERRAMENTO: MIL{ano-1}.SALDOCONTABIL com INMES BETWEEN 0 AND
     {mes_encerramento-1}.
 
     POR QUE ISTO EXISTE (DIAG16/DIAG17, Ago/2026)
     ---------------------------------------------
-    MIL{ano-1}.VSALDOCONTABIL possui INMES = 14 -- um mes de ENCERRAMENTO
+    MIL{ano-1}.SALDOCONTABIL possui INMES = 14 -- um mes de ENCERRAMENTO
     que a versao anterior deste modulo desconhecia. Nele, o Resultado do
     Exercicio e transferido para dentro do PL, RATEADO entre contas:
 
@@ -583,7 +583,7 @@ def buscar_pl_pre_encerramento(conn, schema_ant, coug, mes_encerramento=14):
         total .......................... -53.672.984.228,98
                                           = Resultado de 2025 (4xx-3xx)
 
-    Como o Exercicio Anterior era lido de MIL{ano}.VSALDOCONTABIL INMES=0
+    Como o Exercicio Anterior era lido de MIL{ano}.SALDOCONTABIL INMES=0
     (abertura), que equivale a MIL{ano-1} acumulado 0..14, esse rateio JA
     vinha embutido nas contas -- e as sub-linhas 231 e 2371 divergiam do
     relatorio oficial (que usa a fonte PRE-encerramento, 0..13, e exibe o
@@ -597,12 +597,12 @@ def buscar_pl_pre_encerramento(conn, schema_ant, coug, mes_encerramento=14):
       T3  Sigma(INMES=14) sobre o PL == Resultado 2025, exato
 
     ATENCAO: esta fonte vale SOMENTE para o bloco PL. Ativo e Passivo
-    exigivel continuam vindo de MIL{ano}.VSALDOCONTABIL INMES=0 -- o
+    exigivel continuam vindo de MIL{ano}.SALDOCONTABIL INMES=0 -- o
     encerramento nao os altera.
     """
     pre = mes_encerramento - 1
     inmes_clause = f"v.INMES BETWEEN 0 AND {pre}"
-    print(f"  [PL pre-encerramento] {schema_ant}.VSALDOCONTABIL ({inmes_clause})...")
+    print(f"  [PL pre-encerramento] {schema_ant}.SALDOCONTABIL ({inmes_clause})...")
     t = {}
     for _, chave, conta_mae, _ in PL_ITENS_SALDO:
         t[chave] = _saldo_conta_mae(conn, schema_ant, conta_mae, inmes_clause,
@@ -630,7 +630,7 @@ def buscar_atos_potenciais(conn, schema, inmes_clause, coug):
     (711/712, uma aproximação que batia parcialmente por coincidência,
     mas não era a fonte real)."""
     t = {}
-    print(f"  [contas de compensacao] {schema}.VSALDOCONTABIL ({inmes_clause})...")
+    print(f"  [contas de compensacao] {schema}.SALDOCONTABIL ({inmes_clause})...")
     for _, chave, contas, _ in ATOS_POT_ATIVOS_ITENS:
         t[chave] = _saldo_contas_exatas(conn, schema, contas, inmes_clause, coug, 'SC')
     for _, chave, contas, _ in ATOS_POT_PASSIVOS_ITENS:
@@ -660,7 +660,7 @@ def buscar_resultado_exercicio(conn, mes, ano, coug, schema, inmes_clause):
 
 
 def buscar_financeiro_permanente(conn, schema, inmes_clause, coug):
-    """Busca Ativo/Passivo Financeiro via JOIN VSALDOCONTABIL +
+    """Busca Ativo/Passivo Financeiro via JOIN SALDOCONTABIL +
     CONTACONTABIL, usando a coluna INSISCONTABIL ("Sistema Contábil" no
     extrato XLS estático contacontabil_2026.xls; valores 'F'=Financeiro,
     'P'=Permanente) -- FONTE DEFINITIVA confirmada via
@@ -681,11 +681,11 @@ def buscar_financeiro_permanente(conn, schema, inmes_clause, coug):
     coluna errada E a falta das 3 contas de classe 6).
 
     CONTACONTABIL existe por ano (MIL{ano}.CONTACONTABIL), exatamente
-    como VSALDOCONTABIL -- por isso o JOIN usa o MESMO schema."""
+    como SALDOCONTABIL -- por isso o JOIN usa o MESMO schema."""
     filtro_ug = f"AND v.COUG = {coug}" if coug else ""
     q_ativo = f"""
         SELECT SUM(v.VADEBITO - v.VACREDITO)
-        FROM {schema}.VSALDOCONTABIL v
+        FROM {schema}.SALDOCONTABIL v
         JOIN {schema}.CONTACONTABIL c ON c.COCONTACONTABIL = v.COCONTACONTABIL
         WHERE {inmes_clause}
           AND v.COCONTACONTABIL BETWEEN 100000000 AND 199999999
@@ -694,14 +694,14 @@ def buscar_financeiro_permanente(conn, schema, inmes_clause, coug):
     """
     q_passivo_principal = f"""
         SELECT SUM(v.VACREDITO - v.VADEBITO)
-        FROM {schema}.VSALDOCONTABIL v
+        FROM {schema}.SALDOCONTABIL v
         JOIN {schema}.CONTACONTABIL c ON c.COCONTACONTABIL = v.COCONTACONTABIL
         WHERE {inmes_clause}
           AND v.COCONTACONTABIL BETWEEN 210000000 AND 219999999
           AND c.INSISCONTABIL = 'F'
           {filtro_ug}
     """
-    print(f"  [financeiro/permanente -- INSISCONTABIL] {schema}.VSALDOCONTABIL "
+    print(f"  [financeiro/permanente -- INSISCONTABIL] {schema}.SALDOCONTABIL "
           f"JOIN {schema}.CONTACONTABIL ({inmes_clause})...")
     ativo_fin = _executar_um(conn, q_ativo)
     passivo_fin_principal = _executar_um(conn, q_passivo_principal)
@@ -719,14 +719,14 @@ def buscar_tudo(conn, mes, ano, coug):
 
     CORRIGIDO (confirmado via --diag em producao, GDF, execucao real sem
     --diag em Maio/2026): o saldo do EXERCICIO ANTERIOR para contas de
-    SALDO (1XX/2XX/711/712) NAO deve vir de MIL{ano-1}.VSALDOCONTABIL
+    SALDO (1XX/2XX/711/712) NAO deve vir de MIL{ano-1}.SALDOCONTABIL
     WHERE INMES=13 -- esse INMES=13 contem apenas ajustes residuais de
     encerramento (visto na execucao real: R$55.889.140,40, muito menor
     que o esperado ~R$68,78 bi), exatamente como documentado no
     cabecalho do bf.py: "13 = encerramento (ajustes, reclassif.,
     inscricao de RP)" -- NAO o saldo total. O saldo de encerramento
     completo do ano anterior e, na verdade, o SALDO DE ABERTURA do ano
-    atual: MIL{ano}.VSALDOCONTABIL WHERE INMES=0 (mesma convencao usada
+    atual: MIL{ano}.SALDOCONTABIL WHERE INMES=0 (mesma convencao usada
     em bf.py: "0 = saldo de abertura -> SALDO DO EXERCICIO ANTERIOR").
     Por isso, para saldos (Ativo/Passivo/PL/Atos Potenciais/Financeiro-
     Permanente), o Exercicio Anterior agora usa schema_at (MIL{ano}) com
@@ -828,7 +828,7 @@ def calcular(brutos, mes_ref=None):
         # ── PATRIMONIO LIQUIDO ───────────────────────────────────────────
         # ATENÇÃO -- BUG ENCONTRADO E CORRIGIDO (confirmado em execução
         # real após corrigir o bug do INMES=0/13 acima): para o Exercício
-        # ATUAL, o saldo da conta-mãe 237 via VSALDOCONTABIL (INMES
+        # ATUAL, o saldo da conta-mãe 237 via SALDOCONTABIL (INMES
         # acumulado 0..mês) é só o saldo ABERTO/residual -- o Resultado do
         # Exercício do período (movimento 4xx-3xx, fonte LANCAMENTOCONTABIL)
         # precisa ser somado para chegar ao saldo final do PL. MAS para o
@@ -884,7 +884,7 @@ def calcular(brutos, mes_ref=None):
         # ── QUADRO ATIVO/PASSIVO FINANCEIRO E PERMANENTE ────────────────
         # ATUALIZAÇÃO (confirmado via --diag em produção, GDF, Maio/2026):
         # o flag CONTACONTABIL.INSUPERAVIT='S' é o critério correto. Via
-        # JOIN VSALDOCONTABIL + CONTACONTABIL (buscar_financeiro_
+        # JOIN SALDOCONTABIL + CONTACONTABIL (buscar_financeiro_
         # permanente()), o lado ATIVO bateu com diferença de apenas
         # ~R$247 milhões (3,2%) sobre o oficial (R$7.665.797.148,08) --
         # confirma o flag. O lado PASSIVO, com o mesmo filtro, retornou
@@ -1613,17 +1613,17 @@ def diagnostico(conn, ano, mes):
     print("  Passivo. Blocos [6a]-[6e] validam tudo isso no Oracle real.)")
     print("="*64)
 
-    print(f"\n[1] VSALDOCONTABIL existe e tem dados p/ contas 1XX/2XX em MIL{ano}?")
+    print(f"\n[1] SALDOCONTABIL existe e tem dados p/ contas 1XX/2XX em MIL{ano}?")
     try:
         q = f"""SELECT v.INMES, COUNT(*) QTD,
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 100000000 AND 199999999
                 GROUP BY v.INMES ORDER BY v.INMES"""
         df = pd.read_sql(q, conn)
         df.columns = [c.upper() for c in df.columns]
         if df.empty:
-            print("    NENHUM registro p/ contas 1XX em VSALDOCONTABIL.")
+            print("    NENHUM registro p/ contas 1XX em SALDOCONTABIL.")
         for _, r in df.iterrows():
             print(f"    INMES={int(r['INMES']):>3}  qtd={int(r['QTD']):>9}  "
                   f"saldo(SD)={float(r['SALDO_SD'] or 0):>22,.2f}")
@@ -1636,7 +1636,7 @@ def diagnostico(conn, ano, mes):
     try:
         q = f"""SELECT v.INMES, COUNT(*) QTD,
                     SUM(v.VACREDITO - v.VADEBITO) SALDO_SC
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 200000000 AND 299999999
                 GROUP BY v.INMES ORDER BY v.INMES"""
         df = pd.read_sql(q, conn)
@@ -1658,7 +1658,7 @@ def diagnostico(conn, ano, mes):
           f"reclassif., inscrição de RP)'), NÃO o saldo total do ano "
           f"anterior. O saldo de encerramento COMPLETO do ano anterior é, "
           f"na verdade, IGUAL ao saldo de ABERTURA do ano atual -- ou "
-          f"seja, deve-se usar MIL{ano}.VSALDOCONTABIL WHERE INMES=0 (NÃO "
+          f"seja, deve-se usar MIL{ano}.SALDOCONTABIL WHERE INMES=0 (NÃO "
           f"MIL{ano_ant} WHERE INMES=13). Isso foi CORRIGIDO em "
           f"buscar_tudo() -- bp.py agora busca o Exercício Anterior "
           f"(saldos) no schema MIL{ano} com INMES=0, idêntico ao bloco "
@@ -1667,14 +1667,14 @@ def diagnostico(conn, ano, mes):
         q = f"""SELECT v.COCONTACONTABIL/100000000 AS CLASSE, v.INMES, COUNT(*) QTD,
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD,
                     SUM(v.VACREDITO - v.VADEBITO) SALDO_SC
-                FROM MIL{ano_ant}.VSALDOCONTABIL v
+                FROM MIL{ano_ant}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 100000000 AND 299999999
                   AND v.INMES = 13
                 GROUP BY v.COCONTACONTABIL/100000000, v.INMES ORDER BY 1"""
         df = pd.read_sql(q, conn)
         df.columns = [c.upper() for c in df.columns]
         if df.empty:
-            print(f"    NENHUM registro em MIL{ano_ant}.VSALDOCONTABIL INMES=13 "
+            print(f"    NENHUM registro em MIL{ano_ant}.SALDOCONTABIL INMES=13 "
                   f"p/ contas 1XX/2XX -- verificar se o schema existe.")
         for _, r in df.iterrows():
             print(f"    Classe={int(r['CLASSE'])}  qtd={int(r['QTD']):>9}  "
@@ -1698,7 +1698,7 @@ def diagnostico(conn, ano, mes):
                          THEN v.VADEBITO - v.VACREDITO ELSE 0 END) SALDO_ATIVOS_SD,
                     SUM(CASE WHEN v.COCONTACONTABIL BETWEEN 712000000 AND 712999999
                          THEN v.VACREDITO - v.VADEBITO ELSE 0 END) SALDO_PASSIVOS_SC
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 711000000 AND 712999999
                 GROUP BY v.INMES ORDER BY v.INMES"""
         df = pd.read_sql(q, conn)
@@ -1725,7 +1725,7 @@ def diagnostico(conn, ano, mes):
           f"oficial em exatamente esse valor):")
     try:
         q = f"""SELECT v.INMES, SUM(v.VACREDITO - v.VADEBITO) SALDO_SC
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 712200000 AND 712299999
                   AND v.INMES BETWEEN 0 AND {mes}
                 GROUP BY v.INMES ORDER BY v.INMES"""
@@ -1764,7 +1764,7 @@ def diagnostico(conn, ano, mes):
         q = f"""SELECT v.COCONTACONTABIL/100000 AS SUBCONTA,
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD,
                     COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 711000000 AND 712999999
                   AND v.INMES BETWEEN 0 AND {mes}
                 GROUP BY v.COCONTACONTABIL/100000 ORDER BY 1"""
@@ -1794,7 +1794,7 @@ def diagnostico(conn, ano, mes):
         q = f"""SELECT v.COCONTACONTABIL, c.NOCONTACONTABIL,
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD,
                     COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 LEFT JOIN MIL{ano}.CONTACONTABIL c
                   ON c.COCONTACONTABIL = v.COCONTACONTABIL
                 WHERE (v.COCONTACONTABIL BETWEEN 711200000 AND 711299999
@@ -1847,7 +1847,7 @@ def diagnostico(conn, ano, mes):
     try:
         q = f"""SELECT v.COCONTACONTABIL, v.INMES,
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD, COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL IN (711210101, 711911400, 711914000,
                                              712310200)
                   AND v.INMES BETWEEN 0 AND {mes}
@@ -1876,7 +1876,7 @@ def diagnostico(conn, ano, mes):
                     SUM(v.VADEBITO - v.VACREDITO) SALDO_SD_TOTAL,
                     SUM(CASE WHEN v.COCONTACONTABIL IN (711911400, 711914000)
                          THEN v.VADEBITO - v.VACREDITO ELSE 0 END) SALDO_EXCLUIR
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 711900000 AND 711999999
                   AND v.INMES BETWEEN 0 AND {mes}"""
         df = pd.read_sql(q, conn)
@@ -1913,7 +1913,7 @@ def diagnostico(conn, ano, mes):
           f"(12.149.372.457,11), não para os 16,21 bi atuais:")
     try:
         q = f"""SELECT v.COUG, SUM(v.VADEBITO - v.VACREDITO) SALDO_SD, COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL = 711210101
                   AND v.INMES BETWEEN 0 AND {mes}
                 GROUP BY v.COUG
@@ -1940,7 +1940,7 @@ def diagnostico(conn, ano, mes):
           f"Serviços), MIL{ano}, INMES BETWEEN 0 AND {mes}:")
     try:
         q = f"""SELECT v.COUG, SUM(v.VADEBITO - v.VACREDITO) SALDO_SD, COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL = 712310200
                   AND v.INMES BETWEEN 0 AND {mes}
                 GROUP BY v.COUG
@@ -2015,7 +2015,7 @@ def diagnostico(conn, ano, mes):
           f"= 7.665.797.148,08 (Maio/2026):")
     try:
         q = f"""SELECT SUM(v.VADEBITO - v.VACREDITO) SALDO_SD, COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 JOIN MIL{ano}.CONTACONTABIL c
                   ON c.COCONTACONTABIL = v.COCONTACONTABIL
                 WHERE v.COCONTACONTABIL BETWEEN 100000000 AND 199999999
@@ -2038,7 +2038,7 @@ def diagnostico(conn, ano, mes):
           f"6.545.291.111,33 (Maio/2026):")
     try:
         q = f"""SELECT SUM(v.VACREDITO - v.VADEBITO) SALDO_SC, COUNT(*) QTD
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 JOIN MIL{ano}.CONTACONTABIL c
                   ON c.COCONTACONTABIL = v.COCONTACONTABIL
                 WHERE v.COCONTACONTABIL BETWEEN 210000000 AND 219999999
@@ -2050,7 +2050,7 @@ def diagnostico(conn, ano, mes):
         qtd_principal = int(df.iloc[0]['QTD'])
 
         q2 = f"""SELECT SUM(v.VACREDITO - v.VADEBITO) SALDO_SC, COUNT(*) QTD
-                 FROM MIL{ano}.VSALDOCONTABIL v
+                 FROM MIL{ano}.SALDOCONTABIL v
                  WHERE v.COCONTACONTABIL IN (622130100, 622130500, 631100000)
                    AND v.INMES BETWEEN 0 AND {mes}"""
         df2 = pd.read_sql(q2, conn)
@@ -2078,7 +2078,7 @@ def diagnostico(conn, ano, mes):
         for _, chave, contas, nome in ATOS_POT_ATIVOS_ITENS:
             lista = ", ".join(contas)
             q = f"""SELECT SUM(v.VACREDITO - v.VADEBITO) SALDO_SC, COUNT(*) QTD
-                    FROM MIL{ano}.VSALDOCONTABIL v
+                    FROM MIL{ano}.SALDOCONTABIL v
                     WHERE v.COCONTACONTABIL IN ({lista})
                       AND v.INMES BETWEEN 0 AND {mes}"""
             df = pd.read_sql(q, conn)
@@ -2097,7 +2097,7 @@ def diagnostico(conn, ano, mes):
         for _, chave, contas, nome in ATOS_POT_PASSIVOS_ITENS:
             lista = ", ".join(contas)
             q = f"""SELECT SUM(v.VACREDITO - v.VADEBITO) SALDO_SC, COUNT(*) QTD
-                    FROM MIL{ano}.VSALDOCONTABIL v
+                    FROM MIL{ano}.SALDOCONTABIL v
                     WHERE v.COCONTACONTABIL IN ({lista})
                       AND v.INMES BETWEEN 0 AND {mes}"""
             df = pd.read_sql(q, conn)

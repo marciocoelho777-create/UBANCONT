@@ -12,15 +12,15 @@ Contas:
 
 MIGRAÇÃO 21/08/2026 — RESULTADO_EXERCICIO via LANCAMENTOCONTABIL
 ----------------------------------------------------------------
-O campo RESULTADO_EXERCICIO foi separado do SQL_BP (VSALDOCONTABIL) para
+O campo RESULTADO_EXERCICIO foi separado do SQL_BP (SALDOCONTABIL) para
 uma query própria em LANCAMENTOCONTABIL, mesma fonte do DVP e do DMPL.
 
 Consequência esperada: BP-01 (Ativo = Passivo + PL) pode falhar intraday
-quando VSALDOCONTABIL ainda não foi refrescado pelo batch — esse gap expõe
+quando SALDOCONTABIL ainda não foi refrescado pelo batch — esse gap expõe
 exatamente a diferença entre as duas fontes para as classes 3 e 4, que é
-R$ 0 no run noturno (quando VSALDOCONTABIL está atualizado) e pode chegar
+R$ 0 no run noturno (quando SALDOCONTABIL está atualizado) e pode chegar
 a alguns milhões durante o dia. Esse comportamento é DESEJADO: o BP-01
-passa a ser o detector do lag entre VSALDOCONTABIL e LANCAMENTOCONTABIL,
+passa a ser o detector do lag entre SALDOCONTABIL e LANCAMENTOCONTABIL,
 em vez de uma verificação puramente tautológica dentro de uma fonte só.
 
 CORREÇÃO 13/08/2026 — BP-02 era tautológico
@@ -80,11 +80,11 @@ SELECT
               AND v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
          THEN v.VADEBITO - v.VACREDITO ELSE 0 END)   AS CAIXA
 
-FROM MIL{ano}.VSALDOCONTABIL v
+FROM MIL{ano}.SALDOCONTABIL v
 """
 
 # Resultado do Exercício via LANCAMENTOCONTABIL — mesma fonte que DVP e DMPL,
-# evita lag de refresh intraday do VSALDOCONTABIL (ver dvp.py, migração 21/08/2026).
+# evita lag de refresh intraday do SALDOCONTABIL (ver dvp.py, migração 21/08/2026).
 SQL_BP_RESULTADO = """
 SELECT
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}

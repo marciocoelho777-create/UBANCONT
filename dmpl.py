@@ -39,10 +39,10 @@
 
     * Linhas de SALDO (Saldos Iniciais / Saldos Finais, Tipo Movimento
       "SC" nas contas de Patrimônio Líquido 231/232/233/235/236/237/
-      23411) -> vêm da VIEW VSALDOCONTABIL, exatamente como bf.py busca
+      23411) -> vêm da VIEW SALDOCONTABIL, exatamente como bf.py busca
       o saldo de caixa (ANT_*/SEG_*):
-        Saldos Iniciais  -> MIL{ano}.VSALDOCONTABIL, INMES = 0
-        Saldos Finais    -> MIL{ano}.VSALDOCONTABIL, INMES BETWEEN 0 AND :mes
+        Saldos Iniciais  -> MIL{ano}.SALDOCONTABIL, INMES = 0
+        Saldos Finais    -> MIL{ano}.SALDOCONTABIL, INMES BETWEEN 0 AND :mes
       Fórmula: VACREDITO - VACREDITO (natureza credora do PL).
 
     * Linhas de MOVIMENTO (Ajustes de Exerc. Anteriores, Aumento de
@@ -179,8 +179,8 @@ def _faixa(mascara):
 
 # (codigo_item, nome_item, componentes)
 #   componentes = [(coluna_chave, mascara, fonte, tipo_mov, sinal), ...]
-#   fonte: 'SALDO_INI' = VSALDOCONTABIL INMES=0 (saldo de abertura)
-#          'SALDO_FIM' = VSALDOCONTABIL INMES BETWEEN 0 AND :mes (saldo atual)
+#   fonte: 'SALDO_INI' = SALDOCONTABIL INMES=0 (saldo de abertura)
+#          'SALDO_FIM' = SALDOCONTABIL INMES BETWEEN 0 AND :mes (saldo atual)
 #          'LANC'      = LANCAMENTOCONTABIL INMES BETWEEN 1 AND :mes (movimento
 #                         acumulado do exercicio atual)
 #   tipo_mov: 'SC'=C-D ; 'SD'=D-C ; 'MC'=so C ; 'MD'=so D
@@ -305,7 +305,7 @@ def _clausula_lanc(alias, mascara, tipo_mov):
 
 def _clausula_saldo(alias, mascara, inmes_clause):
     """Monta o SUM(CASE...) de um componente de SALDO (fonte 'SALDO_INI'
-    ou 'SALDO_FIM'), via VSALDOCONTABIL -- mesmo padrao usado em bf.py
+    ou 'SALDO_FIM'), via SALDOCONTABIL -- mesmo padrao usado em bf.py
     para o saldo de caixa (ANT_*/SEG_*). Contas de Patrimonio Liquido
     tem natureza credora (Tipo Movimento 'SC' na Lista de Equacoes para
     estas linhas), por isso a formula fixa e VACREDITO - VADEBITO."""
@@ -346,7 +346,7 @@ WHERE (o.COCONTACONTABIL BETWEEN 200000000 AND 299999999
 
 
 def montar_sql_saldo(fonte_filtro, inmes_clause):
-    """SQL unico (VSALDOCONTABIL) para os componentes de SALDO (fonte
+    """SQL unico (SALDOCONTABIL) para os componentes de SALDO (fonte
     'SALDO_INI' ou 'SALDO_FIM'), contas de Patrimonio Liquido (231/232/
     233/235/236/237/23411). inmes_clause: 'v.INMES = 0' (saldo de
     abertura) ou 'v.INMES BETWEEN 0 AND :mes' (saldo ate o mes corrente),
@@ -364,7 +364,7 @@ def montar_sql_saldo(fonte_filtro, inmes_clause):
     return f"""
 SELECT
 {corpo}
-FROM {{schema}}.VSALDOCONTABIL v
+FROM {{schema}}.SALDOCONTABIL v
 WHERE v.COCONTACONTABIL BETWEEN 200000000 AND 299999999
   {{filtro_ug}}
 """
@@ -392,7 +392,7 @@ def conectar_oracle():
 def _executar(conn, sql, schema, coug, mes=None, alias_tabela='o'):
     """Executa o SQL via cursor nativo (compativel Oracle 11g thick mode),
     igual ao padrao do dvp.py/bf.py. alias_tabela indica se o filtro de UG
-    deve usar 'o.COUG' (LANCAMENTOCONTABIL) ou 'v.COUG' (VSALDOCONTABIL).
+    deve usar 'o.COUG' (LANCAMENTOCONTABIL) ou 'v.COUG' (SALDOCONTABIL).
     mes, se informado, substitui o placeholder ':mes' (acumulado jan..mes
     ou saldo ate o mes corrente)."""
     filtro = f"AND {alias_tabela}.COUG = {coug}" if coug else ""
@@ -413,12 +413,12 @@ def buscar_dados(conn, mes, ano, coug):
     Lista de Equacoes (ver nota no cabecalho do modulo):
       - SQL_LANC:      LANCAMENTOCONTABIL, INMES BETWEEN 1 AND mes
                        (linhas de movimento + Resultado do Exercicio)
-      - SQL_SALDO_INI: VSALDOCONTABIL, INMES = 0
+      - SQL_SALDO_INI: SALDOCONTABIL, INMES = 0
                        (Saldos Iniciais, contas de Patrimonio Liquido)
-      - SQL_SALDO_FIM: VSALDOCONTABIL, INMES BETWEEN 0 AND mes
+      - SQL_SALDO_FIM: SALDOCONTABIL, INMES BETWEEN 0 AND mes
                        (Saldos Finais, contas de Patrimonio Liquido)"""
     print(f"  [DMPL] MIL{ano}  (LANCAMENTOCONTABIL INMES 1..{mes} p/ movimento; "
-          f"VSALDOCONTABIL INMES=0 e 0..{mes} p/ saldos de Patrim. Liquido)...")
+          f"SALDOCONTABIL INMES=0 e 0..{mes} p/ saldos de Patrim. Liquido)...")
     schema = f"MIL{ano}"
     brutos = {}
     if SQL_LANC is not None:
@@ -802,18 +802,18 @@ def diagnostico(conn, ano, mes):
     print("  DIAGNOSTICO - ESTRUTURA DO BANCO PARA DMPL")
     print("="*64)
 
-    print(f"\n[1] VSALDOCONTABIL existe e tem dados p/ contas 23X (Patrim. "
+    print(f"\n[1] SALDOCONTABIL existe e tem dados p/ contas 23X (Patrim. "
           f"Liquido) em MIL{ano}? (fonte usada p/ Saldos Iniciais/Finais)")
     try:
         q = f"""SELECT v.INMES, COUNT(*) QTD,
                     SUM(v.VACREDITO - v.VADEBITO) SALDO
-                FROM MIL{ano}.VSALDOCONTABIL v
+                FROM MIL{ano}.SALDOCONTABIL v
                 WHERE v.COCONTACONTABIL BETWEEN 230000000 AND 239999999
                 GROUP BY v.INMES ORDER BY v.INMES"""
         df = pd.read_sql(q, conn)
         df.columns = [c.upper() for c in df.columns]
         if df.empty:
-            print(f"    NENHUM registro em VSALDOCONTABIL p/ contas 23XXXXXXX "
+            print(f"    NENHUM registro em SALDOCONTABIL p/ contas 23XXXXXXX "
                   f"-- view pode nao existir, ou coluna/owner diferente.")
         for _, r in df.iterrows():
             print(f"    INMES={int(r['INMES']):>3}  qtd={int(r['QTD']):>9}  "

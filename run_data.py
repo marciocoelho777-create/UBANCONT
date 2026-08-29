@@ -3,7 +3,7 @@
 Roda qualquer demonstrativo contabil com filtro de data de lancamento.
 
 O filtro AND o.DALANCAMENTO <= DATE 'AAAA-MM-DD' e injetado em todas as
-queries que usam LANCAMENTOCONTABIL (alias o). Queries em VSALDOCONTABIL
+queries que usam LANCAMENTOCONTABIL (alias o). Queries em SALDOCONTABIL
 nao sao afetadas (a view nao tem campo de data — apenas INMES).
 
 Uso:
@@ -20,7 +20,7 @@ Uso:
 import argparse, datetime, re, runpy, sys
 import pandas as _pd
 
-# Demonstrativos que usam VSALDOCONTABIL (sem campo de data = sem filtro diario)
+# Demonstrativos que usam SALDOCONTABIL (sem campo de data = sem filtro diario)
 _SEM_LANCAMENTO = {'bp', 'dvp'}
 
 _SCRIPTS = {
@@ -75,7 +75,7 @@ def main():
         _pd.read_sql = _patched_read_sql
         print(f"\n  [run_data] Filtro: DALANCAMENTO <= {a.data}")
         if a.demonstrativo in _SEM_LANCAMENTO:
-            print(f"  [run_data] AVISO: '{a.demonstrativo}' usa VSALDOCONTABIL "
+            print(f"  [run_data] AVISO: '{a.demonstrativo}' usa SALDOCONTABIL "
                   f"(sem campo de data) — filtro nao aplicado a esta demonstracao.")
     else:
         if mes is None:

@@ -7,10 +7,10 @@ Classes contábeis:
   VPD = classe 3 (débito  → SD) → SD = DECODE(INDEBITOCREDITO,'D',VAL,'C',-VAL,0)
   Resultado Patrimonial = VPA − VPD
 
-MIGRAÇÃO 21/08/2026 — VSALDOCONTABIL → LANCAMENTOCONTABIL
+MIGRAÇÃO 21/08/2026 — SALDOCONTABIL → LANCAMENTOCONTABIL
 ----------------------------------------------------------
-A versão anterior usava VSALDOCONTABIL (somando INMES 1..mes). O problema:
-VSALDOCONTABIL é uma view que pode ser refrescada por batch intraday; se o
+A versão anterior usava SALDOCONTABIL (somando INMES 1..mes). O problema:
+SALDOCONTABIL é uma view que pode ser refrescada por batch intraday; se o
 diagnóstico rodar enquanto o refresh está em andamento, o DVP captura um
 snapshot mais antigo do que os módulos que executam depois (BP, DMPL). Isso
 gerava erros espúrios no X6 (DMPL≠DVP) e no R1a (BP≠DVP) durante runs

@@ -6,12 +6,12 @@ Estratégia: extrai apenas os totais necessários para os cruzamentos com os
 demais demonstrativos, MAS preservando a natureza do controle do dmpl.py
 mestre: a identidade de fechamento cruza DUAS fontes distintas.
 
-    SALDO_INI(23x)  [VSALDOCONTABIL, INMES = 0]
+    SALDO_INI(23x)  [SALDOCONTABIL, INMES = 0]
   + MOVIMENTO(23x)  [LANCAMENTOCONTABIL, INMES 1..mes]
-  = SALDO_FIM(23x)  [VSALDOCONTABIL, INMES 0..mes]
+  = SALDO_FIM(23x)  [SALDOCONTABIL, INMES 0..mes]
 
 Isso concilia o razão contra a view de saldos. A versão anterior deste
-arquivo tirava os três termos do VSALDOCONTABIL, o que tornava a
+arquivo tirava os três termos do SALDOCONTABIL, o que tornava a
 identidade uma TAUTOLOGIA (INMES 0..mes é a união disjunta de INMES 0 com
 INMES 1..mes) — o controle passava sempre, inclusive com dados corrompidos.
 
@@ -57,7 +57,7 @@ def _cond(alias_tab: str, mascara: str) -> str:
 
 
 def _montar_sql_saldo(mes: int) -> str:
-    """Saldo inicial e saldo final por coluna, via VSALDOCONTABIL."""
+    """Saldo inicial e saldo final por coluna, via SALDOCONTABIL."""
     partes = []
     for chave, mascara, _ in COLUNAS_PL:
         cond = _cond("v", mascara)
@@ -69,7 +69,7 @@ def _montar_sql_saldo(mes: int) -> str:
             f"         THEN v.VACREDITO - v.VADEBITO ELSE 0 END) AS FIM_{chave}")
     corpo = ",\n\n".join(partes)
     return (f"SELECT\n{corpo}\n"
-            f"FROM MIL{{ano}}.VSALDOCONTABIL v\n"
+            f"FROM MIL{{ano}}.SALDOCONTABIL v\n"
             f"WHERE v.COCONTACONTABIL BETWEEN 200000000 AND 299999999")
 
 

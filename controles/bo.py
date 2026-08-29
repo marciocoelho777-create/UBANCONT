@@ -250,7 +250,7 @@ def auditar(conn, mes, ano):
     # + Superávit Financeiro ≠ Dotação Atualizada). Deve zerar ao fim do mês.
     SQL_C18 = f"""
         SELECT NVL(SUM(VADEBITO - VACREDITO), 0) AS SALDO_521
-        FROM   MIL{ano}.VSALDOCONTABIL
+        FROM   MIL{ano}.SALDOCONTABIL
         WHERE  COCONTACONTABIL = 521920500 AND INMES <= {mes}
     """
     try:

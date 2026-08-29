@@ -60,8 +60,8 @@
   FONTE E ACUMULAÇÃO (mesmo padrão já validado em controles/dvp.py, cujos
   totais batem exatos com o oficial -- ver comparação 17/08/2026, mês
   07/2026 fechado: VPA/VPD/Resultado idênticos ao PSIAG550):
-    Exercício Atual    -> MIL{ano}.VSALDOCONTABIL,   INMES BETWEEN 1 AND :mes
-    Exercício Anterior -> MIL{ano-1}.VSALDOCONTABIL, INMES BETWEEN 1 AND 13
+    Exercício Atual    -> MIL{ano}.SALDOCONTABIL,   INMES BETWEEN 1 AND :mes
+    Exercício Anterior -> MIL{ano-1}.SALDOCONTABIL, INMES BETWEEN 1 AND 13
     (mesma regra "Exercício Anterior = INMES 1..13 do schema MIL{ano-1}"
     documentada e validada em bp.py)
 
@@ -182,7 +182,7 @@ def _clausula(alias, mascara, tipo_mov, alias_tabela='v'):
 
 
 def montar_sql():
-    """SQL único (VSALDOCONTABIL) para todas as categorias de VPA, VPD e
+    """SQL único (SALDOCONTABIL) para todas as categorias de VPA, VPD e
     Qualitativas, mais a conta de encerramento (891) e sua movimentação
     avulsa no período -- mesmo padrão já validado em controles/dvp.py."""
     partes = []
@@ -219,7 +219,7 @@ def montar_sql():
     return f"""
 SELECT
 {corpo}
-FROM {{schema}}.VSALDOCONTABIL v
+FROM {{schema}}.SALDOCONTABIL v
 WHERE (v.COCONTACONTABIL BETWEEN 300000000 AND 499999999
        OR v.COCONTACONTABIL BETWEEN 891000000 AND 891999999
        OR v.COCONTACONTABIL BETWEEN 951310000 AND 951339999

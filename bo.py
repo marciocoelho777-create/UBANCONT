@@ -429,14 +429,13 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
     """
     SALDOS DE EXERCICIOS ANTERIORES (Recursos Arrecadados em Exerc.
     Anteriores / Superavit Financeiro / Reabertura de Creditos Adicionais).
-    Conforme planilha de equacoes (item 1.01.02.08.01.0), confirmado por
-    decomposicao real (ver investigar_recursos_v3.py, resultado validado
-    R$ 177.212.440,00 == PDF modelo):
+    Conforme planilha de equacoes (item 1.01.02.08.01.0), atualizada em
+    28/08/2026 (a planilha oficial removeu as linhas de 522130101/522130102
+    filtradas por grupo de fonte -- essa parcela ficou exclusiva do item
+    1.01.02.08.02.0 Superavit Financeiro, que ja cobre a faixa completa
+    522130100-522130199 sem filtro de fonte, evitando dupla contagem):
       Recursos Arrecadados, col2 (Atualizada):
         SD 521100000-521299999 com NatRec prefixo '999' (Funcao Receita 999)
-        + SD 522130101 filtrado por GRUPO DE FONTE = '4' (1o digito da Fonte
-          de Recursos, posicao 24 da celula tipo 13 -- NAO e o codigo
-          completo '400000000', e SIM so o 1o digito)
       Recursos Arrecadados, col3 (Realizada):
         SC 621200000 - SD 621300000-621399999, com NatRec prefixo '999'
       Superavit Financeiro: col2 = SD 522130100-522130199 (faixa completa,
@@ -447,19 +446,13 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
     cur = conn.cursor()
 
     cond_999 = "SUBSTR(TO_CHAR(o.COCONTACORRENTE),1,3) = '999'"
-    cond_fonte4 = "SUBSTR(TO_CHAR(o.COCONTACORRENTE),24,1) = '4'"
     # Consolidado em 1 consulta (antes eram 3) -- mesmas expressoes CASE de
     # cada bloco, so reunidas na mesma SELECT para varrer a tabela 1 vez.
     sql = f"""
-        SELECT /*+ PARALLEL(o, 4) */ 
+        SELECT /*+ PARALLEL(o, 4) */
           SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
                     AND o.COCONTACONTABIL BETWEEN 521100000 AND 521299999
                     AND {cond_999}
-               THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
-               ELSE 0 END)
-        + SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-                    AND o.COCONTACONTABIL IN (522130101,522130102)
-                    AND {cond_fonte4}
                THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
                ELSE 0 END) AS ATUALIZADA,
           SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
@@ -496,12 +489,12 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
 
 
 def buscar_saldo_521920500(conn, mes, ano):
-    """Saldo SD da conta 521920500 (Previsao Adicional a Lancar) em VSALDOCONTABIL
+    """Saldo SD da conta 521920500 (Previsao Adicional a Lancar) em SALDOCONTABIL
     ate INMES=mes. Se != 0, explica o gap do equilibrio orcamentario (C18)."""
     cur = conn.cursor()
     cur.execute(f"""
         SELECT NVL(SUM(VADEBITO - VACREDITO), 0)
-        FROM MIL{ano}.VSALDOCONTABIL
+        FROM MIL{ano}.SALDOCONTABIL
         WHERE COCONTACONTABIL = 521920500 AND INMES <= {mes}
     """)
     val = float(cur.fetchone()[0] or 0)
@@ -1090,23 +1083,23 @@ def calcular_despesas(despesas_raw):
     subtotal = {c: d['DESPESAS CORRENTES (VIII)'][c] + d['DESPESAS DE CAPITAL (IX)'][c]
                 + d.get('Reserva de Contingência', {}).get(c, 0)
                 for c in campos}
-    d['SUBTOTAL DAS DESPESAS'] = subtotal
+    d['SUBTOTAL DAS DESPESAS (XI)'] = subtotal
 
-    # Amortizacao da Divida / Refinanciamento (X): GDF nao opera com
+    # Amortizacao da Divida / Refinanciamento (XII): GDF nao opera com
     # refinanciamento na execucao corrente -> mantido zerado (igual ao PDF
-    # modelo, onde a linha X aparece com 0,00 em todas as colunas).
+    # modelo, onde a linha XII aparece com 0,00 em todas as colunas).
     refin = {c: 0.0 for c in campos}
-    d['AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (X)'] = refin
+    d['AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (XII)'] = refin
 
     subtotal_refin = {c: subtotal[c] + refin[c] for c in campos}
-    d['SUBTOTAL COM REFINANCIAMENTO (XI)'] = subtotal_refin
+    d['SUBTOTAL COM REFINANCIAMENTO (XIII)'] = subtotal_refin
 
-    # SUPERAVIT (XIII) e TOTAL (XIV) dependem da Receita Realizada Total e
+    # SUPERAVIT (XIV) e TOTAL (XV) dependem da Receita Realizada Total e
     # sao calculados em calcular_tudo() (junto com o DEFICIT das receitas),
     # pois representam o mesmo ajuste de equilibrio visto de lados opostos.
     # Aqui ficam zerados como placeholder.
-    d['SUPERAVIT (XIII)'] = {c: 0.0 for c in campos}
-    d['TOTAL (XIV)'] = dict(subtotal_refin)
+    d['SUPERAVIT (XIV)'] = {c: 0.0 for c in campos}
+    d['TOTAL (XV)'] = dict(subtotal_refin)
 
     for nome, dic in d.items():
         if 'dotacao_atualizada' in dic:
@@ -1186,9 +1179,9 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
     Receita e o lado da Despesa (MCASP 9a Ed., item 2.4.1):
       - Se Despesa Empenhada > Receita Realizada (SUBTOTAL III/V) ->
         aparece DEFICIT (VI) do lado das receitas, igualando TOTAL (VII)
-        a SUBTOTAL COM REFINANCIAMENTO (XI) das despesas.
-      - Se Receita Realizada > Despesa Empenhada (SUBTOTAL XI) -> aparece
-        SUPERAVIT (XIII) do lado das despesas, igualando TOTAL (XIV) ao
+        a SUBTOTAL COM REFINANCIAMENTO (XIII) das despesas.
+      - Se Receita Realizada > Despesa Empenhada (SUBTOTAL XIII) -> aparece
+        SUPERAVIT (XIV) do lado das despesas, igualando TOTAL (XV) ao
         TOTAL (VII) da receita.
     Os dois nunca coexistem (um dos dois fica zerado).
     """
@@ -1200,7 +1193,7 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
 
     campos_desp = ['dotacao_inicial','dotacao_atualizada','empenhada','liquidada','paga']
     subtotal_refin_receita = receitas['SUBTOTAL COM REFINANCIAMENTO (V)']['realizada']
-    subtotal_refin_despesa = despesas['SUBTOTAL COM REFINANCIAMENTO (XI)']['empenhada']
+    subtotal_refin_despesa = despesas['SUBTOTAL COM REFINANCIAMENTO (XIII)']['empenhada']
     ajuste = subtotal_refin_receita - subtotal_refin_despesa
 
     if ajuste < 0:
@@ -1213,21 +1206,21 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
             'atualizada': receitas['SUBTOTAL COM REFINANCIAMENTO (V)']['atualizada'],
             'realizada':  subtotal_refin_receita + ajuste,
         }
-        despesas['SUPERAVIT (XIII)'] = {c: 0.0 for c in campos_desp}
-        despesas['TOTAL (XIV)'] = dict(despesas['SUBTOTAL COM REFINANCIAMENTO (XI)'])
+        despesas['SUPERAVIT (XIV)'] = {c: 0.0 for c in campos_desp}
+        despesas['TOTAL (XV)'] = dict(despesas['SUBTOTAL COM REFINANCIAMENTO (XIII)'])
     else:
         # Receita realizada supera (ou iguala) a despesa empenhada -> SUPERAVIT (despesas)
         receitas['DEFICIT (VI)'] = {'inicial':0.0,'atualizada':0.0,'realizada':0.0}
         receitas['TOTAL (VII)'] = dict(receitas['SUBTOTAL COM REFINANCIAMENTO (V)'])
         superavit = {c: 0.0 for c in campos_desp}
         superavit['empenhada'] = ajuste
-        despesas['SUPERAVIT (XIII)'] = superavit
-        despesas['TOTAL (XIV)'] = {c: despesas['SUBTOTAL COM REFINANCIAMENTO (XI)'][c] + superavit[c]
+        despesas['SUPERAVIT (XIV)'] = superavit
+        despesas['TOTAL (XV)'] = {c: despesas['SUBTOTAL COM REFINANCIAMENTO (XIII)'][c] + superavit[c]
                                     for c in campos_desp}
 
     for nome in ('DEFICIT (VI)', 'TOTAL (VII)'):
         receitas[nome]['saldo'] = receitas[nome].get('realizada',0) - receitas[nome].get('atualizada',0)
-    for nome in ('SUPERAVIT (XIII)', 'TOTAL (XIV)'):
+    for nome in ('SUPERAVIT (XIV)', 'TOTAL (XV)'):
         despesas[nome]['saldo_dotacao'] = despesas[nome]['dotacao_atualizada'] - despesas[nome]['empenhada']
 
     return {
@@ -1255,7 +1248,7 @@ def auditoria_integridade(t, saldo_521920500=0.0):
     financiamento_atualizada = (saldos_ant['superavit_financeiro']['atualizada']
                                  + saldos_ant['reabertura_creditos']['atualizada'])
     receita_lado = rec['TOTAL (VII)']['atualizada'] + financiamento_atualizada
-    despesa_lado = des['SUBTOTAL COM REFINANCIAMENTO (XI)']['dotacao_atualizada']
+    despesa_lado = des['SUBTOTAL COM REFINANCIAMENTO (XIII)']['dotacao_atualizada']
     dif = receita_lado - despesa_lado
     if abs(dif) < 1.00:
         achados.append(('OK', 'Equilíbrio Orçamentário (MCASP 2.1)',
@@ -1531,17 +1524,17 @@ def gerar_excel(t, mes, ano, ug_label, output_path, achados=None):
     _linha_despesa(ws2, r, 'DESPESAS DE CAPITAL (IX)', des['DESPESAS DE CAPITAL (IX)'], 0, bold=True, bg=F_GRAY); r += 1
     for nome, _gnd in DESPESAS_CAPITAL:
         _linha_despesa(ws2, r, nome, des[nome], 1); r += 1
-    _linha_despesa(ws2, r, 'RESERVA DE CONTINGÊNCIA', des['Reserva de Contingência'], 0, bold=True, bg=F_GRAY); r += 1
+    _linha_despesa(ws2, r, 'RESERVA DE CONTINGÊNCIA (X)', des['Reserva de Contingência'], 0, bold=True, bg=F_GRAY); r += 1
     _linha_despesa(ws2, r, 'RESERVA DO RPPS', des['Reserva do RPPS'], 0, bold=True, bg=F_GRAY); r += 1
-    for nome in ('SUBTOTAL DAS DESPESAS','AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (X)',
-                 'SUBTOTAL COM REFINANCIAMENTO (XI)','SUPERAVIT (XIII)','TOTAL (XIV)'):
+    for nome in ('SUBTOTAL DAS DESPESAS (XI)','AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (XII)',
+                 'SUBTOTAL COM REFINANCIAMENTO (XIII)','SUPERAVIT (XIV)','TOTAL (XV)'):
         _linha_despesa(ws2, r, nome, des[nome], 0, bold=True, bg=F_GRAY); r += 1
 
     D = r + 1
     cel(ws2, D, 1, 'Equilíbrio: TOTAL(VII)+Saldos Exerc.Ant. [Receitas, Atualizada] '
                    'vs Dotação Atualizada (Despesas):', sz=8)
     eq = (rec['TOTAL (VII)']['atualizada'] + rec['SALDOS DE EXERCÍCIOS ANTERIORES']['atualizada']
-          - des['SUBTOTAL COM REFINANCIAMENTO (XI)']['dotacao_atualizada'])
+          - des['SUBTOTAL COM REFINANCIAMENTO (XIII)']['dotacao_atualizada'])
     cel(ws2, D, 4, eq, sz=8, ha='right', fmt=FMT_BRL)
 
     # ── ABA 3: CRÉDITOS ADICIONAIS ───────────────────────────────────────
@@ -1577,7 +1570,7 @@ def gerar_excel(t, mes, ano, ug_label, output_path, achados=None):
     _linha_credito(ws3, r, 'DESPESAS DE CAPITAL', cred['DESPESAS DE CAPITAL'], 0, bold=True, bg=F_GRAY); r += 1
     for nome, _gnd in DESPESAS_CAPITAL:
         _linha_credito(ws3, r, nome, cred[nome], 1); r += 1
-    _linha_credito(ws3, r, 'RESERVA DE CONTINGÊNCIA', cred['Reserva de Contingência'], 0, bold=True, bg=F_GRAY); r += 1
+    _linha_credito(ws3, r, 'RESERVA DE CONTINGÊNCIA (X)', cred['Reserva de Contingência'], 0, bold=True, bg=F_GRAY); r += 1
     _linha_credito(ws3, r, 'TOTAL', cred['TOTAL'], 0, bold=True, bg=F_GRAY); r += 1
 
     # ── ABA 4: RESTOS A PAGAR ────────────────────────────────────────────
@@ -1844,16 +1837,16 @@ def gerar_pdf(t, mes, ano, ug_label, output_path, achados=None):
     rows_des.append(linha_des('DESPESAS DE CAPITAL (IX)', des['DESPESAS DE CAPITAL (IX)'], bold=True)); bold_des.add(idx); idx+=1
     for nome, _ in DESPESAS_CAPITAL:
         rows_des.append(linha_des(nome, des[nome], ind=8)); idx+=1
-    rows_des.append(linha_des('RESERVA DE CONTINGÊNCIA', des['Reserva de Contingência'], bold=True)); bold_des.add(idx); idx+=1
+    rows_des.append(linha_des('RESERVA DE CONTINGÊNCIA (X)', des['Reserva de Contingência'], bold=True)); bold_des.add(idx); idx+=1
     rows_des.append(linha_des('RESERVA DO RPPS', des['Reserva do RPPS'], bold=True)); bold_des.add(idx); idx+=1
-    for nome in ('SUBTOTAL DAS DESPESAS', 'AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (X)',
-                 'SUBTOTAL COM REFINANCIAMENTO (XI)', 'SUPERAVIT (XIII)', 'TOTAL (XIV)'):
+    for nome in ('SUBTOTAL DAS DESPESAS (XI)', 'AMORTIZAÇÃO DA DÍVIDA/REFINANCIAMENTO (XII)',
+                 'SUBTOTAL COM REFINANCIAMENTO (XIII)', 'SUPERAVIT (XIV)', 'TOTAL (XV)'):
         rows_des.append(linha_des(nome, des[nome], bold=True)); bold_des.add(idx); idx+=1
     col_w_des = [70*mm, 35*mm, 35*mm, 35*mm, 35*mm, 30*mm, 35*mm]
     story.append(fmt_table(headers_des, rows_des, col_w_des, bold_rows=bold_des))
 
     eq = (rec['TOTAL (VII)']['atualizada'] + rec['SALDOS DE EXERCÍCIOS ANTERIORES']['atualizada']
-          - des['SUBTOTAL COM REFINANCIAMENTO (XI)']['dotacao_atualizada'])
+          - des['SUBTOTAL COM REFINANCIAMENTO (XIII)']['dotacao_atualizada'])
     story.append(Spacer(1, 2*mm))
     story.append(Paragraph(
         f"<b>Equilíbrio:</b> TOTAL(VII)+Saldos Exerc.Ant. [Receitas, Atualizada] "
@@ -1891,7 +1884,7 @@ def gerar_pdf(t, mes, ano, ug_label, output_path, achados=None):
     rows_cred.append(linha_cred('DESPESAS DE CAPITAL', cred['DESPESAS DE CAPITAL'], bold=True)); bold_cred.add(idx); idx+=1
     for nome, _ in DESPESAS_CAPITAL:
         rows_cred.append(linha_cred(nome, cred[nome], ind=8)); idx+=1
-    rows_cred.append(linha_cred('RESERVA DE CONTINGÊNCIA', cred['Reserva de Contingência'], bold=True)); bold_cred.add(idx); idx+=1
+    rows_cred.append(linha_cred('RESERVA DE CONTINGÊNCIA (X)', cred['Reserva de Contingência'], bold=True)); bold_cred.add(idx); idx+=1
     rows_cred.append(linha_cred('TOTAL', cred['TOTAL'], bold=True)); bold_cred.add(idx); idx+=1
     col_w_cred = [55*mm, 30*mm, 30*mm, 30*mm, 32*mm, 30*mm, 30*mm, 30*mm]
     story.append(fmt_table(headers_cred, rows_cred, col_w_cred, bold_rows=bold_cred))
@@ -2566,7 +2559,7 @@ def main():
     print(f"    {'TOTAL (VII) Realizada':<35}: {rec['TOTAL (VII)']['realizada']:>20,.2f}")
     print(f"    {'DESPESAS CORRENTES (VIII) Empenhada':<35}: {des['DESPESAS CORRENTES (VIII)']['empenhada']:>20,.2f}")
     print(f"    {'DESPESAS DE CAPITAL (IX) Empenhada':<35}: {des['DESPESAS DE CAPITAL (IX)']['empenhada']:>20,.2f}")
-    print(f"    {'TOTAL (XIV) Empenhada':<35}: {des['TOTAL (XIV)']['empenhada']:>20,.2f}")
+    print(f"    {'TOTAL (XV) Empenhada':<35}: {des['TOTAL (XV)']['empenhada']:>20,.2f}")
     print(f"{'─'*60}")
 
     imprimir_auditoria(achados)

@@ -11,7 +11,7 @@ LÓGICA DO CAMPO "MÊS" DA LISTA DE EQUAÇÕES
 ------------------------------------------
 A coluna "Mês" da Lista NÃO é mês do calendário — é seletor de origem:
 
-    Mês 0   -> saldo de abertura            : VSALDOCONTABIL INMES = 0
+    Mês 0   -> saldo de abertura            : SALDOCONTABIL INMES = 0
     Mês 1   -> em conta de SALDO (2.05.xx)  : VSALDO INMES=0 + LANC INMES 1..mes
     Mês 1   -> em conta de MOVIMENTO        : LANCAMENTOCONTABIL INMES 1..mes
     Mês 13  -> movimento acumulado          : LANCAMENTOCONTABIL INMES 1..mes
@@ -19,7 +19,7 @@ A coluna "Mês" da Lista NÃO é mês do calendário — é seletor de origem:
 
 O híbrido do item 2.05.xx é necessário porque o LANCAMENTOCONTABIL não tem
 INMES=0 para as contas 111XXXXXX: o saldo de abertura existe apenas no
-VSALDOCONTABIL. As contas 113XXXXXX seguem a mesma regra (confirmado no
+SALDOCONTABIL. As contas 113XXXXXX seguem a mesma regra (confirmado no
 mestre: a diferença observada era exatamente o saldo de abertura).
 
 ATENÇÃO ao parâmetro --mes: com mes <= 12 o range 1..mes nunca alcança
@@ -231,7 +231,7 @@ _GRUPOS = [("CAIXA", _G_CAIXA), ("RPPS", _G_RPPS), ("DEPR", _G_DEPR),
 
 
 def _sql_saldo_ini(ano: int) -> str:
-    """Saldo de abertura por grupo — VSALDOCONTABIL INMES = 0 (Mês 0)."""
+    """Saldo de abertura por grupo — SALDOCONTABIL INMES = 0 (Mês 0)."""
     partes = []
     for chave, cond in _GRUPOS:
         c = cond.format(a="v")
@@ -242,7 +242,7 @@ def _sql_saldo_ini(ano: int) -> str:
     partes.append(f"    SUM(CASE WHEN v.INMES = 0 AND {c}\n"
                   f"         THEN v.VACREDITO - v.VADEBITO ELSE 0 END) AS INI_SC_VTCR")
     return ("SELECT\n" + ",\n\n".join(partes)
-            + f"\nFROM MIL{ano}.VSALDOCONTABIL v")
+            + f"\nFROM MIL{ano}.SALDOCONTABIL v")
 
 
 def _sql_saldo_mov(mes: int, ano: int) -> str:
@@ -267,7 +267,7 @@ SELECT
     SUM(CASE WHEN v.INMES BETWEEN 0 AND {mes}
               AND v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
          THEN v.VADEBITO - v.VACREDITO ELSE 0 END) AS CAIXA_FINAL
-FROM MIL{ano}.VSALDOCONTABIL v
+FROM MIL{ano}.SALDOCONTABIL v
 """
 
 
@@ -357,7 +357,7 @@ def auditar(conn, mes, ano):
             f"Caixa Final: {t['CAIXA_FINAL']:,.2f}", valor=t["CAIXA_FINAL"]))
 
     # ── BF-04 (novo): caixa 111XXXXXX pelas duas origens ───────────────────
-    # CAIXA_FINAL usa VSALDOCONTABIL acumulado (INMES 0..mes), definição do BP.
+    # CAIXA_FINAL usa SALDOCONTABIL acumulado (INMES 0..mes), definição do BP.
     # O Saldo Seguinte usa VSALDO(0) + LANCAMENTO(1..mes), definição do BF.
     # Restringindo à faixa 111XXXXXX, as duas têm que dar o mesmo número — é a
     # conciliação razão × view de saldos, o mesmo teste do DMPL-01.
@@ -367,11 +367,11 @@ def auditar(conn, mes, ano):
     if checa_gap(gap4, D("1.00")):
         achados.append(achado_ok("BF","BF-04","Caixa 111XXXXXX: razão = view de saldos",
             f"BF (abertura+lançamentos) {seg_111:,.2f}  =  "
-            f"VSALDOCONTABIL acumulado {t['CAIXA_FINAL']:,.2f}", valor=seg_111))
+            f"SALDOCONTABIL acumulado {t['CAIXA_FINAL']:,.2f}", valor=seg_111))
     else:
         achados.append(achado_erro("BF","BF-04","Caixa 111XXXXXX: razão ≠ view de saldos",
             f"Diferença: {gap4:,.2f}  |  BF (abertura+lançamentos) {seg_111:,.2f}  "
-            f"vs VSALDOCONTABIL acumulado {t['CAIXA_FINAL']:,.2f}", valor=gap4))
+            f"vs SALDOCONTABIL acumulado {t['CAIXA_FINAL']:,.2f}", valor=gap4))
 
     # ── BF-05 (informativo): composição, p/ conferência contra o mestre ────
     achados.append(achado_info("BF","BF-05","Composição do Balanço Financeiro",

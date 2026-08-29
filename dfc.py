@@ -850,7 +850,7 @@ SELECT
 -- ──────────────────────────────────────────────────────────────────────────
 --  CAIXA E EQUIVALENTES (111XXXXXX)
 --  NOTA: Caixa Inicial/Final NAO entram aqui -- sao buscados em consulta
---  separada contra a VIEW VSALDOCONTABIL (ver funcao buscar_caixa()),
+--  separada contra a VIEW SALDOCONTABIL (ver funcao buscar_caixa()),
 --  pois misturar essa fonte com os SUM(CASE...) de LANCAMENTOCONTABIL
 --  no mesmo SELECT causa ORA-00937 no Oracle 11g.
 -- ──────────────────────────────────────────────────────────────────────────
@@ -937,10 +937,10 @@ def buscar_caixa(conn, mes, ano, coug):
     """
     Busca Caixa Inicial e Caixa Final.
 
-    Caixa Inicial: VIEW VSALDOCONTABIL, INMES=0 (saldo de abertura do
+    Caixa Inicial: VIEW SALDOCONTABIL, INMES=0 (saldo de abertura do
     exercicio, ja encerrado -- fonte estavel).
 
-    Caixa Final: NAO usa VSALDOCONTABIL para o movimento do mes corrente.
+    Caixa Final: NAO usa SALDOCONTABIL para o movimento do mes corrente.
     Descoberto via auditoria cruzada (mestre.py, Regra 4a/4b e X1b) que a
     VIEW e recalculada em lote (ciclo de consolidacao periodico) enquanto
     o mes corrente ainda esta aberto -- duas execucoes do mesmo script,
@@ -966,7 +966,7 @@ def buscar_caixa(conn, mes, ano, coug):
 
     cur.execute(f"""
         SELECT SUM(v.VADEBITO - v.VACREDITO)
-        FROM   MIL{ano}.VSALDOCONTABIL v
+        FROM   MIL{ano}.SALDOCONTABIL v
         WHERE  v.INMES = 0
           AND  v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
           {filtro_v}
@@ -1008,9 +1008,9 @@ def buscar_dados(conn, mes, ano, coug):
     cur.close()
     resultado = {k: float(v or 0) for k, v in zip(cols, row)}
 
-    # Remove o placeholder e busca caixa real via VSALDOCONTABIL
+    # Remove o placeholder e busca caixa real via SALDOCONTABIL
     resultado.pop('CAIXA_INICIAL_PLACEHOLDER', None)
-    print(f"  Buscando Caixa Inicial/Final via VSALDOCONTABIL...")
+    print(f"  Buscando Caixa Inicial/Final via SALDOCONTABIL...")
     caixa_inicial, caixa_final = buscar_caixa(conn, mes, ano, coug)
     resultado['CAIXA_INICIAL'] = caixa_inicial
     resultado['CAIXA_FINAL']   = caixa_final

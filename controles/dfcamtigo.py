@@ -4,7 +4,7 @@ Controles do Demonstrativo de Fluxos de Caixa (Anexo 15).
 Usa o SQL_DFC do dfc.py original com as correções:
   - 449093 removido de TRANSF_CONCEDIDAS (pertence a OUTROS_DESEMB_INVEST)
   - REMUNERACAO_DISP absorvida em OUTRAS_REC_OPERAC
-Caixa via VSALDOCONTABIL 111XXXXXX (igual ao BP).
+Caixa via SALDOCONTABIL 111XXXXXX (igual ao BP).
 """
 from __future__ import annotations
 from decimal import Decimal
@@ -678,7 +678,7 @@ SELECT
 -- ──────────────────────────────────────────────────────────────────────────
 --  CAIXA E EQUIVALENTES (111XXXXXX)
 --  NOTA: Caixa Inicial/Final NAO entram aqui -- sao buscados em consulta
---  separada contra a VIEW VSALDOCONTABIL (ver funcao buscar_caixa()),
+--  separada contra a VIEW SALDOCONTABIL (ver funcao buscar_caixa()),
 --  pois misturar essa fonte com os SUM(CASE...) de LANCAMENTOCONTABIL
 --  no mesmo SELECT causa ORA-00937 no Oracle 11g.
 -- ──────────────────────────────────────────────────────────────────────────
@@ -697,7 +697,7 @@ SELECT
     SUM(CASE WHEN v.INMES BETWEEN 0 AND {mes}
               AND v.COCONTACONTABIL BETWEEN 111000000 AND 111999999
          THEN v.VADEBITO - v.VACREDITO ELSE 0 END) AS CAIXA_FIN
-FROM MIL{ano}.VSALDOCONTABIL v
+FROM MIL{ano}.SALDOCONTABIL v
 """
 
 

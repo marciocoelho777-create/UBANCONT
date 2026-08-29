@@ -220,12 +220,12 @@ CONTROLES = [
     },
     {
         'id': '15', 'check': 'col2_neg',
-        'nome': 'C15 — Receita Negativa (VSALDOCONTABIL)',
+        'nome': 'C15 — Receita Negativa (SALDOCONTABIL)',
         'tipo': 'INTEGRIDADE',
         'sql': '15-Receita Negativa Saldo.sql',
         'descricao': (
             'Contas de receita orcamentaria (621200000-621399999) com saldo negativo '
-            'no VSALDOCONTABIL. Saldo negativo indica estorno maior que o valor lancado.'
+            'no SALDOCONTABIL. Saldo negativo indica estorno maior que o valor lancado.'
         ),
     },
     {
@@ -245,7 +245,7 @@ CONTROLES = [
         'sql': '17-Inversão de Saldo.sql',
         'descricao': (
             'Contas ativas (classe 1) com saldo natural Devedor (INSALDOCONTABIL=D, ININVERSAOSALDO=N) '
-            'que apresentam saldo Credor (negativo) no VSALDOCONTABIL. '
+            'que apresentam saldo Credor (negativo) no SALDOCONTABIL. '
             'Saldo negativo = conta com saldo invertido.'
         ),
     },
