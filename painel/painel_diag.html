@@ -123,7 +123,7 @@ tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:var(--s2)}
 tr.hid{display:none}
 td{padding:9px 12px;vertical-align:middle}
-td.det{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2);font-size:12px}
+td.det{max-width:480px;white-space:normal;word-break:break-word;color:var(--t2);font-size:12px;line-height:1.5}
 .si{font-size:14px;line-height:1}
 .badge{display:inline-flex;padding:1px 7px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid;white-space:nowrap}
 .b-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
@@ -6775,6 +6775,16 @@ function _dt(iso){
   }catch(e){ return iso; }
 }
 
+/* Dados extraídos do Oracle refletem o fechamento do dia anterior (D-1) à execução */
+function _dtDados(iso){
+  if(!iso) return '';
+  try{
+    const d = new Date(iso.replace('T',' '));
+    d.setDate(d.getDate()-1);
+    return d.toLocaleDateString('pt-BR');
+  }catch(e){ return ''; }
+}
+
 function _bi(v){
   if(v===null||v===undefined) return '—';
   const neg = v<0;
@@ -6842,7 +6852,7 @@ function updateAll(){
   const elSub=document.getElementById('hd-sub');
   if(elSub) elSub.textContent=`${escopo} · ${mesNome}/${ano}`;
   const elMeta=document.getElementById('hd-meta');
-  if(elMeta) elMeta.innerHTML=`Competência: <strong>${mesNome}/${ano}</strong><br>Última execução: ${_dt(gerado_em)}`;
+  if(elMeta) elMeta.innerHTML=`Competência: <strong>${mesNome}/${ano}</strong><br>Última execução: ${_dt(gerado_em)}<br>Dados de: <strong>${_dtDados(gerado_em)}</strong>`;
 
   /* KPI tiles */
   document.querySelectorAll('[data-kpi]').forEach(el=>{
