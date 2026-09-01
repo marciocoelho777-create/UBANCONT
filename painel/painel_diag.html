@@ -124,6 +124,9 @@ tbody tr:hover{background:var(--s2)}
 tr.hid{display:none}
 td{padding:9px 12px;vertical-align:middle}
 td.det{max-width:480px;white-space:normal;word-break:break-word;color:var(--t2);font-size:12px;line-height:1.5}
+td.norma{max-width:340px;white-space:normal;word-break:break-word;font-size:12px;line-height:1.5}
+.norma-ref{display:block;font-weight:600;color:var(--brand);font-size:11px;letter-spacing:.01em;margin-bottom:2px}
+.norma-exp{display:block;color:var(--t2)}
 .si{font-size:14px;line-height:1}
 .badge{display:inline-flex;padding:1px 7px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid;white-space:nowrap}
 .b-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
@@ -361,8 +364,9 @@ footer{text-align:center;padding:14px;font-size:11px;color:var(--t3);border-top:
           <th style="width:32px"></th>
           <th>Módulo</th>
           <th>Código</th>
-          <th>Controle</th>
+          <th>Controle de Integridade</th>
           <th>Detalhe</th>
+          <th>Norma de Referência</th>
         </tr>
       </thead>
       <tbody id="ctrl-body"></tbody>
@@ -6765,6 +6769,56 @@ const BC  = {OK:'b-ok', ERRO:'b-err', ALERTA:'b-err', INFO:'b-inf'};
 const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MOD_LABEL = {X:'CRZ'}; // evita "X" na badge (confunde com erro)
 
+/* Base normativa de cada controle, em linguagem simples e direta.
+   Chave = codigo do achado (a.c). Cobre os códigos gerados pelos módulos em
+   controles/*.py — ver mapeamento em controles/{bf,bo,dfc,dvp,dmpl,bp,
+   balancete,cruzamentos}.py. Estilo de citação consistente com o já usado
+   em motor_regras.py (relatorio_integridade.py). */
+const NORMAS = {
+  'BF-01': {n:'Lei 4.320/1964, art. 103', e:'O Balanço Financeiro tem que fechar: tudo que entrou (receita + saldo anterior) precisa ser igual a tudo que saiu (despesa + saldo para o exercício seguinte).'},
+  'BF-02': {n:'MCASP Pte. II — Transferências Financeiras', e:'Toda transferência recebida por uma unidade corresponde a uma transferência concedida por outra — os dois lados do Balanço Financeiro têm que bater.'},
+  'BF-03': {n:'MCASP Pte. II — Disponibilidades', e:'O saldo de caixa que sobra para o mês seguinte não pode ser negativo — não existe caixa devedor.'},
+  'BF-04': {n:'MCASP Pte. II — Conciliação contábil', e:'O caixa apurado pelo Balanço Financeiro (abertura + lançamentos do período) precisa bater com o saldo que a própria contabilidade registra para a mesma conta.'},
+  'BF-05': {n:'Lei 4.320/1964, art. 103', e:'Mostra, de forma informativa, como cada parcela (receita, despesa, transferências, aplicações etc.) compõe o total de ingressos e dispêndios do período.'},
+  'BO-01': {n:'Lei 4.320/1964, arts. 58-65', e:'A despesa segue uma ordem: primeiro se empenha, depois se liquida, depois se paga — o valor pago nunca pode passar do liquidado, nem o liquidado do empenhado.'},
+  'BO-01b':{n:'Lei 4.320/1964, arts. 63-64', e:'Alerta quando o valor pago aparece maior que o liquidado — indício de lançamento fora da sequência normal empenho → liquidação → pagamento.'},
+  'BO-02': {n:'Lei 4.320/1964, art. 59; LRF art. 15', e:'Não se pode empenhar despesa além do limite de crédito orçamentário aprovado (a dotação atualizada) para aquela conta.'},
+  'BO-03': {n:'MCASP Pte. II — Classificação orçamentária', e:'Toda despesa lançada na contabilidade precisa ter classificação orçamentária completa; sem isso, ela existe na contabilidade mas some do Balanço Orçamentário oficial.'},
+  'BO-04': {n:'MCASP Pte. II — Créditos Adicionais', e:'Créditos adicionais aprovados entram primeiro numa conta de trânsito (521920500) antes de serem reclassificados às dotações definitivas; enquanto isso não ocorre, o equilíbrio orçamentário mostra uma diferença temporária normal.'},
+  'DFC-01': {n:'MCASP Pte. II, Anexo 15', e:'A soma dos três fluxos de caixa (operacional, investimento, financiamento) tem que ser igual à variação real do caixa entre o início e o fim do período.'},
+  'DFC-02a':{n:'MCASP Pte. II, Anexo 15', e:'O saldo de caixa no início do período não pode ser negativo.'},
+  'DFC-02b':{n:'MCASP Pte. II, Anexo 15', e:'O saldo de caixa no fim do período não pode ser negativo.'},
+  'DVP-01': {n:'Lei 4.320/1964, art. 105', e:'O resultado patrimonial (VPA − VPD) só é oficialmente encerrado na conta 891XXXXXX em dezembro; durante o ano, a validação é feita cruzando com o BP e a DMPL (controles X6 e R1a).'},
+  'DVP-02a':{n:'Lei 4.320/1964, art. 105', e:'O total das Variações Patrimoniais Aumentativas deve ter sinal positivo — valor negativo indica lançamento com sinal invertido.'},
+  'DVP-02b':{n:'Lei 4.320/1964, art. 105', e:'O total das Variações Patrimoniais Diminutivas deve ter sinal positivo — valor negativo indica lançamento com sinal invertido.'},
+  'DVP-03': {n:'MCASP Pte. II — VPA/VPD', e:'Informa quanto do total de VPA e VPD já está detalhado por grupo neste diagnóstico — o restante existe no total, mas não é aberto item a item aqui.'},
+  'DMPL-01':{n:'MCASP Pte. II — DMPL', e:'Para cada componente do Patrimônio Líquido, o saldo inicial mais a movimentação do período tem que fechar exatamente no saldo final.'},
+  'DMPL-02':{n:'MCASP Pte. II — DMPL', e:'Informa o total de ajustes que alteraram o Patrimônio Líquido no período fora do resultado do exercício (ajustes de exercícios anteriores, aumento de capital, reservas etc.).'},
+  'DMPL-03':{n:'MCASP Pte. II, DVP x DMPL', e:'O resultado do exercício que aparece na DMPL precisa ser o mesmo valor apurado na DVP (Resultado Patrimonial) — é o cruzamento X6.'},
+  'BP-01': {n:'Lei 4.320/1964, art. 104; MCASP Pte. II, Anexo 1 do BP', e:'Equação contábil fundamental: tudo que a entidade tem (Ativo) tem que ser igual ao que ela deve mais o seu patrimônio líquido (Passivo + PL).'},
+  'BP-02': {n:'MCASP Pte. II, Anexo 1 do BP', e:'A soma do Ativo Circulante com o Ativo Não Circulante tem que fechar exatamente com o total da classe contábil 1 (Ativo).'},
+  'BP-03': {n:'MCASP Pte. II — Disponibilidades', e:'O saldo de Caixa e Equivalentes de Caixa no Balanço Patrimonial não pode ser negativo.'},
+  'BP-04': {n:'MCASP Pte. II, Anexo 1 do BP', e:'A soma do Passivo com o Patrimônio Líquido tem que fechar exatamente com o total da classe contábil 2 (Passivo).'},
+  'BAL-01':{n:'PCASP — Método das Partidas Dobradas', e:'Todo lançamento contábil tem uma contrapartida: a soma de todas as contas devedoras (classes 1,3,5,7) tem que ser exatamente igual à soma das credoras (classes 2,4,6,8,9).'},
+  'BAL-02':{n:'PCASP — Natureza do saldo por classe', e:'Cada classe contábil tem uma natureza de saldo esperada (devedora ou credora); saldo com o sinal trocado é informativo e pede verificação, mas pode ser normal em alguns casos (ex.: resultado deficitário).'},
+  'X1a': {n:'MCASP Pte. II, BF x DFC', e:'O caixa inicial do período tem que ser o mesmo valor no Balanço Financeiro e na Demonstração dos Fluxos de Caixa — a mesma informação vista por dois demonstrativos diferentes.'},
+  'X1b': {n:'MCASP Pte. II, BF x DFC', e:'Mesma lógica do caixa inicial (X1a), mas para o saldo final do período.'},
+  'X2':  {n:'MCASP Pte. II, Anexo 15', e:'Confirma, cruzando os dois demonstrativos, que a geração líquida de caixa apurada bate com a variação real do caixa no período.'},
+  'X6':  {n:'MCASP Pte. II, DVP x DMPL', e:'O resultado do exercício tem que ser o mesmo número na Demonstração das Variações Patrimoniais e na Demonstração das Mutações do PL.'},
+  'R1a': {n:'MCASP Pte. II, DVP x BP', e:'O resultado do exercício registrado no Balanço Patrimonial precisa ser igual ao Resultado Patrimonial (III) apurado na DVP.'},
+  'R2':  {n:'MCASP Pte. II, DMPL x BP', e:'O saldo final total da DMPL tem que ser exatamente o valor do Patrimônio Líquido mostrado no Balanço Patrimonial.'},
+  'R4a': {n:'MCASP Pte. II, BP x DFC', e:'O saldo de Caixa e Equivalentes de Caixa do Balanço Patrimonial precisa ser igual ao caixa final apurado na Demonstração dos Fluxos de Caixa.'},
+  'R7':  {n:'MCASP Pte. II, BF x BO', e:'A receita orçamentária do Balanço Financeiro tem que ser igual à receita realizada mostrada no Balanço Orçamentário.'},
+  'R8':  {n:'MCASP Pte. II, BF x BO', e:'A despesa orçamentária paga no Balanço Financeiro tem que ser igual à despesa paga mostrada no Balanço Orçamentário.'},
+  'R10a':{n:'MCASP Pte. II, BF x BO (Anexo RP)', e:'O valor pago de Restos a Pagar Não Processados no Balanço Financeiro tem que bater com o mesmo valor no anexo de Restos a Pagar do Balanço Orçamentário.'},
+  'R10b':{n:'MCASP Pte. II, BF x BO (Anexo RP)', e:'Mesma lógica do item anterior (R10a), mas para Restos a Pagar Processados.'},
+};
+function normaHtml(codigo){
+  const nm = NORMAS[codigo];
+  if(!nm) return '<span class="norma-exp" style="opacity:.6">—</span>';
+  return `<span class="norma-ref">${esc(nm.n)}</span><span class="norma-exp">${esc(nm.e)}</span>`;
+}
+
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
 function _dt(iso){
@@ -6800,6 +6854,7 @@ function render(){
       <td><code>${a.c}</code></td>
       <td>${esc(a.t)}</td>
       <td class="det" title="${esc(a.d)}">${esc(a.d)}</td>
+      <td class="norma">${normaHtml(a.c)}</td>
     </tr>`).join('');
 }
 
