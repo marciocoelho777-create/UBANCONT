@@ -63,7 +63,7 @@
       python balanco_orcamentario.py --mes 5 --ano 2026 --diag
 =============================================================================
 """
-import argparse, sys
+import argparse, calendar, sys
 from datetime import datetime
 from pathlib import Path
 
@@ -490,16 +490,22 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
 
 def buscar_saldo_521920500(conn, mes, ano):
     """Saldo SD da conta 521920500 (Previsao Adicional a Lancar) em SALDOCONTABIL
-    ate INMES=mes. Se != 0, explica o gap do equilibrio orcamentario (C18)."""
+    ate INMES=mes, e tambem isolado so ate o mes ANTERIOR (INMES < mes) --
+    esse segundo valor sinaliza saldo de mes(es) ja encerrado(s) que deveria
+    ter zerado e nao zerou. Se != 0, explica o gap do equilibrio orcamentario
+    (C18). Retorna (saldo_total, saldo_meses_anteriores)."""
     cur = conn.cursor()
     cur.execute(f"""
-        SELECT NVL(SUM(VADEBITO - VACREDITO), 0)
+        SELECT
+            NVL(SUM(CASE WHEN INMES <= {mes} THEN VADEBITO - VACREDITO ELSE 0 END), 0),
+            NVL(SUM(CASE WHEN INMES <  {mes} THEN VADEBITO - VACREDITO ELSE 0 END), 0)
         FROM MIL{ano}.SALDOCONTABIL
-        WHERE COCONTACONTABIL = 521920500 AND INMES <= {mes}
+        WHERE COCONTACONTABIL = 521920500
     """)
-    val = float(cur.fetchone()[0] or 0)
+    row = cur.fetchone()
+    val, val_ant = float(row[0] or 0), float(row[1] or 0)
     cur.close()
-    return val
+    return val, val_ant
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1233,7 +1239,15 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
 # ─────────────────────────────────────────────────────────────────────────────
 #  AUDITORIA DE INTEGRIDADE  (mesmo espirito do Balanco Financeiro)
 # ─────────────────────────────────────────────────────────────────────────────
-def auditoria_integridade(t, saldo_521920500=0.0):
+def _mes_encerrado(mes, ano):
+    """True se hoje ja passou do ultimo dia de (mes, ano) -- usado para
+    escalar o C18 (521920500) de INFO para ALERTA quando o prazo ("deve
+    zerar ate o fim do mes") ja passou e o saldo persiste."""
+    ultimo_dia = calendar.monthrange(ano, mes)[1]
+    return datetime.now().date() > datetime(ano, mes, ultimo_dia).date()
+
+
+def auditoria_integridade(t, saldo_521920500=0.0, saldo_521920500_ant=0.0, mes=None, ano=None):
     achados = []
     rec = t['receitas']; des = t['despesas']
 
@@ -1261,11 +1275,20 @@ def auditoria_integridade(t, saldo_521920500=0.0):
                          f'Exercícios Anteriores é excluído desta conta por ser '
                          f'rubrica informativa (não financia dotação adicional).'))
         if saldo_521920500 != 0.0 and abs(dif + saldo_521920500) < 1.00:
-            achados.append(('INFO', 'C18 — Previsão Adicional a Lançar (521920500)',
-                             f'Saldo 521920500 = {saldo_521920500:,.2f} corresponde '
-                             f'exatamente à diferença acima. Quando os lançamentos '
-                             f'pendentes forem reclassificados ao fim do mês a '
-                             f'diferença zerará automaticamente (ver C18).'))
+            mes_ja_encerrou = mes is not None and ano is not None and _mes_encerrado(mes, ano)
+            saldo_de_mes_anterior = abs(saldo_521920500_ant) >= 1.00
+            if mes_ja_encerrou or saldo_de_mes_anterior:
+                achados.append(('ALERTA', 'C18 — Previsão Adicional a Lançar NÃO resolvida até o fim do mês (521920500)',
+                                 f'Saldo 521920500 = {saldo_521920500:,.2f} (dos quais '
+                                 f'{saldo_521920500_ant:,.2f} já vem de mês(es) anterior(es) '
+                                 f'já encerrado(s)) — deveria ter zerado até o fim do mês e '
+                                 f'não zerou. Verificar (ver C18).'))
+            else:
+                achados.append(('INFO', 'C18 — Previsão Adicional a Lançar (521920500)',
+                                 f'Saldo 521920500 = {saldo_521920500:,.2f} corresponde '
+                                 f'exatamente à diferença acima. Quando os lançamentos '
+                                 f'pendentes forem reclassificados ao fim do mês a '
+                                 f'diferença zerará automaticamente (ver C18).'))
 
     # Controle 2: Despesa Empenhada >= Liquidada >= Paga (cada GND)
     seq_erro = False
@@ -1359,7 +1382,7 @@ def auditoria_defasagem_balancogeral(conn, ano, mes, coug=None):
 
 
 def imprimir_auditoria(achados):
-    icones = {'OK': '✔', 'ERRO': '✘'}
+    icones = {'OK': '✔', 'ERRO': '✘', 'ALERTA': '⚠', 'INFO': 'ℹ'}
     print(f"\n{'─'*60}")
     print("  AUDITORIA DE INTEGRIDADE")
     print(f"{'─'*60}")
@@ -2535,13 +2558,15 @@ def main():
     rpnp_raw      = buscar_rp_nao_processados(conn, a.mes, a.ano, a.ug)
     rpp_raw       = buscar_rp_processados(conn, a.mes, a.ano, a.ug)
     achado_defasagem = auditoria_defasagem_balancogeral(conn, a.ano, a.mes, a.ug)
-    saldo_521920500  = buscar_saldo_521920500(conn, a.mes, a.ano)
+    saldo_521920500, saldo_521920500_ant = buscar_saldo_521920500(conn, a.mes, a.ano)
     conn.close()
 
     print("\n[3/4] Calculando totais derivados...")
     t = calcular_tudo(receitas_raw, opcred_raw, saldos_raw, despesas_raw,
                        creditos_raw, rpnp_raw, rpp_raw)
-    achados = auditoria_integridade(t, saldo_521920500=saldo_521920500)
+    achados = auditoria_integridade(t, saldo_521920500=saldo_521920500,
+                                     saldo_521920500_ant=saldo_521920500_ant,
+                                     mes=a.mes, ano=a.ano)
     achados.append(achado_defasagem)
 
     print("\n[4/4] Gerando arquivo(s) de saida...")

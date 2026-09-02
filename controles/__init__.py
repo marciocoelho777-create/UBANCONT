@@ -5,7 +5,9 @@ diag_contabil.controles
 Tipos e utilitários compartilhados entre os módulos de controle.
 """
 from __future__ import annotations
+import calendar
 from dataclasses import dataclass, field
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 import oracledb
@@ -94,3 +96,12 @@ def achado_info(modulo, codigo, titulo, detalhe="", valor=None) -> Achado:
 def checa_gap(valor: Decimal, tolerancia: Decimal = Decimal("0.02")) -> bool:
     """Retorna True se o valor estiver dentro da tolerância (fecha)."""
     return abs(valor) <= tolerancia
+
+
+def mes_encerrado(mes: int, ano: int) -> bool:
+    """True se hoje já passou do último dia de (mes, ano) -- ou seja, o mês
+    diagnosticado já deveria ter fechado. Usado para escalar pendências que
+    "devem zerar até o fim do mês" (ex.: C18/521920500) de INFO para ALERTA
+    quando o prazo já passou e o saldo persiste."""
+    ultimo_dia = calendar.monthrange(ano, mes)[1]
+    return date.today() > date(ano, mes, ultimo_dia)

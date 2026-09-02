@@ -32,7 +32,8 @@ O cruzamentos.py não muda: lê pelas chaves DESPESA_PAGA/PAG_RPNP/PAG_RPP.
 """
 from __future__ import annotations
 from . import (Achado, query_one, query_all, D,
-               achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
+               achado_ok, achado_erro, achado_alerta, achado_info, checa_gap,
+               mes_encerrado)
 
 SQL_BO = """
 SELECT
@@ -248,20 +249,37 @@ def auditar(conn, mes, ano):
     # há dotação aprovada que ainda não entrou nas contas de despesa normais
     # e explica o eventual gap no equilíbrio orçamentário (Previsão Atualizada
     # + Superávit Financeiro ≠ Dotação Atualizada). Deve zerar ao fim do mês.
+    # SALDO_521_ANT isola o saldo ate o mes ANTERIOR (INMES < mes): se ja
+    # existe saldo antes do mes corrente sequer comecar, e saldo de mes(es)
+    # ja encerrado(s) que deveria ter zerado e nao zerou -- ALERTA mesmo
+    # quando o mes corrente (ainda aberto) e o unico "mes" que o --mes da
+    # rotina noturna sempre passa (ela roda sempre para o mes em curso, entao
+    # so checar mes_encerrado(mes,ano) nunca dispararia nas execucoes diarias).
     SQL_C18 = f"""
-        SELECT NVL(SUM(VADEBITO - VACREDITO), 0) AS SALDO_521
+        SELECT
+            NVL(SUM(CASE WHEN INMES <= {mes} THEN VADEBITO - VACREDITO ELSE 0 END), 0) AS SALDO_521,
+            NVL(SUM(CASE WHEN INMES <  {mes} THEN VADEBITO - VACREDITO ELSE 0 END), 0) AS SALDO_521_ANT
         FROM   MIL{ano}.SALDOCONTABIL
-        WHERE  COCONTACONTABIL = 521920500 AND INMES <= {mes}
+        WHERE  COCONTACONTABIL = 521920500
     """
     try:
         row_c18 = query_one(conn, SQL_C18)
         saldo_521 = D(str(row_c18['SALDO_521']))
+        saldo_521_ant = D(str(row_c18['SALDO_521_ANT']))
         t['SALDO_521920500'] = saldo_521
         if abs(saldo_521) < D('1.00'):
             achados.append(achado_ok("BO", "BO-04",
                 "Previsão Adicional a Lançar (521920500) zerada",
                 f"Saldo INMES ≤ {mes}: {saldo_521:,.2f} — nenhuma previsão pendente",
                 valor=saldo_521))
+        elif mes_encerrado(mes, ano) or abs(saldo_521_ant) >= D('1.00'):
+            achados.append(achado_alerta("BO", "BO-04",
+                "Previsão Adicional a Lançar NÃO resolvida até o fim do mês (C18)",
+                f"Saldo 521920500 = {saldo_521:,.2f} (dos quais {saldo_521_ant:,.2f} "
+                f"já vem de mês(es) anterior(es) já encerrado(s)) — deveria ter "
+                f"zerado até o fim do mês e não zerou; verificar por que os "
+                f"lançamentos pendentes não entraram. Veja rotina C18.",
+                valor=abs(saldo_521)))
         else:
             achados.append(achado_info("BO", "BO-04",
                 "Previsão Adicional a Lançar pendente (C18)",
