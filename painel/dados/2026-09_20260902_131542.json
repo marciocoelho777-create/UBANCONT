@@ -1,0 +1,307 @@
+{
+  "gerado_em": "2026-09-02T13:15:42",
+  "mes": 9,
+  "ano": 2026,
+  "escopo": "Consolidado",
+  "totais": {
+    "ERRO": 3,
+    "ALERTA": 1,
+    "OK": 26,
+    "INFO": 5,
+    "TOTAL": 35
+  },
+  "indicadores": {
+    "caixa_final": 6652490716.68,
+    "receita_realizada": 31608919231.51,
+    "despesa_paga": 26108531705.8,
+    "ingressos": 69068675410.78,
+    "dispendios": 69068157246.17,
+    "despesa_empenhada": 31115624229.56,
+    "despesa_liquidada": 27655121542.76,
+    "ativo_total": 69495477988.88,
+    "patrimonio_liquido": -146576225788.38,
+    "resultado_exercicio": -14940078381.85
+  },
+  "achados": [
+    {
+      "status": "ERRO",
+      "modulo": "BF",
+      "codigo": "BF-01",
+      "titulo": "Ingressos ≠ Dispêndios",
+      "detalhe": "Diferença: 518,164.61  |  Ingressos 69,068,675,410.78  Dispêndios 69,068,157,246.17",
+      "valor": 518164.61
+    },
+    {
+      "status": "OK",
+      "modulo": "BF",
+      "codigo": "BF-02",
+      "titulo": "Transf. Recebidas = Transf. Concedidas",
+      "detalhe": "Recebidas 28,543,558,736.90  =  Concedidas 28,543,558,736.90",
+      "valor": 28543558736.9
+    },
+    {
+      "status": "OK",
+      "modulo": "BF",
+      "codigo": "BF-03",
+      "titulo": "Caixa Final positivo",
+      "detalhe": "Caixa Final: 6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "OK",
+      "modulo": "BF",
+      "codigo": "BF-04",
+      "titulo": "Caixa 111XXXXXX: razão = view de saldos",
+      "detalhe": "BF (abertura+lançamentos) 6,652,490,716.68  =  SALDOCONTABIL acumulado 6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "INFO",
+      "modulo": "BF",
+      "codigo": "BF-05",
+      "titulo": "Composição do Balanço Financeiro",
+      "detalhe": "Receita 31,608,919,231.51 | Transf.Receb 28,543,558,736.90 | Resgates 1,833,386,587.57 | Dep.Restit.Ing 1,347,711,607.78 | Outros Receb 52,388,591.72 | Saldo Ant 5,682,710,655.30 || Despesa 26,108,531,705.80 | Transf.Conc 28,543,558,736.90 | Aplicações 2,406,505,065.84 | RPÑP 1,078,034,624.89 | RPP 2,286,499,193.03 | Dep.Restit.Disp 1,762,667,964.80 | Ajustes -32,891,429.23 | Saldo Seg 6,915,251,384.14",
+      "valor": 69068675410.78
+    },
+    {
+      "status": "OK",
+      "modulo": "BO",
+      "codigo": "BO-01",
+      "titulo": "Empenhada ≥ Liquidada e Empenhada ≥ Paga",
+      "detalhe": "Empenhada 31,115,624,229.56  Liquidada 27,655,121,542.76  Paga 26,108,531,705.80",
+      "valor": 31115624229.56
+    },
+    {
+      "status": "OK",
+      "modulo": "BO",
+      "codigo": "BO-02",
+      "titulo": "Despesa Empenhada ≤ Dotação Atualizada",
+      "detalhe": "Empenhada 31,115,624,229.56  ≤  Atualizada 47,619,392,793.00",
+      "valor": 31115624229.56
+    },
+    {
+      "status": "OK",
+      "modulo": "BO",
+      "codigo": "BO-03",
+      "titulo": "BALANCOGERAL: toda despesa tem classificação orçamentária",
+      "detalhe": "Nenhum registro de despesa com CONATUREZA ou COUO zerados",
+      "valor": 0.0
+    },
+    {
+      "status": "ALERTA",
+      "modulo": "BO",
+      "codigo": "BO-04",
+      "titulo": "Previsão Adicional a Lançar NÃO resolvida até o fim do mês (C18)",
+      "detalhe": "Saldo 521920500 = 14,723.00 (dos quais 14,723.00 já vem de mês(es) anterior(es) já encerrado(s)) — deveria ter zerado até o fim do mês e não zerou; verificar por que os lançamentos pendentes não entraram. Veja rotina C18.",
+      "valor": 14723.0
+    },
+    {
+      "status": "ERRO",
+      "modulo": "DFC",
+      "codigo": "DFC-01",
+      "titulo": "Geracao Liquida != Variacao do Caixa",
+      "detalhe": "Gap: 518,164.61  |  Geracao 1,192,679,339.55  vs  Var.Caixa 1,192,161,174.94",
+      "valor": 518164.61
+    },
+    {
+      "status": "OK",
+      "modulo": "DFC",
+      "codigo": "DFC-02a",
+      "titulo": "Caixa Inicial positivo",
+      "detalhe": "5,460,329,541.74",
+      "valor": 5460329541.74
+    },
+    {
+      "status": "OK",
+      "modulo": "DFC",
+      "codigo": "DFC-02b",
+      "titulo": "Caixa Final positivo",
+      "detalhe": "6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "INFO",
+      "modulo": "DVP",
+      "codigo": "DVP-01",
+      "titulo": "Resultado Patrimonial (encerramento do exercício só em dezembro)",
+      "detalhe": "VPA 101,915,973,784.89  −  VPD 116,856,052,166.74  =  -14,940,078,381.85  — a 891XXXXXX só fecha o exercício em dezembro; a validação do resultado neste período fica com os cruzamentos X6 (DMPL) e R1a (BP)  |  Lançamentos parciais na 891 (não é encerramento, não entra na comparação): UG 130101 256,016.48",
+      "valor": -14940078381.85
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02a",
+      "titulo": "VPA Total positivo",
+      "detalhe": "101,915,973,784.89",
+      "valor": 101915973784.89
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02b",
+      "titulo": "VPD Total positivo",
+      "detalhe": "116,856,052,166.74",
+      "valor": 116856052166.74
+    },
+    {
+      "status": "INFO",
+      "modulo": "DVP",
+      "codigo": "DVP-03",
+      "titulo": "Cobertura dos subtotais detalhados",
+      "detalhe": "VPA: subtotais 62,372,489,299.73 de 101,915,973,784.89 | VPD: subtotais 45,894,041,931.01 de 116,856,052,166.74 — o restante não é aberto por grupo neste diagnóstico",
+      "valor": 108266531230.74
+    },
+    {
+      "status": "OK",
+      "modulo": "DMPL",
+      "codigo": "DMPL-01",
+      "titulo": "Fechamento DMPL: Saldo Ini + Movimento (razão) = Saldo Fin",
+      "detalhe": "Ini -123,862,128,780.30  +  Mov. -7,774,018,626.23  =  -131,636,147,406.53  =  Fin -131,636,147,406.53",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "DMPL",
+      "codigo": "DMPL-02",
+      "titulo": "Mutações do PL no período (exceto Resultado do Exercício)",
+      "detalhe": "-7,774,018,626.23  — identificar origem: ajustes de exerc. anteriores, aumento de capital, reservas, avaliação patrimonial",
+      "valor": null
+    },
+    {
+      "status": "INFO",
+      "modulo": "DMPL",
+      "codigo": "DMPL-03",
+      "titulo": "Resultado do Exercício (DMPL)",
+      "detalhe": "-14,940,078,381.85  — deve igualar o Resultado Patrimonial da DVP (controlado pelo cruzamento X6)",
+      "valor": null
+    },
+    {
+      "status": "OK",
+      "modulo": "BP",
+      "codigo": "BP-01",
+      "titulo": "Ativo = Passivo + PL",
+      "detalhe": "Ativo 69,495,477,988.88  =  Passivo+PL 69,495,477,988.88",
+      "valor": 69495477988.88
+    },
+    {
+      "status": "OK",
+      "modulo": "BP",
+      "codigo": "BP-02",
+      "titulo": "Ativo Circ + Não Circ esgota a classe 1",
+      "detalhe": "Circ 20,864,671,183.64  +  NCirc 48,630,806,805.24  =  69,495,477,988.88  =  classe 1 69,495,477,988.88",
+      "valor": 69495477988.88
+    },
+    {
+      "status": "OK",
+      "modulo": "BP",
+      "codigo": "BP-03",
+      "titulo": "Caixa positivo",
+      "detalhe": "Caixa: 6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "OK",
+      "modulo": "BP",
+      "codigo": "BP-04",
+      "titulo": "Passivo + PL esgota a classe 2",
+      "detalhe": "Passivo 216,071,703,777.26  +  PL(231..237) -131,636,147,406.53  =  classe 2 84,435,556,370.73",
+      "valor": 84435556370.73
+    },
+    {
+      "status": "OK",
+      "modulo": "BAL",
+      "codigo": "BAL-01",
+      "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
+      "detalhe": "Devedores 1,088,711,600,392.67  =  Cl.1 69,495,477,988.88  +  Cl.3 116,856,052,166.74  +  Cl.5 267,089,379,048.10  +  Cl.7 635,270,691,188.95  |  Credores 1,088,711,600,392.67  =  Cl.2 84,435,556,370.73  +  Cl.4 101,915,973,784.89  +  Cl.6 267,089,379,048.10  +  Cl.8 635,270,691,188.95  +  Cl.9 0.00",
+      "valor": 1088711600392.67
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "X1a",
+      "titulo": "Caixa Inicial: BF = DFC",
+      "detalhe": "BF 5,460,329,541.74  =  DFC 5,460,329,541.74",
+      "valor": 5460329541.74
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "X1b",
+      "titulo": "Caixa Final: BF = DFC",
+      "detalhe": "BF 6,652,490,716.68  =  DFC 6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "ERRO",
+      "modulo": "X",
+      "codigo": "X2",
+      "titulo": "DFC: Geração Líquida ≠ Variação do Caixa",
+      "detalhe": "Gap: 518,164.61  |  Geração 1,192,679,339.55  Var.Caixa 1,192,161,174.94",
+      "valor": 518164.61
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "X6",
+      "titulo": "Resultado do Exercício: DMPL = DVP",
+      "detalhe": "DMPL -14,940,078,381.85  =  DVP -14,940,078,381.85",
+      "valor": -14940078381.85
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R1a",
+      "titulo": "Resultado do Exercício: BP = DVP(III)",
+      "detalhe": "BP -14,940,078,381.85  =  DVP -14,940,078,381.85",
+      "valor": -14940078381.85
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R2",
+      "titulo": "Saldo Final DMPL = PL do BP",
+      "detalhe": "DMPL -146,576,225,788.38  =  BP -146,576,225,788.38",
+      "valor": -146576225788.38
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R4a",
+      "titulo": "Caixa: BP = DFC (Caixa Final)",
+      "detalhe": "BP 6,652,490,716.68  =  DFC 6,652,490,716.68",
+      "valor": 6652490716.68
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R7",
+      "titulo": "Receita Realizada: BF = BO",
+      "detalhe": "BF 31,608,919,231.51  =  BO 31,608,919,231.51",
+      "valor": 31608919231.51
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R8",
+      "titulo": "Despesa Paga: BF = BO",
+      "detalhe": "BF 26,108,531,705.80  =  BO 26,108,531,705.80",
+      "valor": 26108531705.8
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R10a",
+      "titulo": "Pgtos RPNP: BF = BO",
+      "detalhe": "BF 1,078,034,624.89  =  BO 1,078,034,624.89",
+      "valor": 1078034624.89
+    },
+    {
+      "status": "OK",
+      "modulo": "X",
+      "codigo": "R10b",
+      "titulo": "Pgtos RPP: BF = BO",
+      "detalhe": "BF 2,286,499,193.03  =  BO 2,286,499,193.03",
+      "valor": 2286499193.03
+    }
+  ]
+}
