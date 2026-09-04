@@ -11,6 +11,7 @@ preservando todo o restante do arquivo (CSS, estrutura, JS de renderização).
 from __future__ import annotations
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 
 RAIZ  = Path(__file__).parent.parent
@@ -161,6 +162,84 @@ def gerar_diag(doc: dict, destino: Path | None = None) -> None:
         f"const META = {json.dumps(meta, ensure_ascii=False, indent=2)};\n"
         f"const ACHADOS = {json.dumps(achados, ensure_ascii=False, indent=2)};\n"
         f"var HISTORICO_FULL = {json.dumps(hist_full, ensure_ascii=False, indent=2)};"
+    )
+    _update(destino, js)
+
+
+def gerar_diag_tipoagreg(resultados: dict, mes: int, ano: int,
+                          destino: Path | None = None) -> None:
+    """Atualiza painel_diag_tipoagreg.html com dados de múltiplos tipos.
+
+    resultados: {tipo_int -> doc_serializado}
+    Também lê os últimos JSONs de cada tipo para preencher tipos que não
+    foram passados no run atual (ex: rodou só tipo 1 mas os demais já
+    existem em disco).
+    """
+    destino = destino or (PAINEL / "painel_diag_tipoagreg.html")
+    if not destino.exists():
+        print(f"  [html] {destino.name} não encontrado — painel não atualizado")
+        return
+
+    pasta_base = RAIZ / "painel" / "dados" / "tipoagreg"
+    NOMES_TIPO = {
+        0: "Todas as Gestões", 1: "Direta", 2: "Direta + Fundos",
+        3: "Autarquias", 4: "Fundação", 5: "Empresa Pública",
+        6: "Economia Mista", 7: "Fundos", 8: "Direta + Repasse",
+        9: "Fundos da Indireta", 10: "Direta + Fundos + Repasse",
+    }
+
+    # Começa com os dados do run atual
+    tipos_data: dict[str, dict] = {}
+    for tipo, doc in resultados.items():
+        tipos_data[str(tipo)] = {
+            "nome":       doc.get("nome_tipo", NOMES_TIPO.get(tipo, f"Tipo {tipo}")),
+            "gerado_em":  doc["gerado_em"],
+            "mes":        doc["mes"],
+            "ano":        doc["ano"],
+            "totais":     doc["totais"],
+            "achados": [
+                {"s": a["status"], "m": a["modulo"], "c": a["codigo"],
+                 "t": a["titulo"], "d": a.get("detalhe", "")}
+                for a in doc.get("achados", [])
+            ],
+        }
+
+    # Completa com os últimos JSONs em disco para tipos ausentes do run atual
+    if pasta_base.exists():
+        for subdir in sorted(pasta_base.iterdir()):
+            if not subdir.is_dir():
+                continue
+            chave = subdir.name
+            if chave in tipos_data:
+                continue
+            arquivos = sorted(subdir.glob("*.json"), reverse=True)
+            for arq in arquivos:
+                try:
+                    d = json.loads(arq.read_text(encoding="utf-8"))
+                    tipos_data[chave] = {
+                        "nome":      d.get("escopo", d.get("nome_tipo", f"Tipo {chave}")),
+                        "gerado_em": d.get("gerado_em", ""),
+                        "mes":       d.get("mes", 0),
+                        "ano":       d.get("ano", 0),
+                        "totais":    d.get("totais", {}),
+                        "achados": [
+                            {"s": a["status"], "m": a["modulo"], "c": a["codigo"],
+                             "t": a["titulo"], "d": a.get("detalhe", "")}
+                            for a in d.get("achados", [])
+                        ],
+                    }
+                    break
+                except Exception:
+                    pass
+
+    meta = {
+        "gerado_em": datetime.now().isoformat(timespec="seconds"),
+        "mes": mes,
+        "ano": ano,
+    }
+    js = (
+        f"const TIPO_META = {json.dumps(meta, ensure_ascii=False, indent=2)};\n"
+        f"const TIPOS_DATA = {json.dumps(tipos_data, ensure_ascii=False, indent=2)};"
     )
     _update(destino, js)
 

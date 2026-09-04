@@ -21,7 +21,10 @@ Add-Content $LOG "  Rodando mes=$mes ano=$ano"
 # 1. Diagnóstico de integridade (gera JSON + painel_diag.html)
 & $PYTHON diag.py --mes $mes --ano $ano --json 2>&1 | Tee-Object -Append -FilePath $LOG
 
-# 2. Balancete Contábil (gera xlsx lido pela auditoria consolidada)
+# 2. Diagnóstico por tipo de agregação (gera JSONs + painel_diag_tipoagreg.html)
+& $PYTHON diag_tipoagreg.py --mes $mes --ano $ano --todos --json 2>&1 | Tee-Object -Append -FilePath $LOG
+
+# 3. Balancete Contábil (gera xlsx lido pela auditoria consolidada)
 & $PYTHON gerar_balancete.py --mes $mes --ano $ano 2>&1 | Tee-Object -Append -FilePath $LOG
 
 # 3. Monitor de classificação (gera painel_classificacao.html)
@@ -37,7 +40,7 @@ Add-Content $LOG "  Rodando mes=$mes ano=$ano"
 $label = "{0:d2}/{1}" -f $mes, $ano
 $msg = "run noturno $(Get-Date -Format 'yyyy-MM-dd') — $label"
 $mesPad = "{0:d2}" -f $mes
-git add painel/dados/ painel/painel_diag.html painel/painel_classificacao.html painel/auditoria_consolidada.html "painel/rotina_controles_${ano}_${mesPad}.html" 2>&1 | Tee-Object -Append -FilePath $LOG
+git add painel/dados/ painel/painel_diag.html painel/painel_diag_tipoagreg.html painel/painel_classificacao.html painel/auditoria_consolidada.html "painel/rotina_controles_${ano}_${mesPad}.html" 2>&1 | Tee-Object -Append -FilePath $LOG
 git commit -m $msg 2>&1 | Tee-Object -Append -FilePath $LOG
 
 # 7. Publicar painéis no UBANCONT (GitHub Pages)
@@ -45,7 +48,8 @@ $UBANCONT = "C:\Users\marcio.coelho\UBANCONT"
 if (Test-Path $UBANCONT) {
     $painelSrc = "$PROJ\painel"
     $painelDst = "$UBANCONT\painel"
-    Copy-Item "$painelSrc\painel_diag.html"            $painelDst -Force
+    Copy-Item "$painelSrc\painel_diag.html"              $painelDst -Force
+    Copy-Item "$painelSrc\painel_diag_tipoagreg.html"  $painelDst -Force
     Copy-Item "$painelSrc\painel_classificacao.html"   $painelDst -Force
     Copy-Item "$painelSrc\auditoria_consolidada.html"  $painelDst -Force
     Copy-Item "$painelSrc\painel_balancete.html"       $painelDst -Force

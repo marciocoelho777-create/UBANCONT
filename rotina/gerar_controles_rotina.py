@@ -412,10 +412,11 @@ CONTROLES = [
         "detalhe_row_id_cols": [4, 2],
         # Drill-down: UG → Gestão → Conta (col 0=nome, col 1=código, col 3=saldo)
         "hierarquia": {
-            "grupo_cols":   [4, 2],
-            "grupo_labels": ["UG", "Gestão"],
-            "saldo_col":    3,
-            "detalhe_cols": [0, 1],
+            "grupo_cols":      [4, 2],
+            "grupo_labels":    ["UG", "Gestão"],
+            "saldo_col":       3,
+            "detalhe_cols":    [0, 1],
+            "conta_filter_col": 1,   # Conta Contábil — vira seletor de filtro
         },
     },
 ]
@@ -741,12 +742,26 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
     numero  = r["numero"]
     col_labels = r.get("col_labels", {})
 
+    cfc = hier.get("conta_filter_col")  # column used for conta selector/filter
+
     def _v(row, i):
         return row[i] if i < len(row) and row[i] is not None else None
 
     def _saldo(row):
         try: return float(_v(row, sc) or 0)
         except: return 0.0
+
+    # pré-calcula contas por grupo (para data-contas em L1/L2)
+    conta_per_l0: dict = {}
+    conta_per_l1: dict = {}
+    if cfc is not None:
+        for row in rows:
+            k0c = str(_v(row, gc[0]) or "").strip()
+            k1c = str(_v(row, gc[1]) or "").strip()
+            ckv = str(_v(row, cfc) or "").strip()
+            if ckv:
+                conta_per_l0.setdefault(k0c, set()).add(ckv)
+                conta_per_l1.setdefault(f"{k0c}|{k1c}", set()).add(ckv)
 
     # agrupa em OrderedDict: L0 → L1 → [rows]
     groups: dict = OrderedDict()
@@ -760,8 +775,10 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
     for k0, sub in groups.items():
         tot0 = sum(sum(_saldo(rw) for rw in v) for v in sub.values())
         ek0  = _he(k0)
+        l0_contas = "|".join(sorted(conta_per_l0.get(k0, set())))
+        d_contas_l0 = f' data-contas="{_he(l0_contas)}"' if cfc is not None else ""
         trs.append(
-            f'<tr class="hier-l1" data-key="{ek0}" data-ug="{ek0}">'
+            f'<tr class="hier-l1" data-key="{ek0}" data-ug="{ek0}"{d_contas_l0}>'
             f'<td class="hier-cell">'
             f'<button class="hier-btn" data-key="{ek0}" onclick="toggleHier(this)">&#9654;</button>'
             f'<span class="hier-lbl">{gl[0]} {_he(k0)}</span></td>'
@@ -771,9 +788,11 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
             tot1 = sum(_saldo(rw) for rw in leaf_rows)
             ek1  = _he(f"{k0}|{k1}")
             ek1_disp = _he(k1)
+            l1_contas = "|".join(sorted(conta_per_l1.get(f"{k0}|{k1}", set())))
+            d_contas_l1 = f' data-contas="{_he(l1_contas)}"' if cfc is not None else ""
             trs.append(
                 f'<tr class="hier-l2" data-parent="{ek0}" data-key="{ek1}"'
-                f' data-ug="{ek0}" data-gest="{_he(k1)}" style="display:none">'
+                f' data-ug="{ek0}" data-gest="{_he(k1)}"{d_contas_l1} style="display:none">'
                 f'<td class="hier-cell">'
                 f'<button class="hier-btn" data-key="{ek1}" onclick="toggleHier(this)">&#9654;</button>'
                 f'<span class="hier-lbl">{gl[1]} {ek1_disp}</span></td>'
@@ -787,9 +806,11 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
                         parts.append(_he(str(v).strip()))
                 desc = " &mdash; ".join(p for p in parts if p)
                 s    = _saldo(rw)
+                conta_val = _he(str(_v(rw, cfc) or "").strip()) if cfc is not None else ""
+                d_conta = f' data-conta="{conta_val}"' if cfc is not None else ""
                 trs.append(
                     f'<tr class="hier-l3" data-parent="{ek1}"'
-                    f' data-ug="{ek0}" data-gest="{_he(k1)}" style="display:none">'
+                    f' data-ug="{ek0}" data-gest="{_he(k1)}"{d_conta} style="display:none">'
                     f'<td class="hier-cell">{desc}</td>'
                     f'<td class="num">{_brl(s)}</td></tr>'
                 )
@@ -875,9 +896,23 @@ def _html_ctrl_section(r: dict) -> str:
                 if s not in seen: seen.add(s); uniq_gest.append(s)
         uniq_gest.sort()
 
+    # seletor extra de conta para controles hierárquicos com conta_filter_col
+    uniq_contas_hier: list = []
+    _hier_for_sel = r.get("hierarquia")
+    if _hier_for_sel:
+        _cfc = _hier_for_sel.get("conta_filter_col")
+        if _cfc is not None:
+            seen = set()
+            for row in rows:
+                v = row[_cfc] if len(row) > _cfc and row[_cfc] is not None else None
+                if v is not None:
+                    s = str(v).strip()
+                    if s not in seen: seen.add(s); uniq_contas_hier.append(s)
+            uniq_contas_hier.sort()
+
     # ── barra de filtros do controle ──────────────────────────────────────────
     filter_html = ""
-    if uniq_ugs or uniq_gest:
+    if uniq_ugs or uniq_gest or uniq_contas_hier:
         parts = []
         if uniq_ugs:
             opts = "\n".join(f'<option value="{_he(u)}">{_he(u)}</option>' for u in uniq_ugs)
@@ -891,6 +926,13 @@ def _html_ctrl_section(r: dict) -> str:
                 f'<label for="sel-gest-{numero}">Gest&#227;o</label>'
                 f'<select id="sel-gest-{numero}" onchange="filtrarCtrl(\'{numero}\')">'
                 f'<option value="">&#8212; todas as gest&#245;es &#8212;</option>{opts}</select>')
+        if uniq_contas_hier:
+            _cfc_lbl = _he(col_labels.get(_hier_for_sel.get("conta_filter_col", -1), "Conta Cont&#225;bil"))
+            opts = "\n".join(f'<option value="{_he(c)}">{_he(c)}</option>' for c in uniq_contas_hier)
+            parts.append(
+                f'<label for="sel-conta-{numero}">{_cfc_lbl}</label>'
+                f'<select id="sel-conta-{numero}" onchange="filtrarCtrl(\'{numero}\')">'
+                f'<option value="">&#8212; todas &#8212;</option>{opts}</select>')
         parts.append(f'<button onclick="limparCtrl(\'{numero}\')">Limpar</button>')
         parts.append(f'<span class="ctrl-filter-info" id="info-{numero}"></span>')
         filter_html = f'<div class="ctrl-filter">{"".join(parts)}</div>'
@@ -982,7 +1024,8 @@ def _html_ctrl_section(r: dict) -> str:
             f'  </div>\n</details>')
 
 
-def _gerar_html(resultados_html: list, mes: int, ano: int) -> str:
+def _gerar_html(resultados_html: list, mes: int, ano: int,
+                meses_disponiveis: list | None = None) -> str:
     agora    = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     mes_nome = _MESES_PT[mes] if 1 <= mes <= 12 else str(mes)
 
@@ -993,6 +1036,24 @@ def _gerar_html(resultados_html: list, mes: int, ano: int) -> str:
 
     nav_items = "".join(f'<a href="#ctrl-{r["numero"]}">C{r["numero"]}</a>' for r in resultados_html)
     secoes    = "\n".join(_html_ctrl_section(r) for r in resultados_html)
+
+    # ── seletor de histórico (meses disponíveis) ──────────────────────────────
+    nome_atual = f"rotina_controles_{ano}_{mes:02d}.html"
+    if meses_disponiveis and len(meses_disponiveis) > 1:
+        opts_hist = "\n".join(
+            f'<option value="{_he(fname)}"{"selected" if fname == nome_atual else ""}>'
+            f'{_he(_MESES_PT[m] if 1 <= m <= 12 else str(m))}/{a}</option>'
+            for a, m, fname in meses_disponiveis
+        )
+        run_wrap = (
+            f'<div class="run-wrap">'
+            f'<span class="run-lbl">Compet&#234;ncia</span>'
+            f'<select id="run-select" onchange="window.location.href=this.value">'
+            f'{opts_hist}</select>'
+            f'</div>'
+        )
+    else:
+        run_wrap = ""
 
     return f"""<!DOCTYPE html>
 <html lang="pt-BR">
@@ -1034,6 +1095,7 @@ body{{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);backg
     justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}}
 .hd-title{{font-size:15px;font-weight:700;letter-spacing:-.01em}}
 .hd-sub{{font-size:12px;opacity:.72;margin-top:2px}}
+.hd-ts{{font-size:11px;opacity:.55;margin-top:3px;font-family:var(--fm)}}
 .hd-badge{{font-size:11px;font-weight:600;background:rgba(255,255,255,.18);
           border:1px solid rgba(255,255,255,.28);border-radius:100px;padding:3px 11px}}
 .wrap{{max-width:1200px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:14px}}
@@ -1094,6 +1156,14 @@ table.tbl td.diff-cell{{font-weight:600}}
 .trunc-note{{font-size:11px;color:var(--inf);font-style:italic;padding:6px 2px}}
 footer{{font-size:11px;color:var(--t3);text-align:center;padding:14px;margin-top:10px}}
 @media(max-width:680px){{.kpi-row{{grid-template-columns:repeat(2,1fr)}}}}
+.run-wrap{{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--s1);
+          border:1px solid var(--bd);border-radius:var(--r)}}
+.run-lbl{{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);
+         white-space:nowrap;flex-shrink:0}}
+#run-select{{flex:1;padding:5px 9px;border:1px solid var(--bd);border-radius:6px;
+            background:var(--s2);color:var(--t1);font-size:12px;font-family:var(--fn);
+            cursor:pointer;max-width:320px}}
+#run-select:focus{{outline:2px solid var(--brand);outline-offset:1px}}
 /* ── Tabela hierárquica (drill-down) ── */
 .tbl-hier tr.hier-l1 td{{background:var(--s2);font-weight:700;font-size:12px}}
 .tbl-hier tr.hier-l2 td{{background:var(--s1);font-size:11.5px}}
@@ -1116,11 +1186,13 @@ footer{{font-size:11px;color:var(--t3);text-align:center;padding:14px;margin-top
 <div class="hd">
   <div>
     <div class="hd-title">Controles de Rotina &#8212; GDF</div>
-    <div class="hd-sub">{mes_nome}/{ano} &#8212; competência {mes:02d}/{ano}</div>
+    <div class="hd-sub">Dados de competência {mes:02d}/{ano} ({mes_nome}/{ano})</div>
+    <div class="hd-ts">Executado em {agora}</div>
   </div>
   <div class="hd-badge">{mes:02d}/{ano}</div>
 </div>
 <div class="wrap">
+  {run_wrap}
   <div class="kpi-row">
     <div class="kpi" style="--kpi-stripe:var(--brand)">
       <div class="kpi-lbl">Controles</div><div class="kpi-val">{n_total}</div>
@@ -1162,18 +1234,21 @@ function toggleHier(btn){{
 function filtrarCtrl(num){{
   var ugEl=document.getElementById('sel-ug-'+num);
   var gsEl=document.getElementById('sel-gest-'+num);
+  var ctEl=document.getElementById('sel-conta-'+num);
   var ug=ugEl?ugEl.value:'';
   var gs=gsEl?gsEl.value:'';
+  var conta=ctEl?ctEl.value:'';
   var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
   if(!tbl)return;
   var isHier=tbl.classList.contains('tbl-hier');
   var info=document.getElementById('info-'+num);
   if(isHier){{
-    /* colapsa tudo e filtra L1 por UG */
+    /* colapsa tudo e filtra L1 por UG e/ou Conta Contábil */
     tbl.querySelectorAll('tbody tr').forEach(function(tr){{
       if(tr.classList.contains('hier-l1')){{
-        var show=!ug||tr.dataset.ug===ug;
-        tr.style.display=show?'':'none';
+        var okUg=!ug||tr.dataset.ug===ug;
+        var okCt=!conta||(tr.dataset.contas||'').split('|').indexOf(conta)>=0;
+        tr.style.display=(okUg&&okCt)?'':'none';
       }} else {{
         tr.style.display='none';
         var cb=tr.querySelector('.hier-btn');
@@ -1183,7 +1258,7 @@ function filtrarCtrl(num){{
     if(info){{
       var vis=tbl.querySelectorAll('tr.hier-l1').length - tbl.querySelectorAll('tr.hier-l1[style*="none"]').length;
       var tot=tbl.querySelectorAll('tr.hier-l1').length;
-      info.textContent=ug?vis+' de '+tot+' UG(s)':'';
+      info.textContent=(ug||conta)?vis+' de '+tot+' UG(s)':'';
     }}
   }} else {{
     var vis=0,tot=0;
@@ -1197,8 +1272,10 @@ function filtrarCtrl(num){{
 function limparCtrl(num){{
   var ugEl=document.getElementById('sel-ug-'+num);
   var gsEl=document.getElementById('sel-gest-'+num);
+  var ctEl=document.getElementById('sel-conta-'+num);
   if(ugEl)ugEl.value='';
   if(gsEl)gsEl.value='';
+  if(ctEl)ctEl.value='';
   var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
   if(!tbl)return;
   if(tbl.classList.contains('tbl-hier')){{
@@ -1338,7 +1415,20 @@ def main() -> None:
             PAINEL_DIR.mkdir(parents=True, exist_ok=True)
             nome_html   = f"rotina_controles_{args.ano}_{args.mes:02d}.html"
             caminho_html = PAINEL_DIR / nome_html
-            html = _gerar_html(resultados_html, args.mes, args.ano)
+
+            # descobre todos os meses disponíveis (inclui o atual)
+            import re as _re
+            _pat = _re.compile(r"rotina_controles_(\d{4})_(\d{2})\.html")
+            _meses: list = []
+            for _f in PAINEL_DIR.glob("rotina_controles_*.html"):
+                _m = _pat.match(_f.name)
+                if _m:
+                    _meses.append((int(_m.group(1)), int(_m.group(2)), _f.name))
+            if not any(f == nome_html for _, _, f in _meses):
+                _meses.append((args.ano, args.mes, nome_html))
+            _meses.sort(key=lambda x: (x[0], x[1]), reverse=True)  # mais recente primeiro
+
+            html = _gerar_html(resultados_html, args.mes, args.ano, _meses)
             caminho_html.write_text(html, encoding="utf-8")
             print(f"  ✔ Painel HTML salvo: {caminho_html}")
 
