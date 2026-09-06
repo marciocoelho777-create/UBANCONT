@@ -1667,9 +1667,13 @@ let tipoAtivo = null, statusFiltro = 'ALL', modFiltro = null;
 
 function montarAbas(){
   const bar = document.getElementById('tipo-bar');
+  const sel = document.getElementById('tipo-select');
   bar.innerHTML = '';
+  // populate select
+  sel.innerHTML = '<option value="">— Todos (Consolidado) —</option>';
   Object.keys(TIPOS_DATA).map(Number).sort((a,b)=>a-b).forEach(t => {
     const d = TIPOS_DATA[t], tot = d.totais||{};
+    // tab
     const btn = document.createElement('button');
     btn.className = 'tipo-tab';
     btn.dataset.tipo = t;
@@ -1680,14 +1684,117 @@ function montarAbas(){
     btn.innerHTML = `${d.nome||'Tipo '+t}${badge}`;
     btn.onclick = () => selecionarTipo(t);
     bar.appendChild(btn);
+    // option
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = `${t} – ${d.nome||'Tipo '+t}`;
+    sel.appendChild(opt);
   });
   const primeiro = +Object.keys(TIPOS_DATA).sort((a,b)=>+a-+b)[0];
   if (!isNaN(primeiro)) selecionarTipo(primeiro);
 }
 
+function selecionarTipoSelect(val){
+  const sel = document.getElementById('tipo-select');
+  if(val === ''){
+    // consolidado
+    tipoAtivo = null; statusFiltro = 'ALL'; modFiltro = null;
+    document.querySelectorAll('.tipo-tab').forEach(b => b.classList.remove('active'));
+    renderConsolidado();
+  } else {
+    selecionarTipo(+val);
+  }
+}
+
+function renderConsolidado(){
+  // aggregate totals across all tipos
+  let totalErro=0,totalAlr=0,totalOk=0,totalInf=0,totalTot=0;
+  const tipos = Object.keys(TIPOS_DATA).map(Number).sort((a,b)=>a-b);
+  tipos.forEach(t=>{
+    const tot=TIPOS_DATA[t].totais||{};
+    totalErro+=(tot.ERRO||0); totalAlr+=(tot.ALERTA||0);
+    totalOk+=(tot.OK||0); totalInf+=(tot.INFO||0);
+    totalTot+=(tot.TOTAL||(TIPOS_DATA[t].achados||[]).length);
+  });
+
+  const mesEx = tipos.length ? (TIPOS_DATA[tipos[0]].mes||'') : '';
+  const anoEx = tipos.length ? (TIPOS_DATA[tipos[0]].ano||'') : '';
+  const comp = mesEx&&anoEx ? `${MESES[mesEx]||mesEx}/${anoEx}` : '—';
+  document.getElementById('hd-sub').textContent = 'Consolidado — Todos os Tipos';
+  document.getElementById('hd-data').textContent = tipos.length ? (TIPOS_DATA[tipos[0]].gerado_em||'—').replace('T',' ').substring(0,16) : '—';
+  document.getElementById('hd-comp').textContent = comp;
+  document.getElementById('footer').innerHTML =
+    `Diagnóstico Contábil GDF · ${comp} · <code>diag_tipoagreg.py</code> · Visão Consolidada`;
+
+  let h='';
+  h+=`<div class="kpi-row">
+    <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:${totalErro>0?'var(--err)':'var(--t1)'}">
+      <div class="kpi-lbl">Erros</div><div class="kpi-val">${totalErro}</div>
+      <div class="kpi-sub">em ${tipos.length} tipos</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--wrn-bd);--kpi-color:${totalAlr>0?'var(--wrn)':'var(--t1)'}">
+      <div class="kpi-lbl">Alertas</div><div class="kpi-val">${totalAlr}</div>
+      <div class="kpi-sub">&nbsp;</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)">
+      <div class="kpi-lbl">OK</div><div class="kpi-val">${totalOk}</div>
+      <div class="kpi-sub">de ${totalTot} controles</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--inf-bd);--kpi-color:var(--inf)">
+      <div class="kpi-lbl">Informativos</div><div class="kpi-val">${totalInf}</div>
+      <div class="kpi-sub">sem ação necessária</div></div>
+  </div>`;
+
+  // matrix por tipo
+  h+=`<div class="card"><div class="card-hd"><span class="card-title">Resumo por Tipo de Agregação</span></div>
+    <div class="matrix-wrap"><table class="matrix">
+      <thead><tr><th>Tipo</th><th>Erros</th><th>Alertas</th><th>OK</th><th>Info</th><th>Total</th></tr></thead>
+      <tbody>`;
+  tipos.forEach(t=>{
+    const d=TIPOS_DATA[t], tot=d.totais||{};
+    const rowErr=tot.ERRO||0;
+    h+=`<tr>
+      <td><strong>${t}</strong> — ${d.nome||'Tipo '+t}</td>
+      <td style="color:${rowErr>0?'var(--err)':'inherit'};font-weight:${rowErr>0?700:400}">${rowErr||'—'}</td>
+      <td>${tot.ALERTA||'—'}</td>
+      <td style="color:var(--ok)">${tot.OK||'—'}</td>
+      <td style="color:var(--inf)">${tot.INFO||'—'}</td>
+      <td>${tot.TOTAL||(d.achados||[]).length}</td>
+    </tr>`;
+  });
+  h+=`</tbody></table></div></div>`;
+
+  // flat list of all achados with tipo column
+  const allAchados = [];
+  tipos.forEach(t=>{ (TIPOS_DATA[t].achados||[]).forEach(a=>allAchados.push({...a,_tipo:t,_nome:TIPOS_DATA[t].nome||'Tipo '+t})); });
+  const erros = allAchados.filter(a=>a.s==='ERRO');
+  if(erros.length){
+    h+=`<div class="err-card"><div class="err-hd">✘ ${erros.length} erro${erros.length>1?'s':''} encontrado${erros.length>1?'s':''}</div><div class="prob-body">`;
+    erros.forEach(e=>{ h+=`<div class="prob-item"><code>${e.c}</code> [Tipo ${e._tipo}] — ${e.t}${e.d?'<br><small style="color:var(--t3)">'+e.d.substring(0,160)+'</small>':''}</div>`; });
+    h+=`</div></div>`;
+  }
+
+  h+=`<div class="card">
+    <div class="card-hd"><span class="card-title">Todos os Controles — Consolidado</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th style="width:32px"></th><th>Tipo</th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Norma/Regra</th><th>Detalhe</th></tr></thead>
+      <tbody>${allAchados.map(a=>`<tr>
+        <td><span class="st ${statusClass(a.s)}">${statusIcon(a.s)}</span></td>
+        <td><small>${a._tipo}</small></td>
+        <td><strong>${MOD_LABEL[a.m]||a.m}</strong></td>
+        <td class="cod">${a.c}</td>
+        <td>${a.t}</td>
+        <td class="norma">${NORMAS[a.c]||''}</td>
+        <td class="det">${a.d||''}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+
+  document.getElementById('wrap').innerHTML = h;
+}
+
 function selecionarTipo(t){
   tipoAtivo = t; statusFiltro = 'ALL'; modFiltro = null;
   document.querySelectorAll('.tipo-tab').forEach(b => b.classList.toggle('active', +b.dataset.tipo===t));
+  const sel = document.getElementById('tipo-select');
+  if(sel) sel.value = String(t);
   renderizar();
 }
 
@@ -1764,7 +1871,7 @@ function renderizar(){
       </div>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th style="width:32px"></th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Detalhe</th></tr></thead>
+      <thead><tr><th style="width:32px"></th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Norma/Regra</th><th>Detalhe</th></tr></thead>
       <tbody id="ctrl-body"></tbody>
     </table></div>
   </div>`;
@@ -1777,12 +1884,13 @@ function renderTabela(achados){
   const body = document.getElementById('ctrl-body');
   if(!body) return;
   const filt = achados.filter(a=>(statusFiltro==='ALL'||a.s===statusFiltro)&&(!modFiltro||a.m===modFiltro));
-  if(!filt.length){ body.innerHTML=`<tr><td colspan="5" class="empty">Nenhum controle corresponde ao filtro.</td></tr>`; return; }
+  if(!filt.length){ body.innerHTML=`<tr><td colspan="6" class="empty">Nenhum controle corresponde ao filtro.</td></tr>`; return; }
   body.innerHTML = filt.map(a=>`<tr>
     <td><span class="st ${statusClass(a.s)}">${statusIcon(a.s)}</span></td>
     <td><strong>${MOD_LABEL[a.m]||a.m}</strong></td>
     <td class="cod">${a.c}</td>
     <td>${a.t}</td>
+    <td class="norma">${NORMAS[a.c]||''}</td>
     <td class="det">${a.d||''}</td>
   </tr>`).join('');
 }
