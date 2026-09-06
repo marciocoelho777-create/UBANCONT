@@ -36,12 +36,12 @@ from . import (Achado, query_one, query_all, D,
                mes_encerrado)
 
 # Cópia de bo.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
-def _qf(conn, sql, cogestao_list, alias, **fmt):
+def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
     s = sql.format(**fmt) if fmt else sql
     if cogestao_list:
         ids = ",".join(str(int(c)) for c in cogestao_list)
         kw = "AND" if "WHERE" in s.upper() else "WHERE"
-        s += f"\n  {kw} {alias}.COGESTAO IN ({ids})"
+        s += f"\n  {kw} {alias}.{campo} IN ({ids})"
     return query_one(conn, s)
 
 SQL_BO = """
@@ -173,7 +173,8 @@ ORDER  BY 3 DESC
 
 
 def extrair(conn, mes, ano, cogestao_list=None):
-    t = _qf(conn, SQL_BO, cogestao_list, "o", mes=mes, ano=ano)
+    # SQL_BO usa LANCAMENTOCONTABIL → COGESTAOCONTAB (gestão contabilizante, = critério do PSIAG)
+    t = _qf(conn, SQL_BO, cogestao_list, "o", campo="COGESTAOCONTAB", mes=mes, ano=ano)
     return {k: (D(0) if v is None else v) for k, v in t.items()}
 
 

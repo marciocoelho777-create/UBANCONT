@@ -75,12 +75,12 @@ from . import (Achado, query_one, query_all, D,
                achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
 
 # Cópia de dvp.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
-def _qf(conn, sql, cogestao_list, alias, **fmt):
+def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
     s = sql.format(**fmt) if fmt else sql
     if cogestao_list:
         ids = ",".join(str(int(c)) for c in cogestao_list)
         kw = "AND" if "WHERE" in s.upper() else "WHERE"
-        s += f"\n  {kw} {alias}.COGESTAO IN ({ids})"
+        s += f"\n  {kw} {alias}.{campo} IN ({ids})"
     return query_one(conn, s)
 
 SQL_DVP = """
@@ -156,7 +156,8 @@ HAVING SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
 
 
 def extrair(conn, mes: int, ano: int, cogestao_list=None) -> dict:
-    t = _qf(conn, SQL_DVP, cogestao_list, "o", mes=mes, ano=ano)
+    # SQL_DVP usa LANCAMENTOCONTABIL → COGESTAOCONTAB (gestão contabilizante, = critério do PSIAG)
+    t = _qf(conn, SQL_DVP, cogestao_list, "o", campo="COGESTAOCONTAB", mes=mes, ano=ano)
     return {k: (D(0) if v is None else v) for k, v in t.items()}
 
 

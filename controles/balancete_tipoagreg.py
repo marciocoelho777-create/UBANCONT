@@ -23,12 +23,12 @@ from . import (Achado, query_one, D,
                achado_ok, achado_erro, achado_info, checa_gap)
 
 # Cópia de balancete.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
-def _qf(conn, sql, cogestao_list, alias, **fmt):
+def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
     s = sql.format(**fmt) if fmt else sql
     if cogestao_list:
         ids = ",".join(str(int(c)) for c in cogestao_list)
         kw = "AND" if "WHERE" in s.upper() else "WHERE"
-        s += f"\n  {kw} {alias}.COGESTAO IN ({ids})"
+        s += f"\n  {kw} {alias}.{campo} IN ({ids})"
     return query_one(conn, s)
 
 SQL_BALANCETE = """

@@ -27,12 +27,12 @@ from . import (Achado, query_one, D,
                achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
 
 # Cópia de dmpl.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
-def _qf(conn, sql, cogestao_list, alias, **fmt):
+def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
     s = sql.format(**fmt) if fmt else sql
     if cogestao_list:
         ids = ",".join(str(int(c)) for c in cogestao_list)
         kw = "AND" if "WHERE" in s.upper() else "WHERE"
-        s += f"\n  {kw} {alias}.COGESTAO IN ({ids})"
+        s += f"\n  {kw} {alias}.{campo} IN ({ids})"
     return query_one(conn, s)
 
 # (chave, máscara) — espelha COLUNAS do dmpl.py mestre.
@@ -110,8 +110,9 @@ def _montar_sql_lanc(mes: int) -> str:
 
 def extrair(conn, mes: int, ano: int, cogestao_list=None) -> dict:
     t = {}
+    # SALDOCONTABIL → COGESTAO (default); LANCAMENTOCONTABIL → COGESTAOCONTAB (= critério PSIAG)
     t.update(_qf(conn, _montar_sql_saldo(mes), cogestao_list, "v", ano=ano))
-    t.update(_qf(conn, _montar_sql_lanc(mes), cogestao_list, "o", ano=ano))
+    t.update(_qf(conn, _montar_sql_lanc(mes), cogestao_list, "o", campo="COGESTAOCONTAB", ano=ano))
     t = {k: (D(0) if v is None else v) for k, v in t.items()}
 
     pl_ini = sum(t[f"INI_{c}"] for c, _, _ in COLUNAS_PL)

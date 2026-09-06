@@ -71,12 +71,14 @@ from . import (Achado, query_one, D,
                achado_ok, achado_erro, achado_alerta, achado_info, checa_gap)
 
 # Cópia de bf.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
-def _qf(conn, sql, cogestao_list, alias, **fmt):
+# campo: LANCAMENTOCONTABIL usa COGESTAOCONTAB (gestão contabilizante, = PSIAG);
+#        SALDOCONTABIL usa COGESTAO (não tem COGESTAOCONTAB).
+def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
     s = sql.format(**fmt) if fmt else sql
     if cogestao_list:
         ids = ",".join(str(int(c)) for c in cogestao_list)
         kw = "AND" if "WHERE" in s.upper() else "WHERE"
-        s += f"\n  {kw} {alias}.COGESTAO IN ({ids})"
+        s += f"\n  {kw} {alias}.{campo} IN ({ids})"
     return query_one(conn, s)
 
 # ── Contas de Depósitos Restituíveis (itens 1.04.03 / 2.04.03) ──────────────
@@ -287,11 +289,13 @@ def extrair(conn, mes, ano, cogestao_list=None):
             "incluir lancamentos de encerramento que ja sao somados a parte "
             "pelo termo INMES=15, contando duas vezes. Use mes<=12.")
 
-    t = _qf(conn, SQL_MOV, cogestao_list, "o", mes=mes, ano=ano)
-    t.update(_qf(conn, SQL_ENC, cogestao_list, "o", ano=ano))
+    # LANCAMENTOCONTABIL → COGESTAOCONTAB (gestão contabilizante, = critério do PSIAG)
+    # SALDOCONTABIL      → COGESTAO       (não tem COGESTAOCONTAB)
+    t = _qf(conn, SQL_MOV, cogestao_list, "o", campo="COGESTAOCONTAB", mes=mes, ano=ano)
+    t.update(_qf(conn, SQL_ENC, cogestao_list, "o", campo="COGESTAOCONTAB", ano=ano))
     t.update(_qf(conn, SQL_CAIXA, cogestao_list, "v", mes=mes, ano=ano))
     ini = _qf(conn, _sql_saldo_ini(ano), cogestao_list, "v")
-    mov = _qf(conn, _sql_saldo_mov(mes, ano), cogestao_list, "o")
+    mov = _qf(conn, _sql_saldo_mov(mes, ano), cogestao_list, "o", campo="COGESTAOCONTAB")
     t.update(ini)
     t.update(mov)
     # SUM() Oracle retorna NULL quando nenhuma linha passou pelo filtro de COGESTAO.

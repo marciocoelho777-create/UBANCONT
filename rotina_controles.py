@@ -70,6 +70,7 @@ CONTROLES = [
             '(211xxx–215xxx) estao em equilibrio com a NE Principal (827110101). '
             'Diferenca != 0 por UG indica lancamento inconsistente.'
         ),
+        'norma': 'MCASP 8ª ed. — Parte II, Cap. 4; PCASP — contas 21/82',
         'rename': {
             'E997027': 'Gestao', 'E997028': 'Gestao Contab',
             'E997036': 'UG Contab', 'E997038': 'UG',
@@ -126,6 +127,7 @@ CONTROLES = [
             'Equilibrio entre contas 21 de Restos a Pagar e as contas '
             '827110201, 827110203 e 631810000. Diferenca != 0 = RP sem contrapartida.'
         ),
+        'norma': 'Lei 4.320/64, art. 36; MCASP 8ª ed. — RP (contas 21/82); NBC TSP 03',
     },
     {
         'id': '03', 'check': 'col4_nz',
@@ -136,6 +138,7 @@ CONTROLES = [
             'Contas de cancelamento de RP (21xxx98xx) devem corresponder a '
             '632110100 e 632110300. Diferenca != 0 = cancelamento sem registro adequado.'
         ),
+        'norma': 'Portaria MF 548/2015, art. 8º; NBC TSP 03 — Cancelamento de RP; MCASP contas 632110100/300',
     },
     {
         'id': '04', 'check': 'col4_nz',
@@ -146,6 +149,7 @@ CONTROLES = [
             'Lancamentos em contas 21 sem nota de empenho frente a conta 827110401. '
             'Diferenca != 0 = RP sem empenho identificado.'
         ),
+        'norma': 'Lei 4.320/64, art. 58–60; MCASP — RP sem empenho (conta 827110401)',
     },
     {
         'id': '05', 'check': 'col4_nz',
@@ -156,6 +160,7 @@ CONTROLES = [
             'RP em liquidacao: contas 218919600/218929600 e 218919896/218929896 '
             'frente a 827110196 e 631200000. Diferenca != 0 = RP em liquidacao inconsistente.'
         ),
+        'norma': 'Lei 4.320/64, art. 63; MCASP — RP em liquidação (conta 827110196/631200000)',
     },
     {
         'id': '06', 'check': 'col4_nz',
@@ -166,6 +171,7 @@ CONTROLES = [
             'RPNP liquidado: contas 218914002/218924002 frente a conta 631300000. '
             'Diferenca != 0 = liquidacao de RPNP sem registro correto.'
         ),
+        'norma': 'Lei 4.320/64, art. 36; MCASP — RPNP liquidado (conta 631300000)',
     },
     {
         'id': '08', 'check': 'col4_nz',
@@ -177,6 +183,7 @@ CONTROLES = [
             'Soma das classes 1+2+3+4 deve ser zero. '
             'Diferenca != 0 = lancamento sem contrapartida INTRA.'
         ),
+        'norma': 'MCASP 8ª ed. — Parte II, Cap. 3 (Balancete INTRA); PCASP — regra de equilíbrio',
     },
     {
         'id': '09', 'check': 'col4_nz',
@@ -187,6 +194,7 @@ CONTROLES = [
             'Equilibrio do balancete Nao INTRA. '
             'Soma das classes 1+2+3+4 deve ser zero por UG.'
         ),
+        'norma': 'MCASP 8ª ed. — Parte II, Cap. 3 (Balancete Não INTRA); PCASP — regra de equilíbrio',
     },
     {
         'id': '10', 'check': 'col4_nz',
@@ -197,6 +205,7 @@ CONTROLES = [
             'Equilibrio do Balanco Financeiro por UG (Ingressos = Dispendios + Variacao de Saldo). '
             'Diferenca != 0 indica BF desequilibrado.'
         ),
+        'norma': 'Lei 4.320/64, art. 103; MCASP 8ª ed. — Balanço Financeiro (equação de equilíbrio)',
     },
     {
         'id': '13', 'check': 'col4_nz',
@@ -207,6 +216,7 @@ CONTROLES = [
             'Equilibrio do BP por UG (Ativo = Passivo + PL). '
             'Diferenca != 0 indica inconsistencia patrimonial.'
         ),
+        'norma': 'Lei 4.320/64, art. 105; NBC TSP 01; MCASP 8ª ed. — BP: Ativo = Passivo + PL',
     },
     {
         'id': '14', 'check': 'col4_nz',
@@ -217,6 +227,7 @@ CONTROLES = [
             'Equilibrio entre contas 721190100-400 e 821190100-400 '
             '(excluindo documento 2025NS00005). Diferenca != 0 = contrapartida nao registrada.'
         ),
+        'norma': 'PCASP — contas 7211904XX/8211904XX; MCASP — lançamentos de contrapartida obrigatória',
     },
     {
         'id': '15', 'check': 'col2_neg',
@@ -227,6 +238,7 @@ CONTROLES = [
             'Contas de receita orcamentaria (621200000-621399999) com saldo negativo '
             'no SALDOCONTABIL. Saldo negativo indica estorno maior que o valor lancado.'
         ),
+        'norma': 'NBC TSP 01 — Receita; PCASP contas 6212–6213 (saldo natural credor; negativo = erro)',
     },
     {
         'id': '16', 'check': 'col4_nz',
@@ -237,6 +249,7 @@ CONTROLES = [
             'Movimentacao nas contas 522190401 e 522190409. '
             'Valor != 0 indica lancamentos que precisam ser verificados.'
         ),
+        'norma': 'PCASP — contas 522190401 e 522190409; nota CONTDF sobre movimentação restrita',
     },
     {
         'id': '17', 'check': 'col3_neg',
@@ -248,6 +261,7 @@ CONTROLES = [
             'que apresentam saldo Credor (negativo) no SALDOCONTABIL. '
             'Saldo negativo = conta com saldo invertido.'
         ),
+        'norma': 'PCASP — INSALDOCONTABIL; NBC TSP Estrutura — saldo natural das contas patrimoniais',
     },
     {
         'id': '18', 'check': 'col3_nz',
@@ -258,6 +272,7 @@ CONTROLES = [
             'Saldo pendente nas contas de previsao adicional (521920500 e 821191201) ate o mes 6. '
             'Saldo != 0 indica previsao adicional ainda nao lancada.'
         ),
+        'norma': 'MCASP 8ª ed. — Previsão Adicional; contas 521920500 e 821191201; IN SEEC nº 01/2023',
         'subtotal_por': 'COCONTACONTABIL',
     },
 ]
@@ -596,6 +611,21 @@ table.tbl tr.subtot td{background:rgba(18,85,204,.05)!important;
           margin-left:auto;opacity:.8;transition:opacity .12s}
 .hist-idx:hover{opacity:1}
 
+/* ── Filtro de tipo de controle ── */
+.tipo-filter{display:flex;align-items:center;gap:10px;padding:10px 14px;
+             background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);flex-wrap:wrap}
+.tipo-filter label{font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap}
+.tipo-filter select{padding:4px 12px;border:1px solid var(--bd);border-radius:5px;
+                    font-size:12px;font-family:var(--fn);background:var(--s1);
+                    color:var(--t1);outline:none;transition:border-color .15s;cursor:pointer}
+.tipo-filter select:focus{border-color:var(--brand)}
+.tipo-count{font-size:11px;color:var(--t3);margin-left:auto;white-space:nowrap}
+/* ── Norma legal ── */
+.ctrl-norma{font-size:11px;color:var(--inf);padding:5px 12px;
+            background:var(--inf-bg);border-radius:5px;border-left:3px solid var(--inf-bd);
+            line-height:1.5}
+.ctrl-norma strong{font-weight:600}
+
 /* ── Rodapé ── */
 footer{font-size:11px;color:var(--t3);text-align:center;padding:18px}
 
@@ -754,6 +784,22 @@ def gerar_html(resultados, mes, ano, saida):
   </div>
 </div>"""
 
+    # Filtro por tipo de controle
+    tipos_disponiveis = sorted({c['tipo'] for c in [r[0] for r in resultados]})
+    n_lanc = sum(1 for r in resultados if r[0]['tipo'] == 'LANCAMENTO')
+    n_intg = sum(1 for r in resultados if r[0]['tipo'] == 'INTEGRIDADE')
+    opts_tipo = '<option value="">— Todos (Consolidado) —</option>'
+    for t in tipos_disponiveis:
+        cnt = n_lanc if t == 'LANCAMENTO' else n_intg
+        opts_tipo += f'<option value="{_esc(t)}">{_esc(t)} ({cnt})</option>'
+    tipo_filter = (
+        f'<div class="tipo-filter">'
+        f'<label for="sel-tipo">Tipo de Controle:</label>'
+        f'<select id="sel-tipo" onchange="filtrarPorTipo(this.value)">{opts_tipo}</select>'
+        f'<span class="tipo-count" id="tipo-count">{len(resultados)} de {len(resultados)} controles</span>'
+        f'</div>'
+    )
+
     # Nav rápida — destaca controles com erro
     nav_links = []
     for c, df, _, ne, _ in resultados:
@@ -764,7 +810,9 @@ def gerar_html(resultados, mes, ano, saida):
     # Seções de controle
     cards = []
     for controle, df, df_erro, n_erro, n_total in resultados:
-        cid = controle['id']
+        cid  = controle['id']
+        tipo_val = controle['tipo']
+        norma_val = controle.get('norma', '')
 
         btn_xls = (f'<button class="btn-xls" '
                    f'onclick="exportarExcel(\'tbl-{cid}\',\'C{cid}\')" '
@@ -791,12 +839,15 @@ def gerar_html(resultados, mes, ano, saida):
                       + _tabela_html(df, df_erro, cid, subtotal_por=controle.get('subtotal_por')))
             aberto = ''
 
-        tipo = f'<span class="chip c-inf">{_esc(controle["tipo"])}</span>'
+        tipo_chip = f'<span class="chip c-inf">{_esc(tipo_val)}</span>'
+        norma_html = (f'<p class="ctrl-norma"><strong>Norma/Regra:</strong> {_esc(norma_val)}</p>'
+                      if norma_val else '')
 
         cards.append(f"""
-<details class="ctrl"{aberto} id="ctrl-{cid}">
-  <summary>{status}&nbsp;{tipo}&nbsp;<span class="sum-nome">{_esc(controle["nome"])}</span><span class="sum-chevron">&#9654;</span></summary>
+<details class="ctrl"{aberto} id="ctrl-{cid}" data-tipo="{_esc(tipo_val)}">
+  <summary>{status}&nbsp;{tipo_chip}&nbsp;<span class="sum-nome">{_esc(controle["nome"])}</span><span class="sum-chevron">&#9654;</span></summary>
   <div class="ctrl-body">
+    {norma_html}
     <p class="ctrl-desc">{_esc(controle["descricao"])}</p>
     {corpo}
   </div>
@@ -851,6 +902,7 @@ def gerar_html(resultados, mes, ano, saida):
 </div>
 <div class="wrap">
   {kpis}
+  {tipo_filter}
   {nav}
   {"".join(cards)}
 </div>
@@ -895,6 +947,25 @@ function filtrarTabela(inp, tblId) {{
   for (var i = 0; i < rows.length; i++) {{
     rows[i].style.display = (!q || rows[i].innerText.toLowerCase().includes(q)) ? '' : 'none';
   }}
+}}
+function filtrarPorTipo(tipo) {{
+  var els = document.querySelectorAll('details.ctrl');
+  var visiveis = 0;
+  els.forEach(function(el) {{
+    var ok = !tipo || el.dataset.tipo === tipo;
+    el.style.display = ok ? '' : 'none';
+    if (ok) visiveis++;
+  }});
+  var cnt = document.getElementById('tipo-count');
+  if (cnt) cnt.textContent = visiveis + ' de ' + els.length + ' controles';
+  // Atualiza nav: esconde links de controles ocultos
+  document.querySelectorAll('.nav a').forEach(function(a) {{
+    var href = a.getAttribute('href');
+    if (!href) return;
+    var id = href.replace('#ctrl-', '');
+    var el = document.getElementById('ctrl-' + id);
+    a.style.display = (el && el.style.display !== 'none') ? '' : 'none';
+  }});
 }}
 </script>
 </body>
