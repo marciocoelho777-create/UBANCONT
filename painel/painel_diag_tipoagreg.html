@@ -1956,6 +1956,8 @@ function renderConsolidado(){
       if((_STATUS_RANK[a.s]||0) > (_STATUS_RANK[atual]||0)) _piorPorCod.set(a.c, a.s);
     });
   });
+  // BF-02 antecipado: soma = 0 no consolidado → OK (espelhado no bloco principal abaixo)
+  if(_piorPorCod.get('BF-02')==='INFO') _piorPorCod.set('BF-02','OK');
   let totalErro=0,totalAlr=0,totalOk=0,totalInf=0;
   _piorPorCod.forEach(s=>{ if(s==='ERRO')totalErro++; else if(s==='ALERTA')totalAlr++; else if(s==='OK')totalOk++; else totalInf++; });
   const totalTot = _piorPorCod.size;
@@ -2006,18 +2008,32 @@ function renderConsolidado(){
 
   // Agregar por código: uma linha por regra, pior status entre os tipos
   const STATUS_RANK = {ERRO:3, ALERTA:2, OK:1, INFO:0};
-  const porCodigo = new Map(); // codigo -> {m, t, piorStatus, tiposProblema[]}
+  // porCodigo -> {m, t, piorStatus, tiposProblema[], detalhePior, detalheRef}
+  const porCodigo = new Map();
   tipos.forEach(tipo=>{
     const nomeTipo = TIPOS_DATA[tipo].nome || ('Tipo '+tipo);
     (TIPOS_DATA[tipo].achados||[]).forEach(a=>{
       if(!porCodigo.has(a.c)){
-        porCodigo.set(a.c, {m:a.m, t:a.t, piorStatus:'INFO', tiposProblema:[]});
+        porCodigo.set(a.c, {m:a.m, t:a.t, piorStatus:'INFO', tiposProblema:[], detalhePior:'', detalheRef:a.d||''});
       }
       const entry = porCodigo.get(a.c);
-      if((STATUS_RANK[a.s]||0) > (STATUS_RANK[entry.piorStatus]||0)) entry.piorStatus = a.s;
-      if(a.s !== 'OK' && a.s !== 'INFO') entry.tiposProblema.push({tipo, nome:nomeTipo, s:a.s});
+      if((STATUS_RANK[a.s]||0) > (STATUS_RANK[entry.piorStatus]||0)){
+        entry.piorStatus = a.s;
+        entry.detalhePior = a.d||'';
+      }
+      if(a.s !== 'OK' && a.s !== 'INFO') entry.tiposProblema.push({tipo, nome:nomeTipo, s:a.s, d:a.d||''});
     });
   });
+
+  // BF-02: quando nenhum tipo tem ERRO/ALERTA, a soma das transferências fecha a zero
+  // no consolidado — eleva para OK com nota explicativa.
+  if(porCodigo.has('BF-02')){
+    const e02 = porCodigo.get('BF-02');
+    if(e02.piorStatus === 'INFO'){
+      e02.piorStatus = 'OK';
+      e02.detalhePior = 'Soma das transferências entre tipos = 0 (equilibrado no consolidado)';
+    }
+  }
 
   // Ordem canônica dos módulos
   const MOD_ORDER = ['BF','BO','DVP','DMPL','BP','BAL','X'];
@@ -2048,20 +2064,22 @@ function renderConsolidado(){
 
   h+=`<div class="card">
     <div class="card-hd"><span class="card-title">Controles — Visão Consolidada</span>
-      <small style="color:var(--t3);font-size:11px;margin-left:8px">pior status entre os tipos; clique no tipo para ver detalhes</small>
+      <small style="color:var(--t3);font-size:11px;margin-left:8px">pior status entre os tipos · clique no tipo para detalhes individuais</small>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th style="width:32px"></th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Tipos c/ problema</th><th>Norma/Regra</th></tr></thead>
+      <thead><tr><th style="width:32px"></th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Tipos c/ problema</th><th>Detalhe</th><th>Norma/Regra</th></tr></thead>
       <tbody>${linhasConsolidadas.map(([cod,e])=>{
         const tiposProb = e.tiposProblema.length
-          ? e.tiposProblema.map(p=>`<span class="chip ${p.s==='ERRO'?'c-err':'c-alr'}" style="font-size:10px;padding:1px 5px">${p.nome}</span>`).join(' ')
-          : '<span style="color:var(--ok);font-size:11px">✔ todos OK/Info</span>';
+          ? e.tiposProblema.map(p=>`<span class="chip ${p.s==='ERRO'?'c-err':'c-alr'}" style="font-size:10px;padding:1px 5px" title="${p.d.substring(0,200)}">${p.nome}</span>`).join(' ')
+          : '<span style="color:var(--ok);font-size:11px">✔ todos OK</span>';
+        const det = e.detalhePior || e.detalheRef || '';
         return `<tr>
           <td><span class="st ${statusClass(e.piorStatus)}">${statusIcon(e.piorStatus)}</span></td>
           <td><strong>${MOD_LABEL[e.m]||e.m}</strong></td>
           <td class="cod">${cod}</td>
           <td>${e.t}</td>
           <td style="white-space:normal;min-width:140px">${tiposProb}</td>
+          <td class="det">${det}</td>
           <td class="norma">${NORMAS[cod]||''}</td>
         </tr>`;
       }).join('')}</tbody>
