@@ -118,6 +118,23 @@ td{padding:9px 12px;vertical-align:top}
 .det{font-size:12px;color:var(--t2);line-height:1.55}
 .empty{text-align:center;padding:32px;color:var(--t3);font-size:13px}
 
+/* ── Select bar ── */
+.tipo-select-bar{background:var(--navy-mid);padding:8px 24px;display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--navy-light)}
+.tipo-select-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.60);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+#tipo-select{padding:5px 14px;border:1px solid rgba(255,255,255,.18);border-radius:6px;background:var(--navy-light);color:#fff;font-size:13px;font-family:var(--fn);cursor:pointer;min-width:240px}
+#tipo-select option{background:var(--navy);color:#fff}
+
+/* ── Norma badge ── */
+.norma{font-size:11px;color:var(--inf);font-style:italic;max-width:300px;line-height:1.4}
+
+/* ── Consolidado matrix ── */
+.matrix-wrap{overflow-x:auto}
+table.matrix th,table.matrix td{padding:7px 10px;white-space:nowrap}
+table.matrix th{background:var(--navy);color:rgba(255,255,255,.80);font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;border-bottom:1px solid var(--navy-mid)}
+table.matrix td:first-child{white-space:normal;font-size:12.5px;font-weight:600;min-width:120px}
+table.matrix td.cod-cell{font-family:var(--fm);font-size:11.5px}
+table.matrix tr:hover td{background:var(--s2)}
+
 /* ── Info bar ── */
 .info-bar{background:var(--inf-bg);border:1px solid var(--inf-bd);border-radius:var(--r);padding:12px 18px;font-size:12px;color:var(--inf);display:flex;align-items:center;gap:10px}
 
@@ -143,7 +160,12 @@ footer{text-align:center;font-size:12px;color:var(--t3);padding:28px 20px 20px;b
   </div>
 </header>
 
-<!-- Seletor de tipo -->
+<!-- Select de tipo -->
+<div class="tipo-select-bar">
+  <span class="tipo-select-lbl">Tipo de Agregação</span>
+  <select id="tipo-select" onchange="selecionarTipoSelect(this.value)"></select>
+</div>
+<!-- Abas de tipo -->
 <nav class="tipo-bar" id="tipo-bar"></nav>
 
 <main>
@@ -1603,6 +1625,40 @@ const TIPOS_DATA = {
 
 const MOD_LABEL = {X:'CRZ'};
 const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const NORMAS = {
+  'BF-01': 'Lei 4.320/64, art. 103 — Ingressos = Dispêndios (equilíbrio BF)',
+  'BF-02': 'MCASP 8ª ed. — BF: Transf. Recebidas = Concedidas (consolidação interna)',
+  'BF-03': 'Lei 4.320/64, art. 103 — Caixa e equivalentes não pode ser negativo',
+  'BF-04': 'MCASP 8ª ed. — conciliação razão (LANCAMENTOCONTABIL) × SALDOCONTABIL',
+  'BF-05': 'Lei 4.320/64, art. 103 — composição do Balanço Financeiro por natureza',
+  'BO-01': 'Lei 4.320/64, arts. 58-60 — Empenhada ≥ Liquidada ≥ Paga (ciclo da despesa)',
+  'BO-02': 'Lei 4.320/64, art. 167, II — despesa empenhada não pode superar dotação atualizada',
+  'BO-03': 'MCASP 8ª ed. — toda despesa deve ter classificação orçamentária válida',
+  'BO-04': 'MCASP 8ª ed. — conta 521920500 (Previsão Adicional a Lançar) deve zerar no fechamento do mês',
+  'DVP-01': 'NBC TSP 01; MCASP 8ª ed. — Resultado Patrimonial = VPA − VPD; encerrado em dezembro',
+  'DVP-02a': 'PCASP — VPA (classe 4) tem saldo natural credor; valor negativo indica inversão',
+  'DVP-02b': 'PCASP — VPD (classe 3) tem saldo natural devedor; valor negativo indica inversão',
+  'DVP-03': 'MCASP 8ª ed. — cobertura dos subtotais de VPA e VPD detalhados no DVP',
+  'DMPL-01': 'NBC TSP 01; MCASP 8ª ed. — Saldo Ini + Movimento (razão) = Saldo Fin',
+  'DMPL-02': 'MCASP 8ª ed. — mutações do PL não decorrentes do resultado (ajustes, reservas)',
+  'DMPL-03': 'MCASP 8ª ed. — Resultado DMPL deve igualar Resultado Patrimonial da DVP (ver X6)',
+  'BP-01': 'Lei 4.320/64, art. 105; NBC TSP 01 — Ativo = Passivo + PL (equilíbrio patrimonial)',
+  'BP-02': 'PCASP — Ativo Circ + Não Circ esgota a classe 1 (sem contas fora das faixas)',
+  'BP-03': 'Lei 4.320/64, art. 105; PCASP — Caixa (111XXXXXX) não pode ser negativo',
+  'BP-04': 'PCASP — Passivo + PL esgota a classe 2 (sem contas fora de 211/221/231..237)',
+  'BAL-01': 'MCASP 8ª ed., Parte II — Partidas Dobradas: Devedores (1+3+5+7) = Credores (2+4+6+8+9)',
+  'X1a':  'MCASP 8ª ed. — cruzamento: Caixa Inicial BF = DFC',
+  'X1b':  'MCASP 8ª ed. — cruzamento: Caixa Final BF = DFC',
+  'X2':   'MCASP 8ª ed. — cruzamento: DFC Geração Líquida (I+II+III) = Variação de Caixa',
+  'X6':   'MCASP 8ª ed. — cruzamento: Resultado Patrimonial DMPL = DVP',
+  'R1a':  'MCASP 8ª ed. — cruzamento: Resultado Patrimonial BP = DVP(III)',
+  'R2':   'NBC TSP 01 — cruzamento: Saldo Final DMPL = Patrimônio Líquido do BP',
+  'R4a':  'MCASP 8ª ed. — cruzamento: Caixa Final BP = DFC',
+  'R7':   'Lei 4.320/64, art. 103; MCASP — cruzamento: Receita Realizada BF = BO',
+  'R8':   'Lei 4.320/64, art. 103; MCASP — cruzamento: Despesa Paga BF = BO',
+  'R10a': 'MCASP 8ª ed. — cruzamento: Pagamentos de RPNP BF = BO',
+  'R10b': 'MCASP 8ª ed. — cruzamento: Pagamentos de RPP BF = BO',
+};
 
 function statusClass(s){ return {ERRO:'st-ERRO',ALERTA:'st-ALERTA',OK:'st-OK',INFO:'st-INFO'}[s]||'st-INFO'; }
 function statusIcon(s){ return {ERRO:'✘',ALERTA:'⚠',OK:'✔',INFO:'ℹ'}[s]||'·'; }
