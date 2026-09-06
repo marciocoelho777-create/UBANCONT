@@ -1946,15 +1946,19 @@ function selecionarTipoSelect(val){
 }
 
 function renderConsolidado(){
-  // aggregate totals across all tipos
-  let totalErro=0,totalAlr=0,totalOk=0,totalInf=0,totalTot=0;
+  // totais por regra única (pior status entre tipos) — não soma por tipo
   const tipos = Object.keys(TIPOS_DATA).map(Number).sort((a,b)=>a-b);
+  const _STATUS_RANK = {ERRO:3, ALERTA:2, OK:1, INFO:0};
+  const _piorPorCod = new Map();
   tipos.forEach(t=>{
-    const tot=TIPOS_DATA[t].totais||{};
-    totalErro+=(tot.ERRO||0); totalAlr+=(tot.ALERTA||0);
-    totalOk+=(tot.OK||0); totalInf+=(tot.INFO||0);
-    totalTot+=(tot.TOTAL||(TIPOS_DATA[t].achados||[]).length);
+    (TIPOS_DATA[t].achados||[]).forEach(a=>{
+      const atual = _piorPorCod.get(a.c)||'INFO';
+      if((_STATUS_RANK[a.s]||0) > (_STATUS_RANK[atual]||0)) _piorPorCod.set(a.c, a.s);
+    });
   });
+  let totalErro=0,totalAlr=0,totalOk=0,totalInf=0;
+  _piorPorCod.forEach(s=>{ if(s==='ERRO')totalErro++; else if(s==='ALERTA')totalAlr++; else if(s==='OK')totalOk++; else totalInf++; });
+  const totalTot = _piorPorCod.size;
 
   const mesEx = tipos.length ? (TIPOS_DATA[tipos[0]].mes||'') : '';
   const anoEx = tipos.length ? (TIPOS_DATA[tipos[0]].ano||'') : '';
@@ -2000,29 +2004,67 @@ function renderConsolidado(){
   });
   h+=`</tbody></table></div></div>`;
 
-  // flat list of all achados with tipo column
-  const allAchados = [];
-  tipos.forEach(t=>{ (TIPOS_DATA[t].achados||[]).forEach(a=>allAchados.push({...a,_tipo:t,_nome:TIPOS_DATA[t].nome||'Tipo '+t})); });
-  const erros = allAchados.filter(a=>a.s==='ERRO');
-  if(erros.length){
-    h+=`<div class="err-card"><div class="err-hd">✘ ${erros.length} erro${erros.length>1?'s':''} encontrado${erros.length>1?'s':''}</div><div class="prob-body">`;
-    erros.forEach(e=>{ h+=`<div class="prob-item"><code>${e.c}</code> [Tipo ${e._tipo}] — ${e.t}${e.d?'<br><small style="color:var(--t3)">'+e.d.substring(0,160)+'</small>':''}</div>`; });
+  // Agregar por código: uma linha por regra, pior status entre os tipos
+  const STATUS_RANK = {ERRO:3, ALERTA:2, OK:1, INFO:0};
+  const porCodigo = new Map(); // codigo -> {m, t, piorStatus, tiposProblema[]}
+  tipos.forEach(tipo=>{
+    const nomeTipo = TIPOS_DATA[tipo].nome || ('Tipo '+tipo);
+    (TIPOS_DATA[tipo].achados||[]).forEach(a=>{
+      if(!porCodigo.has(a.c)){
+        porCodigo.set(a.c, {m:a.m, t:a.t, piorStatus:'INFO', tiposProblema:[]});
+      }
+      const entry = porCodigo.get(a.c);
+      if((STATUS_RANK[a.s]||0) > (STATUS_RANK[entry.piorStatus]||0)) entry.piorStatus = a.s;
+      if(a.s !== 'OK' && a.s !== 'INFO') entry.tiposProblema.push({tipo, nome:nomeTipo, s:a.s});
+    });
+  });
+
+  // Ordem canônica dos módulos
+  const MOD_ORDER = ['BF','BO','DVP','DMPL','BP','BAL','X'];
+  const linhasConsolidadas = [...porCodigo.entries()].sort((a,b)=>{
+    const ma=MOD_ORDER.indexOf(a[1].m), mb=MOD_ORDER.indexOf(b[1].m);
+    return ma!==mb ? ma-mb : a[0].localeCompare(b[0]);
+  });
+
+  // Cards de problema consolidados
+  const errosConsolidados = linhasConsolidadas.filter(([,e])=>e.piorStatus==='ERRO');
+  const alertasConsolidados = linhasConsolidadas.filter(([,e])=>e.piorStatus==='ALERTA');
+  if(errosConsolidados.length){
+    h+=`<div class="err-card"><div class="err-hd">✘ ${errosConsolidados.length} controle${errosConsolidados.length>1?'s':''} com erro</div><div class="prob-body">`;
+    errosConsolidados.forEach(([cod,e])=>{
+      const tipos_afet = e.tiposProblema.map(p=>p.nome).join(', ');
+      h+=`<div class="prob-item"><code>${cod}</code> — ${e.t}<br><small style="color:var(--t3)">Tipos afetados: ${tipos_afet}</small></div>`;
+    });
+    h+=`</div></div>`;
+  }
+  if(alertasConsolidados.length){
+    h+=`<div class="alr-card"><div class="alr-hd">⚠ ${alertasConsolidados.length} controle${alertasConsolidados.length>1?'s':''} com alerta</div><div class="prob-body">`;
+    alertasConsolidados.forEach(([cod,e])=>{
+      const tipos_afet = e.tiposProblema.map(p=>p.nome).join(', ');
+      h+=`<div class="prob-item" style="border-left-color:var(--wrn-bd)"><code>${cod}</code> — ${e.t}<br><small style="color:var(--t3)">Tipos afetados: ${tipos_afet}</small></div>`;
+    });
     h+=`</div></div>`;
   }
 
   h+=`<div class="card">
-    <div class="card-hd"><span class="card-title">Todos os Controles — Consolidado</span></div>
+    <div class="card-hd"><span class="card-title">Controles — Visão Consolidada</span>
+      <small style="color:var(--t3);font-size:11px;margin-left:8px">pior status entre os tipos; clique no tipo para ver detalhes</small>
+    </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th style="width:32px"></th><th>Tipo</th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Norma/Regra</th><th>Detalhe</th></tr></thead>
-      <tbody>${allAchados.map(a=>`<tr>
-        <td><span class="st ${statusClass(a.s)}">${statusIcon(a.s)}</span></td>
-        <td><small>${a._tipo}</small></td>
-        <td><strong>${MOD_LABEL[a.m]||a.m}</strong></td>
-        <td class="cod">${a.c}</td>
-        <td>${a.t}</td>
-        <td class="norma">${NORMAS[a.c]||''}</td>
-        <td class="det">${a.d||''}</td>
-      </tr>`).join('')}</tbody>
+      <thead><tr><th style="width:32px"></th><th>Módulo</th><th>Código</th><th>Controle de Integridade</th><th>Tipos c/ problema</th><th>Norma/Regra</th></tr></thead>
+      <tbody>${linhasConsolidadas.map(([cod,e])=>{
+        const tiposProb = e.tiposProblema.length
+          ? e.tiposProblema.map(p=>`<span class="chip ${p.s==='ERRO'?'c-err':'c-alr'}" style="font-size:10px;padding:1px 5px">${p.nome}</span>`).join(' ')
+          : '<span style="color:var(--ok);font-size:11px">✔ todos OK/Info</span>';
+        return `<tr>
+          <td><span class="st ${statusClass(e.piorStatus)}">${statusIcon(e.piorStatus)}</span></td>
+          <td><strong>${MOD_LABEL[e.m]||e.m}</strong></td>
+          <td class="cod">${cod}</td>
+          <td>${e.t}</td>
+          <td style="white-space:normal;min-width:140px">${tiposProb}</td>
+          <td class="norma">${NORMAS[cod]||''}</td>
+        </tr>`;
+      }).join('')}</tbody>
     </table></div>
   </div>`;
 
