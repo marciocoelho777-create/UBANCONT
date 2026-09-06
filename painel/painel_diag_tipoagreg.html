@@ -1956,8 +1956,20 @@ function renderConsolidado(){
       if((_STATUS_RANK[a.s]||0) > (_STATUS_RANK[atual]||0)) _piorPorCod.set(a.c, a.s);
     });
   });
-  // BF-02 antecipado: soma = 0 no consolidado → OK (espelhado no bloco principal abaixo)
-  if(_piorPorCod.get('BF-02')==='INFO') _piorPorCod.set('BF-02','OK');
+  // BF-02 antecipado: somar gaps para decidir status no consolidado
+  if(_piorPorCod.has('BF-02')){
+    let _soma02=0;
+    tipos.forEach(tipo=>{
+      const ach=(TIPOS_DATA[tipo].achados||[]).find(a=>a.c==='BF-02');
+      if(!ach) return;
+      const d=ach.d||'';
+      const mD=d.match(/Diferen[cç]a:\s*([-\d,.]+)/i);
+      if(mD){_soma02+=parseFloat(mD[1].replace(/,/g,''));return;}
+      const mS=d.match(/Saldo\s+([-\d,.]+)/i);
+      if(mS){_soma02+=parseFloat(mS[1].replace(/,/g,''));}
+    });
+    _piorPorCod.set('BF-02', Math.abs(_soma02)<1.0 ? 'OK' : 'ALERTA');
+  }
   let totalErro=0,totalAlr=0,totalOk=0,totalInf=0;
   _piorPorCod.forEach(s=>{ if(s==='ERRO')totalErro++; else if(s==='ALERTA')totalAlr++; else if(s==='OK')totalOk++; else totalInf++; });
   const totalTot = _piorPorCod.size;
@@ -2025,13 +2037,30 @@ function renderConsolidado(){
     });
   });
 
-  // BF-02: quando nenhum tipo tem ERRO/ALERTA, a soma das transferências fecha a zero
-  // no consolidado — eleva para OK com nota explicativa.
+  // BF-02: somar o gap (RECEB − CONC) de cada tipo.
+  // Se a soma fechar ≈ 0, o consolidado está OK mesmo que cada tipo individualmente não bata.
   if(porCodigo.has('BF-02')){
     const e02 = porCodigo.get('BF-02');
-    if(e02.piorStatus === 'INFO'){
+    let somaGaps = 0;
+    tipos.forEach(tipo=>{
+      const ach = (TIPOS_DATA[tipo].achados||[]).find(a=>a.c==='BF-02');
+      if(!ach) return;
+      const d = ach.d||'';
+      // Formato ALERTA (dados antigos): "Diferença: -6,520,014,454.11"
+      const mDif = d.match(/Diferen[cç]a:\s*([-\d,.]+)/i);
+      if(mDif){ somaGaps += parseFloat(mDif[1].replace(/,/g,'')); return; }
+      // Formato INFO (novos dados): "Recebidas X  Concedidas Y  Saldo Z (label)"
+      const mSaldo = d.match(/Saldo\s+([-\d,.]+)/i);
+      if(mSaldo){ somaGaps += parseFloat(mSaldo[1].replace(/,/g,'')); return; }
+      // Formato OK: "Recebidas X  =  Concedidas X" → gap = 0
+    });
+    if(Math.abs(somaGaps) < 1.0){
       e02.piorStatus = 'OK';
-      e02.detalhePior = 'Soma das transferências entre tipos = 0 (equilibrado no consolidado)';
+      e02.tiposProblema = [];
+      e02.detalhePior = `Soma das transferências entre tipos = ${somaGaps.toFixed(2)} — equilibrado no consolidado`;
+    } else {
+      e02.piorStatus = 'ALERTA';
+      e02.detalhePior = `Soma das diferenças entre tipos = ${somaGaps.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} — cobertura incompleta`;
     }
   }
 
