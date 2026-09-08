@@ -528,6 +528,31 @@ footer {
     </div>
   </div>
 
+  <!-- 4b· Ortografia do ITEMBALANCO -->
+  <div class="card" id="card-ortografia">
+    <div class="card-hd">
+      Ortografia do ITEMBALANCO
+      <span id="ort-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="ort-wrap">
+      <table id="tbl-ortografia">
+        <thead>
+          <tr>
+            <th>Demo</th>
+            <th>Código</th>
+            <th>Nome (NOITEMBALANCO)</th>
+            <th>Tipo de erro</th>
+            <th>Detalhe / Sugestões</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-ortografia"></tbody>
+      </table>
+      <p id="ort-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Nenhum problema de ortografia detectado
+      </p>
+    </div>
+  </div>
+
   <!-- 5· Campos de classificação por registro -->
   <div class="card">
     <div class="card-hd">
@@ -722,13 +747,18 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-09-06T09:56:50",
+  "gerado_em": "2026-09-08T13:14:50",
   "mes": 9,
   "ano": 2026,
   "por_demonstrativo": {},
   "achados": [],
   "gnd_errado": [],
   "historico": [
+    {
+      "gerado_em": "2026-09-08T13:14:50",
+      "n": 0,
+      "por_dem": {}
+    },
     {
       "gerado_em": "2026-09-06T09:56:50",
       "n": 0,
@@ -753,15 +783,267 @@ const CDATA = {
       "gerado_em": "2026-09-02T06:01:41",
       "n": 0,
       "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-01T09:39:19",
-      "n": 0,
-      "por_dem": {}
     }
   ]
 };
+const ORTOGRAFIA = [
+  {
+    "demo": "DFC",
+    "coitembalanco": 30403000000,
+    "noitembalanco": "a Municípios",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 50201000000,
+    "noitembalanco": "Juros e Correção Monetária da Divída Externa",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 50301000000,
+    "noitembalanco": "Outros Encargos da Divída",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 30401000000,
+    "noitembalanco": "a União",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 30402000000,
+    "noitembalanco": "a Estados e Distrito Federal",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "BO",
+    "coitembalanco": 30101020000,
+    "noitembalanco": "Juros e Encargos da Divída",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "BO",
+    "coitembalanco": 40101020000,
+    "noitembalanco": "Juros e Encargos da Divída",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 50101000000,
+    "noitembalanco": "Juros e Correção Monetária da Divída Interna",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 30102000000,
+    "noitembalanco": "de Estados e Distrito Federal",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 30103000000,
+    "noitembalanco": "de Municípios",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "BO",
+    "coitembalanco": 10102079902,
+    "noitembalanco": "TOTAL  (VII) = (V + VI)",
+    "problemas": [
+      {
+        "tipo": "espaços",
+        "detalhe": "espaço duplo",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "BO",
+    "coitembalanco": 50101020000,
+    "noitembalanco": "Juros e Encargos da Divída",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "BP",
+    "coitembalanco": 10101000000,
+    "noitembalanco": "Caixa e Equivalentes de  Caixa",
+    "problemas": [
+      {
+        "tipo": "espaços",
+        "detalhe": "espaço duplo",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "BO",
+    "coitembalanco": 20101020000,
+    "noitembalanco": "Juros e Encargos da Divída",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"Divída\"",
+        "sugestoes": [
+          "divida"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "DVP",
+    "coitembalanco": 20200000000,
+    "noitembalanco": "BENEFÍCIOS PREVIDENCIÁRIOS E ASSISTENCIAIS",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"PREVIDENCIÁRIOS\"",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "DFC",
+    "coitembalanco": 30101000000,
+    "noitembalanco": "da União",
+    "problemas": [
+      {
+        "tipo": "capitalização",
+        "detalhe": "primeira letra minúscula",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "BP-Empresa",
+    "coitembalanco": 10402000000,
+    "noitembalanco": "DIREITOS CONVÊNIADOS E OUTROS INSTRUM. CONGÊNERES",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"CONVÊNIADOS\"",
+        "sugestoes": []
+      }
+    ]
+  },
+  {
+    "demo": "DRE",
+    "coitembalanco": 10602040000,
+    "noitembalanco": "INCORPORAÇÃO/DESINCOR. DE DIREITOS",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"DESINCOR\"",
+        "sugestoes": [
+          "desancar",
+          "desanco",
+          "desancora"
+        ]
+      }
+    ]
+  },
+  {
+    "demo": "BP-Empresa",
+    "coitembalanco": 10102020400,
+    "noitembalanco": "CRÉDITOS PARCELADOS",
+    "problemas": [
+      {
+        "tipo": "ortografia",
+        "detalhe": "\"PARCELADOS\"",
+        "sugestoes": [
+          "aparcelados"
+        ]
+      }
+    ]
+  }
+];
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-09-08T13:14:50",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
   {
     "gerado_em": "2026-09-06T09:56:50",
     "mes": 9,
@@ -1182,65 +1464,6 @@ var HISTORICO_FULL = [
         ]
       }
     ]
-  },
-  {
-    "gerado_em": "2026-08-21T14:02:33",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
   }
 ];
 /* AUTO-DATA-END */
@@ -1377,6 +1600,44 @@ function renderRun(data){
         return (v===null||v===0)?'<td class="null">nulo ✗</td>':`<td class="vl">${v}</td>`;
       }).join('')}
     </tr>`).join('');
+  }
+
+  /* Ortografia do ITEMBALANCO */
+  const ortData = (typeof ORTOGRAFIA !== 'undefined') ? ORTOGRAFIA : [];
+  const ortBadge = document.getElementById('ort-badge');
+  const ortOk    = document.getElementById('ort-ok');
+  const ortTbody = document.getElementById('tbody-ortografia');
+  if(ortBadge){
+    if(ortData.length){
+      ortBadge.innerHTML=`<span class="badge b-wrn">${ortData.length} item(ns) com problema</span>`;
+    } else {
+      ortBadge.innerHTML=`<span class="badge b-ok">sem problemas</span>`;
+    }
+  }
+  if(ortTbody){
+    if(ortData.length){
+      if(ortOk) ortOk.style.display='none';
+      ortTbody.innerHTML=ortData.map(x=>{
+        const probs=x.problemas||[];
+        const tipos=[...new Set(probs.map(p=>p.tipo))].join(', ');
+        const detalhes=probs.map(p=>{
+          let d=p.detalhe||'';
+          if(p.sugestoes&&p.sugestoes.length) d+=` → ${p.sugestoes.join(', ')}`;
+          return d;
+        }).join(' | ');
+        const nome=(x.noitembalanco||'').replace(/</g,'&lt;');
+        return `<tr>
+          <td><span class="badge b-muted">${x.demo||'?'}</span></td>
+          <td><code>${x.coitembalanco||'—'}</code></td>
+          <td style="max-width:320px;word-break:break-word">${nome}</td>
+          <td>${tipos}</td>
+          <td style="font-size:12px">${detalhes}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      ortTbody.innerHTML='';
+      if(ortOk) ortOk.style.display='';
+    }
   }
 
   /* Histórico de execuções */
