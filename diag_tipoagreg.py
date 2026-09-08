@@ -45,7 +45,7 @@ INSTANT_CLIENT_DIR = ""
 OUTPUT_DIR  = Path(__file__).parent / "saidas"
 PAINEL_DIR  = Path(__file__).parent / "painel" / "dados" / "tipoagreg"
 
-TIPOS_NOCTURNOS = [1, 3, 4, 5, 6, 7]
+TIPOS_NOCTURNOS = [1, 3, 4, 5, 6, 7, 9]
 
 try:
     import importlib.util as _ilu, pathlib as _pl

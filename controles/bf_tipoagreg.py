@@ -347,15 +347,17 @@ def auditar(conn, mes, ano, cogestao_list=None):
             f"Diferença: {gap:,.2f}  |  Ingressos {t['INGRESSOS']:,.2f}  "
             f"Dispêndios {t['DISPENDIOS']:,.2f}", valor=gap))
 
-    # ── BF-02: Transferências Recebidas = Concedidas ───────────────────────
+    # ── BF-02: Saldo de Transferências (INFO por tipo) ─────────────────────
+    # A regra Recebidas = Concedidas só vale no CONSOLIDADO (toda a administração).
+    # Por tipo de agregação, transferências entre tipos geram saldo líquido positivo
+    # ou negativo — essa divergência é esperada e não constitui erro nem alerta.
+    # A soma dos saldos de todos os tipos deve ≈ 0 (verificado no consolidado).
     gap2 = t["TRANSF_RECEB"] - t["TRANSF_CONC"]
-    if checa_gap(gap2):
-        achados.append(achado_ok("BF","BF-02","Transf. Recebidas = Transf. Concedidas",
-            f"Recebidas {t['TRANSF_RECEB']:,.2f}  =  Concedidas {t['TRANSF_CONC']:,.2f}",
-            valor=t["TRANSF_RECEB"]))
-    else:
-        achados.append(achado_alerta("BF","BF-02","Transf. Recebidas ≠ Transf. Concedidas",
-            f"Diferença: {gap2:,.2f}", valor=gap2))
+    sinal = "recebedor líquido" if gap2 > 0 else ("cedente líquido" if gap2 < 0 else "neutro")
+    achados.append(achado_info("BF","BF-02","Saldo de Transferências (intra-GDF)",
+        f"Recebidas {t['TRANSF_RECEB']:,.2f}  Concedidas {t['TRANSF_CONC']:,.2f}"
+        f"  Saldo {gap2:,.2f} ({sinal})",
+        valor=gap2))
 
     # ── BF-03: Caixa Final positivo ────────────────────────────────────────
     if t["CAIXA_FINAL"] < 0:

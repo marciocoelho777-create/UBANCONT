@@ -1268,10 +1268,11 @@ def auditoria_integridade(t, saldo_521920500=0.0, saldo_521920500_ant=0.0, mes=N
         achados.append(('OK', 'Equilíbrio Orçamentário (MCASP 2.1)',
                          f'Diferença: {dif:,.2f} (fecha exato)'))
     else:
-        achados.append(('ERRO', 'Equilíbrio Orçamentário (MCASP 2.1)',
+        achados.append(('ALERTA', 'Equilíbrio Orçamentário (MCASP 2.1)',
                          f'Diferença: {dif:,.2f} — Previsão Atualizada + '
                          f'(Superávit Financeiro + Reabertura de Créditos) não '
-                         f'igualou a Dotação Atualizada. Recursos Arrecadados em '
+                         f'igualou a Dotação Atualizada. Esperado zerar no '
+                         f'fechamento do mês. Recursos Arrecadados em '
                          f'Exercícios Anteriores é excluído desta conta por ser '
                          f'rubrica informativa (não financia dotação adicional).'))
         if saldo_521920500 != 0.0 and abs(dif + saldo_521920500) < 1.00:

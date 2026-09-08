@@ -66,6 +66,101 @@ DIR_DADOS = RAIZ / "painel" / "dados" / "classificacao"
 TIPO_BALANCO = {1: "BF", 2: "BP", 3: "DVP", 4: "BO", 5: "DRE",
                 6: "BP-Empresa", 7: "DFC", 8: "DMPL"}
 
+# ---------------------------------------------------------------------------
+# Ortografia — whitelist de termos técnicos do setor público
+# ---------------------------------------------------------------------------
+_ORT_WHITELIST = {w.lower() for w in [
+    "RPPS","RPNP","SIAFEM","SIGGO","SEFAZ","GDF","PGDF","SES","SE","SEC","SED",
+    "SSP","ADASA","BRB","CAESB","NOVACAP","CEB","METRÔ","DER","DETRAN","AGEFIS",
+    "SEAP","SEMA","SEMAD","SEAGRI","SEDHAB","SINESP","SETUR","SOHB","SLU",
+    "DF","UO","UG","OB","NS","NE","PE","RP","PL","BP","BF","BO","DFC","DVP",
+    "DRE","DMPL","FUNPRESP","IPCA","IGP","SELIC","TJLP","PTAX","BID","BIRD",
+    "BNDES","CEF","STN","SOF","SIOP","SIAFI","TCE","TCU","MPDFT","TJDFT",
+    "PCDF","CBMDF","PMDF","DODF","IOF","ISS","ICMS","IPI","IR","CSLL","PIS",
+    "COFINS","FGTS","INSS","PASEP","FUNREBOM","DETRAF",
+    "ATIVO","PASSIVO","PATRIMONIAL","ORÇAMENTÁRIO","FINANCEIRO","BALANCETE",
+    "BALANÇO","RECEITA","DESPESA","SUPERÁVIT","DÉFICIT","LIQUIDADO","EMPENHADO",
+    "PAGO","CANCELADO","INSCRITO","PROCESSADO",
+    "INTRAORÇAMENTÁRIA","INTRAORÇAMENTÁRIAS","EXTRAORÇAMENTÁRIA",
+    "EXTRAORÇAMENTÁRIAS","EXTRAORÇAMENTÁRIO","EXTRAORÇAMENTÁRIOS",
+    "COMPENSATÓRIO","COMPENSATÓRIA","PECUNIÁRIA","PECUNIÁRIO",
+    "TRIBUTÁRIO","TRIBUTÁRIA","FIDEJUSSÓRIA","FIDEJUSSÓRIO","CAUTELAR",
+    "VINCULADO","VINCULADA","CONSIGNAÇÃO","DEDUÇÃO","TRANSFERÊNCIA","REPASSE",
+    "SUBVENÇÃO","AUXÍLIO","CONTRIBUIÇÃO","AMORTIZAÇÃO","INVERSÃO","PERMUTA",
+    "RESTOS","PAGAR","EXERCÍCIOS","ANTERIORES","FUTUROS","CRÉDITO","DÉBITO",
+    "CONTRAPARTIDA","REGULARIZAÇÃO","AJUSTE","RECLASSIFICAÇÃO","INCORPORAÇÃO",
+    "DESINCORPORAÇÃO","DEPRECIAÇÃO","EXAUSTÃO","INTEGRALIZAÇÃO",
+    "PREVIDENCIÁRIO","PREVIDENCIÁRIA","MOBILIÁRIA","MOBILIÁRIO",
+    "IMOBILIÁRIA","IMOBILIÁRIO","RESSARCIMENTO","RESSARCIMENTOS",
+    "CONVÊNIO","CONVÊNIOS","ECONÔMICO","ECONÔMICA","ECONÔMICAS","ECONÔMICOS",
+    "PATRIMÔNIO","INDENIZAÇÃO","INDENIZAÇÕES","ORÇAMENTO","ORÇAMENTÁRIA",
+    "ORÇAMENTÁRIO","ORÇAMENTÁRIAS","ORÇAMENTÁRIOS",
+    "DE","DA","DO","DAS","DOS","EM","NA","NO","NAS","NOS","E","A","O","AS",
+    "OS","À","AO","ÀS","AOS","POR","PELO","PELA","PELOS","PELAS","COM","SEM",
+    "ATÉ","APÓS","PARA",
+    "VINC","INDEP","EXEC","INVEST","SERV","PÚBL","PUBL","PERM","REF","TRANSP",
+    "IDENT","VLR","INCORP","MOB","ADM","PREV","DESENV","TRANSF","CONTRIB",
+    "ARREC","AMORTZ","LDO","LOA","PPA","PLC","EAP","NF","NFS","DOC","TED",
+    "STF","STJ","SRF","RFB","MF","ME","MGI","LIQ","LÍQ","ATIV","FINANC",
+    "DEP","INSTR","INSTRUM","ASSIST","PREVID","TRAB","OBRIG","APLIC","PAT",
+    "FEPECS","FHDF","HRAS","HMIB","HRC","HRG","HRT","HBDF","IGESDF","IDHAB",
+    "TERRACAP","CODHAB","ESPORTE","SUPERÁVITS","DÉFICITS","CONGÊNERES",
+    "CONVENIADOS","CONVENIADAS","INTRAGOVERNAMENTAIS","MULTIGOVERNAMENTAIS",
+    "REEMISSÃO","PREMIAÇÕES","AUMENTATIVAS","AUMENTATIVA",
+]}
+
+
+def _ort_palavras(texto):
+    return re.findall(r"[A-Za-zÀ-ÖØ-öø-ÿ]+(?:-[A-Za-zÀ-ÖØ-öø-ÿ]+)*", texto or "")
+
+
+def _ort_check(nome, speller):
+    """Retorna lista de problemas encontrados num nome de item."""
+    if not nome:
+        return [{"tipo": "nome vazio", "detalhe": "NOITEMBALANCO vazio/nulo", "sugestoes": []}]
+    problemas = []
+    nome_s = nome.strip()
+    if nome_s and nome_s[0].islower():
+        problemas.append({"tipo": "capitalização", "detalhe": "primeira letra minúscula", "sugestoes": []})
+    if nome != nome_s:
+        problemas.append({"tipo": "espaços", "detalhe": "espaço(s) na borda", "sugestoes": []})
+    if "  " in nome:
+        problemas.append({"tipo": "espaços", "detalhe": "espaço duplo", "sugestoes": []})
+    if speller:
+        for p in _ort_palavras(nome):
+            pu, pl = p.upper(), p.lower()
+            if pu in _ORT_WHITELIST or pl in _ORT_WHITELIST:
+                continue
+            if len(p) <= 2 or (p.isupper() and len(p) <= 6):
+                continue
+            if speller.unknown([pl]):
+                sugs = sorted(speller.candidates(pl) or set())[:3]
+                problemas.append({"tipo": "ortografia", "detalhe": f'"{p}"', "sugestoes": sugs})
+    return problemas
+
+
+def varrer_ortografia(linhas, speller):
+    """Verifica ortografia dos nomes ativos do ITEMBALANCO (já carregados)."""
+    vistos = set()
+    achados = []
+    for r in linhas:
+        nome = (r.get("NOITEMBALANCO") or "").strip()
+        tipo = r.get("INTIPOBALANCO")
+        item_id = r.get("COITEMBALANCO")
+        chave = (tipo, item_id, nome)
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        problemas = _ort_check(nome, speller)
+        if problemas:
+            achados.append({
+                "demo":          TIPO_BALANCO.get(tipo, f"tipo{tipo}"),
+                "coitembalanco": item_id,
+                "noitembalanco": nome,
+                "problemas":     problemas,
+            })
+    return achados
+
 # Mapeamento natureza → GND esperado: (nat_ini, nat_fim, gnd, descricao)
 # Baseado no prefixo de 2 dígitos da natureza de despesa (6 dígitos no SIGGO).
 GND_NATUREZA = [
@@ -198,7 +293,7 @@ def carregar_itens(conn, ano):
     for dem, campos in sorted(nao_verif.items()):
         print(f"  [aviso] {dem} usa {', '.join(sorted(campos))}, que não "
               f"existe(m) na BALANCOGERAL — não verificável")
-    return regras
+    return regras, linhas
 
 
 def demonstrativos_da_conta(regras, conta):
@@ -469,11 +564,28 @@ def main():
     print(f"\n== Monitor de Classificação — {a.mes:02d}/{a.ano} ==")
     conn = conectar()
     try:
-        regras     = carregar_itens(conn, a.ano)
+        regras, linhas_ib = carregar_itens(conn, a.ano)
         achados    = varrer(conn, a.mes, a.ano, regras)
         gnd_errado = varrer_gnd_errado(conn, a.mes, a.ano, regras)
     finally:
         conn.close(); print("  Conexão Oracle encerrada.")
+
+    try:
+        from spellchecker import SpellChecker
+        speller = SpellChecker(language="pt")
+    except Exception:
+        speller = None
+        print("  [ortografia] pyspellchecker não disponível — verificação desativada")
+    ort_achados = varrer_ortografia(linhas_ib, speller)
+    if ort_achados:
+        print(f"\n  ORTOGRAFIA — {len(ort_achados)} item(ns) com problema:")
+        for x in ort_achados[:10]:
+            tipos = ", ".join(pr["tipo"] for pr in x["problemas"])
+            print(f"  !! [{x['demo']}] {x['coitembalanco']}  {tipos}  \"{x['noitembalanco'][:60]}\"")
+        if len(ort_achados) > 10:
+            print(f"  ... e mais {len(ort_achados) - 10} item(ns)")
+    else:
+        print("\n  Ortografia: nenhum problema encontrado.")
 
     por_dem = defaultdict(lambda: {"n": 0, "valor": 0.0})
     for x in achados:
@@ -506,7 +618,8 @@ def main():
            "mes": a.mes, "ano": a.ano,
            "por_demonstrativo": dict(por_dem),
            "achados":    achados,
-           "gnd_errado": gnd_errado}
+           "gnd_errado": gnd_errado,
+           "ortografia": ort_achados}
     DIR_DADOS.mkdir(parents=True, exist_ok=True)
     dest = DIR_DADOS / f"{a.ano}-{a.mes:02d}_{datetime.now():%Y%m%d_%H%M%S}.json"
     dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
