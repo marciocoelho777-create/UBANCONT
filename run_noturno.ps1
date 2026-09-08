@@ -40,7 +40,13 @@ Add-Content $LOG "  Rodando mes=$mes ano=$ano"
 $label = "{0:d2}/{1}" -f $mes, $ano
 $msg = "run noturno $(Get-Date -Format 'yyyy-MM-dd') — $label"
 $mesPad = "{0:d2}" -f $mes
+# encontra o arquivo de rotina com timestamp gerado nesta execução
+$rotinaTsFiles = Get-ChildItem "$PROJ\painel" -Filter "rotina_controles_${ano}_${mesPad}_*.html" |
+    Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$rotinaTs = if ($rotinaTsFiles) { "painel/$($rotinaTsFiles.Name)" } else { "" }
+
 git add painel/dados/ painel/painel_diag.html painel/painel_diag_tipoagreg.html painel/painel_classificacao.html painel/auditoria_consolidada.html "painel/rotina_controles_${ano}_${mesPad}.html" 2>&1 | Tee-Object -Append -FilePath $LOG
+if ($rotinaTs) { git add $rotinaTs 2>&1 | Tee-Object -Append -FilePath $LOG }
 git commit -m $msg 2>&1 | Tee-Object -Append -FilePath $LOG
 
 # 7. Publicar painéis no UBANCONT (GitHub Pages)
@@ -54,6 +60,9 @@ if (Test-Path $UBANCONT) {
     Copy-Item "$painelSrc\auditoria_consolidada.html"  $painelDst -Force
     Copy-Item "$painelSrc\painel_balancete.html"       $painelDst -Force
     Copy-Item "$painelSrc\rotina_controles_${ano}_${mesPad}.html" $painelDst -Force
+    if ($rotinaTsFiles) {
+        Copy-Item $rotinaTsFiles.FullName $painelDst -Force
+    }
     Set-Location $UBANCONT
     git add painel/ 2>&1 | Tee-Object -Append -FilePath $LOG
     git commit -m $msg 2>&1 | Tee-Object -Append -FilePath $LOG

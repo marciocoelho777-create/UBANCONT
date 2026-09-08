@@ -1025,7 +1025,8 @@ def _html_ctrl_section(r: dict) -> str:
 
 
 def _gerar_html(resultados_html: list, mes: int, ano: int,
-                meses_disponiveis: list | None = None) -> str:
+                meses_disponiveis: list | None = None,
+                nome_atual: str | None = None) -> str:
     agora    = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     mes_nome = _MESES_PT[mes] if 1 <= mes <= 12 else str(mes)
 
@@ -1037,13 +1038,14 @@ def _gerar_html(resultados_html: list, mes: int, ano: int,
     nav_items = "".join(f'<a href="#ctrl-{r["numero"]}">C{r["numero"]}</a>' for r in resultados_html)
     secoes    = "\n".join(_html_ctrl_section(r) for r in resultados_html)
 
-    # ── seletor de histórico (meses disponíveis) ──────────────────────────────
-    nome_atual = f"rotina_controles_{ano}_{mes:02d}.html"
+    # ── seletor de histórico: uma opção por execução com data/hora ────────────
+    # meses_disponiveis: lista de (ano, mes, fname, lbl) mais recente primeiro
+    _sel_fname = nome_atual or f"rotina_controles_{ano}_{mes:02d}.html"
     if meses_disponiveis and len(meses_disponiveis) > 1:
         opts_hist = "\n".join(
-            f'<option value="{_he(fname)}"{"selected" if fname == nome_atual else ""}>'
-            f'{_he(_MESES_PT[m] if 1 <= m <= 12 else str(m))}/{a}</option>'
-            for a, m, fname in meses_disponiveis
+            f'<option value="{_he(fname)}"{"selected" if fname == _sel_fname else ""}>'
+            f'{_he(lbl)}</option>'
+            for a, m, fname, lbl in meses_disponiveis
         )
         run_wrap = (
             f'<div class="run-wrap">'
@@ -1413,24 +1415,43 @@ def main() -> None:
         # ── Painel HTML ────────────────────────────────────────────────────────
         if resultados_html:
             PAINEL_DIR.mkdir(parents=True, exist_ok=True)
-            nome_html   = f"rotina_controles_{args.ano}_{args.mes:02d}.html"
-            caminho_html = PAINEL_DIR / nome_html
 
-            # descobre todos os meses disponíveis (inclui o atual)
+            # nome com timestamp (arquivo arquivado) e nome "latest"
+            _ts_str   = datetime.now().strftime("%Y%m%d_%H%M%S")
+            nome_ts   = f"rotina_controles_{args.ano}_{args.mes:02d}_{_ts_str}.html"
+            nome_html = f"rotina_controles_{args.ano}_{args.mes:02d}.html"
+
+            # descobre execuções arquivadas (rotina_controles_AAAA_MM_YYYYMMDD_HHmmss.html)
             import re as _re
-            _pat = _re.compile(r"rotina_controles_(\d{4})_(\d{2})\.html")
+            _pat_ts = _re.compile(
+                r"rotina_controles_(\d{4})_(\d{2})_(\d{8})_(\d{6})\.html")
             _meses: list = []
-            for _f in PAINEL_DIR.glob("rotina_controles_*.html"):
-                _m = _pat.match(_f.name)
+            for _f in PAINEL_DIR.glob("rotina_controles_*_*_*.html"):
+                _m = _pat_ts.match(_f.name)
                 if _m:
-                    _meses.append((int(_m.group(1)), int(_m.group(2)), _f.name))
-            if not any(f == nome_html for _, _, f in _meses):
-                _meses.append((args.ano, args.mes, nome_html))
-            _meses.sort(key=lambda x: (x[0], x[1]), reverse=True)  # mais recente primeiro
+                    _a, _mo = int(_m.group(1)), int(_m.group(2))
+                    _d, _t  = _m.group(3), _m.group(4)
+                    _mn = _MESES_PT[_mo] if 1 <= _mo <= 12 else str(_mo)
+                    _lbl = f"{_mn}/{_a} — {_d[6:8]}/{_d[4:6]}/{_d[:4]} {_t[:2]}:{_t[2:4]}"
+                    _meses.append((_a, _mo, _d + _t, _f.name, _lbl))
 
-            html = _gerar_html(resultados_html, args.mes, args.ano, _meses)
-            caminho_html.write_text(html, encoding="utf-8")
-            print(f"  ✔ Painel HTML salvo: {caminho_html}")
+            # inclui a execução atual (ainda não salva)
+            _d0, _t0 = _ts_str[:8], _ts_str[9:]
+            _mn0 = _MESES_PT[args.mes] if 1 <= args.mes <= 12 else str(args.mes)
+            _lbl0 = f"{_mn0}/{args.ano} — {_d0[6:8]}/{_d0[4:6]}/{_d0[:4]} {_t0[:2]}:{_t0[2:4]}"
+            _meses.append((args.ano, args.mes, _d0 + _t0, nome_ts, _lbl0))
+            _meses.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+            meses_disp = [(a, mo, fname, lbl) for a, mo, _, fname, lbl in _meses]
+
+            html = _gerar_html(resultados_html, args.mes, args.ano,
+                               meses_disp, nome_atual=nome_ts)
+
+            # salva arquivo arquivado (com timestamp)
+            (PAINEL_DIR / nome_ts).write_text(html, encoding="utf-8")
+            # atualiza "latest" do mês
+            (PAINEL_DIR / nome_html).write_text(html, encoding="utf-8")
+            print(f"  ✔ Painel HTML salvo: {PAINEL_DIR / nome_ts}")
+            print(f"  ✔ Latest atualizado: {PAINEL_DIR / nome_html}")
 
     finally:
         conn.close()
