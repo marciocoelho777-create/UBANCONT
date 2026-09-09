@@ -105,6 +105,7 @@ def resolver_cogestao(conn, cotipo: int, ano: int) -> tuple[list[int], str]:
 # ─────────────────────────────────────────────────────────────────────────────
 from controles import bf_tipoagreg        as _bf
 from controles import bo_tipoagreg        as _bo
+from controles import dfc_tipoagreg       as _dfc
 from controles import dvp_tipoagreg       as _dvp
 from controles import dmpl_tipoagreg      as _dmpl
 from controles import bp_tipoagreg        as _bp
@@ -114,6 +115,7 @@ from controles import cruzamentos_tipoagreg as _x
 MODULOS = {
     "bf":   (_bf.auditar,  "Balanço Financeiro"),
     "bo":   (_bo.auditar,  "Balanço Orçamentário"),
+    "dfc":  (_dfc.auditar, "Fluxo de Caixa (DFC)"),
     "dvp":  (_dvp.auditar, "Variações Patrimoniais"),
     "dmpl": (_dmpl.auditar,"Mutações do Patrimônio Líquido"),
     "bp":   (_bp.auditar,  "Balanço Patrimonial"),
@@ -196,7 +198,7 @@ def main():
                 print("\n[X] Rodando validações cruzadas...")
                 achados_x = _x.auditar(
                     t_bf=totais.get("bf"), t_bo=totais.get("bo"),
-                    t_dfc=None, t_dvp=totais.get("dvp"),
+                    t_dfc=totais.get("dfc"), t_dvp=totais.get("dvp"),
                     t_dmpl=totais.get("dmpl"), t_bp=totais.get("bp"),
                 )
                 imprimir_modulo("X", "Validações Cruzadas entre Demonstrativos", achados_x)
