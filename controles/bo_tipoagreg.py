@@ -32,8 +32,7 @@ O cruzamentos.py não muda: lê pelas chaves DESPESA_PAGA/PAG_RPNP/PAG_RPP.
 """
 from __future__ import annotations
 from . import (Achado, query_one, query_all, D,
-               achado_ok, achado_erro, achado_alerta, achado_info, checa_gap,
-               mes_encerrado)
+               achado_ok, achado_erro, achado_alerta, checa_gap)
 
 # Cópia de bo.py — filtro por tipo de agregação de gestão. NÃO mexer no original.
 def _qf(conn, sql, cogestao_list, alias, campo="COGESTAO", **fmt):
@@ -260,12 +259,8 @@ def auditar(conn, mes, ano, cogestao_list=None):
     # há dotação aprovada que ainda não entrou nas contas de despesa normais
     # e explica o eventual gap no equilíbrio orçamentário (Previsão Atualizada
     # + Superávit Financeiro ≠ Dotação Atualizada). Deve zerar ao fim do mês.
-    # SALDO_521_ANT isola o saldo ate o mes ANTERIOR (INMES < mes): se ja
-    # existe saldo antes do mes corrente sequer comecar, e saldo de mes(es)
-    # ja encerrado(s) que deveria ter zerado e nao zerou -- ALERTA mesmo
-    # quando o mes corrente (ainda aberto) e o unico "mes" que o --mes da
-    # rotina noturna sempre passa (ela roda sempre para o mes em curso, entao
-    # so checar mes_encerrado(mes,ano) nunca dispararia nas execucoes diarias).
+    # Qualquer saldo != 0 já é ALERTA (não espera o mês fechar nem exige
+    # saldo de mês anterior) — pedido explícito do usuário em 09/09/2026.
     SQL_C18 = f"""
         SELECT
             NVL(SUM(CASE WHEN INMES <= {mes} THEN VADEBITO - VACREDITO ELSE 0 END), 0) AS SALDO_521,
@@ -283,20 +278,13 @@ def auditar(conn, mes, ano, cogestao_list=None):
                 "Previsão Adicional a Lançar (521920500) zerada",
                 f"Saldo INMES ≤ {mes}: {saldo_521:,.2f} — nenhuma previsão pendente",
                 valor=saldo_521))
-        elif mes_encerrado(mes, ano) or abs(saldo_521_ant) >= D('1.00'):
-            achados.append(achado_alerta("BO", "BO-04",
-                "Previsão Adicional a Lançar NÃO resolvida até o fim do mês (C18)",
-                f"Saldo 521920500 = {saldo_521:,.2f} (dos quais {saldo_521_ant:,.2f} "
-                f"já vem de mês(es) anterior(es) já encerrado(s)) — deveria ter "
-                f"zerado até o fim do mês e não zerou; verificar por que os "
-                f"lançamentos pendentes não entraram. Veja rotina C18.",
-                valor=abs(saldo_521)))
         else:
-            achados.append(achado_info("BO", "BO-04",
+            achados.append(achado_alerta("BO", "BO-04",
                 "Previsão Adicional a Lançar pendente (C18)",
-                f"Saldo 521920500 = {saldo_521:,.2f} — dotação aprovada ainda não "
-                f"reclassificada às contas definitivas. Quando lançada, zerará "
-                f"o gap do equilíbrio orçamentário. Veja rotina C18.",
+                f"Saldo 521920500 = {saldo_521:,.2f} (dos quais {saldo_521_ant:,.2f} "
+                f"já vem de mês(es) anterior(es) já encerrado(s)) — dotação aprovada "
+                f"ainda não reclassificada às contas definitivas; explica o gap do "
+                f"equilíbrio orçamentário. Veja rotina C18.",
                 valor=abs(saldo_521)))
     except Exception as e:
         achados.append(achado_alerta("BO", "BO-04",

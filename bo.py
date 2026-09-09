@@ -1239,12 +1239,6 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
 # ─────────────────────────────────────────────────────────────────────────────
 #  AUDITORIA DE INTEGRIDADE  (mesmo espirito do Balanco Financeiro)
 # ─────────────────────────────────────────────────────────────────────────────
-def _mes_encerrado(mes, ano):
-    """True se hoje ja passou do ultimo dia de (mes, ano) -- usado para
-    escalar o C18 (521920500) de INFO para ALERTA quando o prazo ("deve
-    zerar ate o fim do mes") ja passou e o saldo persiste."""
-    ultimo_dia = calendar.monthrange(ano, mes)[1]
-    return datetime.now().date() > datetime(ano, mes, ultimo_dia).date()
 
 
 def auditoria_integridade(t, saldo_521920500=0.0, saldo_521920500_ant=0.0, mes=None, ano=None):
@@ -1276,20 +1270,12 @@ def auditoria_integridade(t, saldo_521920500=0.0, saldo_521920500_ant=0.0, mes=N
                          f'Exercícios Anteriores é excluído desta conta por ser '
                          f'rubrica informativa (não financia dotação adicional).'))
         if saldo_521920500 != 0.0 and abs(dif + saldo_521920500) < 1.00:
-            mes_ja_encerrou = mes is not None and ano is not None and _mes_encerrado(mes, ano)
-            saldo_de_mes_anterior = abs(saldo_521920500_ant) >= 1.00
-            if mes_ja_encerrou or saldo_de_mes_anterior:
-                achados.append(('ALERTA', 'C18 — Previsão Adicional a Lançar NÃO resolvida até o fim do mês (521920500)',
-                                 f'Saldo 521920500 = {saldo_521920500:,.2f} (dos quais '
-                                 f'{saldo_521920500_ant:,.2f} já vem de mês(es) anterior(es) '
-                                 f'já encerrado(s)) — deveria ter zerado até o fim do mês e '
-                                 f'não zerou. Verificar (ver C18).'))
-            else:
-                achados.append(('INFO', 'C18 — Previsão Adicional a Lançar (521920500)',
-                                 f'Saldo 521920500 = {saldo_521920500:,.2f} corresponde '
-                                 f'exatamente à diferença acima. Quando os lançamentos '
-                                 f'pendentes forem reclassificados ao fim do mês a '
-                                 f'diferença zerará automaticamente (ver C18).'))
+            achados.append(('ALERTA', 'C18 — Previsão Adicional a Lançar (521920500)',
+                             f'Saldo 521920500 = {saldo_521920500:,.2f} (dos quais '
+                             f'{saldo_521920500_ant:,.2f} já vem de mês(es) anterior(es) '
+                             f'já encerrado(s)) — corresponde exatamente à diferença '
+                             f'acima; dotação aprovada ainda não reclassificada às '
+                             f'contas definitivas. Verificar (ver C18).'))
 
     # Controle 2: Despesa Empenhada >= Liquidada >= Paga (cada GND)
     seq_erro = False
