@@ -264,6 +264,7 @@ def gerar_classificacao(doc: dict, destino: Path | None = None) -> None:
     hist_full = _ler_historico_full_classif(pasta_classif, n=24)
     js = (
         f"const CDATA = {json.dumps(cdata, ensure_ascii=False, indent=2)};\n"
+        f"const MUDANCAS_IB = {json.dumps(doc.get('mudancas_ib', []), ensure_ascii=False, indent=2)};\n"
         f"const ORTOGRAFIA = {json.dumps(doc.get('ortografia', []), ensure_ascii=False, indent=2)};\n"
         f"var HISTORICO_FULL = {json.dumps(hist_full, ensure_ascii=False, indent=2)};"
     )

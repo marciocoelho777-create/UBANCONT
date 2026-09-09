@@ -528,7 +528,33 @@ footer {
     </div>
   </div>
 
-  <!-- 4b· Ortografia do ITEMBALANCO -->
+  <!-- 4b· Mudanças no ITEMBALANCO (últimos 15 dias) -->
+  <div class="card" id="card-mudancas-ib">
+    <div class="card-hd">
+      Mudanças no ITEMBALANCO — últimos 15 dias
+      <span id="mud-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="mud-wrap">
+      <table id="tbl-mudancas">
+        <thead>
+          <tr>
+            <th>Demo</th>
+            <th>Cód. Item</th>
+            <th>Nome</th>
+            <th>Tipo de mudança</th>
+            <th>Conta afetada</th>
+            <th>Referência</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-mudancas"></tbody>
+      </table>
+      <p id="mud-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Nenhuma mudança detectada nos últimos 15 dias
+      </p>
+    </div>
+  </div>
+
+  <!-- 4d· Ortografia do ITEMBALANCO -->
   <div class="card" id="card-ortografia">
     <div class="card-hd">
       Ortografia do ITEMBALANCO
@@ -747,13 +773,18 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-09-09T09:52:33",
+  "gerado_em": "2026-09-09T17:28:41",
   "mes": 9,
   "ano": 2026,
   "por_demonstrativo": {},
   "achados": [],
   "gnd_errado": [],
   "historico": [
+    {
+      "gerado_em": "2026-09-09T17:28:41",
+      "n": 0,
+      "por_dem": {}
+    },
     {
       "gerado_em": "2026-09-09T09:52:33",
       "n": 0,
@@ -778,14 +809,10 @@ const CDATA = {
       "gerado_em": "2026-09-05T21:50:32",
       "n": 0,
       "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-04T10:47:12",
-      "n": 0,
-      "por_dem": {}
     }
   ]
 };
+const MUDANCAS_IB = [];
 const ORTOGRAFIA = [
   {
     "demo": "DFC",
@@ -940,6 +967,13 @@ const ORTOGRAFIA = [
 ];
 var HISTORICO_FULL = [
   {
+    "gerado_em": "2026-09-09T17:28:41",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
     "gerado_em": "2026-09-09T09:52:33",
     "mes": 9,
     "ano": 2026,
@@ -998,6 +1032,13 @@ var HISTORICO_FULL = [
   {
     "gerado_em": "2026-09-01T09:39:19",
     "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-09-09T17:27:53",
+    "mes": 8,
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
@@ -1124,124 +1165,6 @@ var HISTORICO_FULL = [
         "mes": 6,
         "conta": 622130300,
         "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-25T13:35:41",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-24T13:51:51",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
         "registros": 1,
         "campos": {
           "INCATEGORIA": null,
@@ -1398,6 +1321,55 @@ function renderRun(data){
         return (v===null||v===0)?'<td class="null">nulo ✗</td>':`<td class="vl">${v}</td>`;
       }).join('')}
     </tr>`).join('');
+  }
+
+  /* Mudanças no ITEMBALANCO */
+  const mudData = (typeof MUDANCAS_IB !== 'undefined') ? MUDANCAS_IB : [];
+  const mudBadge  = document.getElementById('mud-badge');
+  const mudOk     = document.getElementById('mud-ok');
+  const mudTbody  = document.getElementById('tbody-mudancas');
+  const MUD_LABEL = {
+    item_novo:        {txt: 'Item novo',          cls: 'b-ok'},
+    item_removido:    {txt: 'Item removido',       cls: 'b-err'},
+    conta_adicionada: {txt: 'Conta adicionada',   cls: 'b-wrn'},
+    conta_removida:   {txt: 'Conta removida',     cls: 'b-wrn'},
+    nome_alterado:    {txt: 'Nome alterado',       cls: 'b-wrn'},
+  };
+  if(mudBadge){
+    if(mudData.length){
+      const nNov = mudData.filter(m=>m.tipo_mud==='item_novo').length;
+      const nRem = mudData.filter(m=>m.tipo_mud==='item_removido').length;
+      const nOut = mudData.length - nNov - nRem;
+      let partes = [];
+      if(nNov) partes.push(`${nNov} novo${nNov>1?'s':''}`);
+      if(nRem) partes.push(`${nRem} removido${nRem>1?'s':''}`);
+      if(nOut) partes.push(`${nOut} alteração${nOut>1?'ões':''}`);
+      mudBadge.innerHTML=`<span class="badge b-wrn">${mudData.length} mudança${mudData.length>1?'s':''}: ${partes.join(', ')}</span>`;
+    } else {
+      mudBadge.innerHTML=`<span class="badge b-ok">sem mudanças</span>`;
+    }
+  }
+  if(mudTbody){
+    if(mudData.length){
+      if(mudOk) mudOk.style.display='none';
+      mudTbody.innerHTML=mudData.map(m=>{
+        const lbl = MUD_LABEL[m.tipo_mud]||{txt:m.tipo_mud,cls:'b-muted'};
+        const nomeCell = m.tipo_mud==='nome_alterado'
+          ? `<span style="color:var(--err);text-decoration:line-through;font-size:11px">${(m.nome_anterior||'').replace(/</g,'&lt;')}</span><br>${(m.noitembalanco||'').replace(/</g,'&lt;')}`
+          : (m.noitembalanco||'').replace(/</g,'&lt;');
+        return `<tr>
+          <td><span class="badge b-muted">${m.demo||'?'}</span></td>
+          <td><code>${m.coitembalanco||'—'}</code></td>
+          <td style="max-width:300px;word-break:break-word">${nomeCell}</td>
+          <td><span class="badge ${lbl.cls}">${lbl.txt}</span></td>
+          <td><code style="font-size:11px">${(m.conta||'—').replace(/</g,'&lt;')}</code></td>
+          <td style="font-size:11px;white-space:nowrap">${m.desde||'—'}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      mudTbody.innerHTML='';
+      if(mudOk) mudOk.style.display='';
+    }
   }
 
   /* Ortografia do ITEMBALANCO */

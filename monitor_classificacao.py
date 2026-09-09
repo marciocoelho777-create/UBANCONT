@@ -161,6 +161,120 @@ def varrer_ortografia(linhas, speller):
             })
     return achados
 
+
+# ---------------------------------------------------------------------------
+# Mudanças no ITEMBALANCO — detecção por snapshot diário
+# ---------------------------------------------------------------------------
+_SNAP_DIR = DIR_DADOS / "snaps_ib"
+
+
+def _salvar_snapshot_ib(linhas, ano, gerado_em):
+    """Persiste snapshot do dia e apaga mais de 40 dias antigos."""
+    _SNAP_DIR.mkdir(parents=True, exist_ok=True)
+    arquivos = sorted(_SNAP_DIR.glob("*.json"), reverse=True)
+    for arq in arquivos[39:]:
+        arq.unlink(missing_ok=True)
+
+    itens = {}
+    for r in linhas:
+        k = f"{r['INTIPOBALANCO']}|{r['COITEMBALANCO']}|{r.get('COCONTACONTABIL','')}"
+        itens[k] = {
+            "demo": TIPO_BALANCO.get(r["INTIPOBALANCO"], f"tipo{r['INTIPOBALANCO']}"),
+            "tipo": r["INTIPOBALANCO"],
+            "cod":  r["COITEMBALANCO"],
+            "conta": r.get("COCONTACONTABIL", ""),
+            "nome": (r.get("NOITEMBALANCO") or "").strip(),
+        }
+
+    dest = _SNAP_DIR / f"{gerado_em[:10].replace('-', '')}.json"
+    dest.write_text(json.dumps({"gerado_em": gerado_em, "ano": ano, "itens": itens},
+                               ensure_ascii=False, separators=(",", ":")),
+                    encoding="utf-8")
+    return itens
+
+
+def varrer_mudancas_ib(linhas, ano, gerado_em):
+    """Compara ITEMBALANCO atual com snapshot de até 15 dias atrás.
+
+    Detecta: itens novos, itens removidos, contas adicionadas/removidas,
+    nomes alterados.  Retorna lista de dicts prontos para o painel.
+    """
+    from datetime import date, timedelta
+
+    itens_atual = _salvar_snapshot_ib(linhas, ano, gerado_em)
+
+    if not _SNAP_DIR.exists():
+        return []
+
+    hoje_str   = gerado_em[:10].replace("-", "")
+    limite_str = (date.today() - timedelta(days=15)).strftime("%Y%m%d")
+
+    # Snaps anteriores ao de hoje, ordenados do mais antigo ao mais recente
+    candidatos = sorted(
+        [a for a in _SNAP_DIR.glob("*.json") if a.stem < hoje_str],
+    )
+    if not candidatos:
+        return []
+
+    # Preferir o mais antigo dentro da janela de 15 dias; senão, o mais recente disponível
+    dentro = [a for a in candidatos if a.stem >= limite_str]
+    ref_arq = dentro[0] if dentro else candidatos[-1]
+
+    try:
+        itens_ref = json.loads(ref_arq.read_text(encoding="utf-8")).get("itens", {})
+    except Exception:
+        return []
+
+    ref_date = f"{ref_arq.stem[:4]}-{ref_arq.stem[4:6]}-{ref_arq.stem[6:]}"
+
+    mudancas = []
+
+    # Novidades (item/conta no atual que não estava na referência)
+    for k, v in itens_atual.items():
+        if k not in itens_ref:
+            item_chave = f"{v['tipo']}|{v['cod']}|"
+            item_existia = any(kk.startswith(item_chave) for kk in itens_ref)
+            mudancas.append({
+                "tipo_mud":      "conta_adicionada" if item_existia else "item_novo",
+                "demo":          v["demo"],
+                "coitembalanco": v["cod"],
+                "noitembalanco": v["nome"],
+                "conta":         v["conta"],
+                "desde":         ref_date,
+            })
+
+    # Remoções (item/conta na referência que sumiu no atual)
+    for k, v in itens_ref.items():
+        if k not in itens_atual:
+            item_chave = f"{v['tipo']}|{v['cod']}|"
+            item_existe = any(kk.startswith(item_chave) for kk in itens_atual)
+            mudancas.append({
+                "tipo_mud":      "conta_removida" if item_existe else "item_removido",
+                "demo":          v["demo"],
+                "coitembalanco": v["cod"],
+                "noitembalanco": v["nome"],
+                "conta":         v["conta"],
+                "desde":         ref_date,
+            })
+
+    # Nomes alterados (mesma chave, nome diferente)
+    for k in itens_atual:
+        if k in itens_ref:
+            nome_novo = itens_atual[k]["nome"]
+            nome_ref  = itens_ref[k]["nome"]
+            if nome_novo != nome_ref:
+                mudancas.append({
+                    "tipo_mud":      "nome_alterado",
+                    "demo":          itens_atual[k]["demo"],
+                    "coitembalanco": itens_atual[k]["cod"],
+                    "noitembalanco": nome_novo,
+                    "nome_anterior": nome_ref,
+                    "conta":         itens_atual[k]["conta"],
+                    "desde":         ref_date,
+                })
+
+    return mudancas
+
 # Mapeamento natureza → GND esperado: (nat_ini, nat_fim, gnd, descricao)
 # Baseado no prefixo de 2 dígitos da natureza de despesa (6 dígitos no SIGGO).
 GND_NATUREZA = [
@@ -576,6 +690,18 @@ def main():
     except Exception:
         speller = None
         print("  [ortografia] pyspellchecker não disponível — verificação desativada")
+    gerado_em   = datetime.now().isoformat(timespec="seconds")
+    mudancas_ib = varrer_mudancas_ib(linhas_ib, a.ano, gerado_em)
+    if mudancas_ib:
+        print(f"\n  MUDANÇAS ITEMBALANCO — {len(mudancas_ib)} mudança(s) desde referência:")
+        for m in mudancas_ib[:10]:
+            print(f"  >> [{m['demo']}] {m['tipo_mud']}  item {m['coitembalanco']}  "
+                  f"conta {m['conta']}  \"{m['noitembalanco'][:50]}\"")
+        if len(mudancas_ib) > 10:
+            print(f"  ... e mais {len(mudancas_ib) - 10} mudança(s)")
+    else:
+        print("\n  ITEMBALANCO: nenhuma mudança detectada nos últimos 15 dias.")
+
     ort_achados = varrer_ortografia(linhas_ib, speller)
     if ort_achados:
         print(f"\n  ORTOGRAFIA — {len(ort_achados)} item(ns) com problema:")
@@ -614,14 +740,16 @@ def main():
     else:
         print("\n  GND-cruzado: nenhuma divergência INCATEGORIA × natureza.")
 
-    doc = {"gerado_em": datetime.now().isoformat(timespec="seconds"),
+    doc = {"gerado_em": gerado_em,
            "mes": a.mes, "ano": a.ano,
            "por_demonstrativo": dict(por_dem),
-           "achados":    achados,
-           "gnd_errado": gnd_errado,
-           "ortografia": ort_achados}
+           "achados":     achados,
+           "gnd_errado":  gnd_errado,
+           "mudancas_ib": mudancas_ib,
+           "ortografia":  ort_achados}
     DIR_DADOS.mkdir(parents=True, exist_ok=True)
-    dest = DIR_DADOS / f"{a.ano}-{a.mes:02d}_{datetime.now():%Y%m%d_%H%M%S}.json"
+    ts = gerado_em.replace("-","").replace(":","").replace("T","_")
+    dest = DIR_DADOS / f"{a.ano}-{a.mes:02d}_{ts}.json"
     dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     (RAIZ / "MONITOR_CLASSIFICACAO.md").write_text(markdown(doc), encoding="utf-8")
     from saida import html_out
