@@ -87,7 +87,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
 <header class="hd">
   <div><div class="hd-title">Auditoria Consolidada — GDF</div>
   <div class="hd-sub">Setembro/2026 · Consolidado</div></div>
-  <div class="hd-sub">Gerado em 10/09/2026 05:02:30</div>
+  <div class="hd-sub">Gerado em 10/09/2026 10:43:56</div>
 </header>
 <main class="wrap">
   <nav class="nav"><a href="#dem-bf">BF</a><a href="#dem-bo">BO</a><a href="#dem-bp">BP</a><a href="#dem-dfc">DFC</a><a href="#dem-dmpl">DMPL</a><a href="#dem-dvp">DVP</a><a href="#dem-bal">BAL</a><a href="#cruzamentos">CRUZAMENTOS</a></nav>
@@ -101,15 +101,15 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
   <div class="kpi-row">
     <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:var(--err)"><div class="kpi-lbl">Erros</div><div class="kpi-val" id="kpi-err">0</div></div>
     <div class="kpi" style="--kpi-stripe:var(--wrn);--kpi-color:var(--wrn)"><div class="kpi-lbl">Alertas</div><div class="kpi-val" id="kpi-alr">2</div></div>
-    <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)"><div class="kpi-lbl">OK</div><div class="kpi-val" id="kpi-ok">55</div></div>
-    <div class="kpi" style="--kpi-stripe:var(--inf);--kpi-color:var(--inf)"><div class="kpi-lbl">Informativos</div><div class="kpi-val" id="kpi-inf">16</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)"><div class="kpi-lbl">OK</div><div class="kpi-val" id="kpi-ok">64</div></div>
+    <div class="kpi" style="--kpi-stripe:var(--inf);--kpi-color:var(--inf)"><div class="kpi-lbl">Informativos</div><div class="kpi-val" id="kpi-inf">13</div></div>
   </div>
 
   <div class="card">
     <div class="card-hd">Resumo <span id="resultado-geral">RESULTADO GERAL: 0 erro(s), 2 alerta(s)</span></div>
     <table class="resumo">
       <thead><tr><th>Demonstrativo</th><th>OK</th><th>Alerta</th><th>Erro</th><th>Info</th></tr></thead>
-      <tbody id="resumo-body"><tr><td>Balanço Financeiro</td><td>3</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Balanço Orçamentário</td><td>4</td><td>2</td><td>0</td><td>0</td></tr><tr><td>Balanço Patrimonial</td><td>14</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Fluxo de Caixa (DFC)</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Mutações do PL (DMPL)</td><td>10</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Variações Patrimoniais (DVP)</td><td>4</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Balancete Contábil</td><td>1</td><td>0</td><td>0</td><td>0</td></tr><tr><td><strong>Cruzamentos</strong></td><td>19</td><td>0</td><td>0</td><td>13</td></tr></tbody>
+      <tbody id="resumo-body"><tr><td>Balanço Financeiro</td><td>3</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Balanço Orçamentário</td><td>4</td><td>2</td><td>0</td><td>0</td></tr><tr><td>Balanço Patrimonial</td><td>14</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Fluxo de Caixa (DFC)</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>Mutações do PL (DMPL)</td><td>10</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Variações Patrimoniais (DVP)</td><td>4</td><td>0</td><td>0</td><td>1</td></tr><tr><td>Balancete Contábil</td><td>1</td><td>0</td><td>0</td><td>0</td></tr><tr><td><strong>Cruzamentos</strong></td><td>28</td><td>0</td><td>0</td><td>10</td></tr></tbody>
     </table>
   </div>
 
@@ -117,7 +117,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
 
   <details class="dem" id="cruzamentos" open>
     <summary>Cruzamentos entre Demonstrativos</summary>
-    <div class="dem-body"><div class="aud-list" id="cruz-body"><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X1a/X1b — Caixa Inicial/Final: BF vs DFC</strong><span>Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04.</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>X2 — DFC: Geração Líquida (I+II+III) = Var. Caixa</strong><span>Geração 161,790,054.9100037  Var.Caixa 161,790,054.91</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>X6 — Resultado do Exercício: DMPL = DVP</strong><span>DMPL -15,101,560,867.22  DVP -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R1a — Resultado do Exercício: BP = DVP(III)</strong><span>BP -15,101,560,867.22  DVP -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R2 — Saldo Final DMPL = PL do BP</strong><span>DMPL -146,743,449,709.4  BP -146,743,449,709.4</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R1b — Resultado do Exercício: BP = DMPL(TOTAL)</strong><span>BP -15,101,560,867.22  DMPL -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R4a — Caixa: BP = DFC (Caixa Final)</strong><span>BP 5,622,119,596.65  DFC 5,622,119,596.65</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R7 — Receita Realizada: BF = BO</strong><span>BF 32,562,516,784.75  BO 32,562,516,784.75</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R8 — Despesa Paga: BF = BO</strong><span>BF 27,938,127,304.84  BO 27,938,127,304.84</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>R10a — Pagamentos RPNP: BF vs BO</strong><span>BF 1,078,420,744.36 — comparação com BO pendente (aba Restos a Pagar ainda não lida por este cruzamento).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>R10b — Pagamentos RPP: BF vs BO</strong><span>BF 2,286,688,240.76 — comparação com BO pendente (aba Restos a Pagar ainda não lida por este cruzamento).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X3 — Receita Realizada (BO) vs VPA Total (DVP)</strong><span>BO 32,562,516,784.75  DVP(VPA) 104,659,077,123.44  Diferença -72,096,560,338.69 — esperada (regimes contábeis distintos).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X4 — Despesa Liquidada (BO) vs VPD Total (DVP)</strong><span>BO 28,206,266,682.67  DVP(VPD) 119,760,637,990.66  Diferença -91,554,371,307.99 — esperada (VPD inclui itens sem empenho).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X5 — Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)</strong><span>BO 0.00  DVP -15,101,560,867.22  Diferença 15,101,560,867.22 — esperada (regimes contábeis distintos).</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11a — Impostos/Taxas/Contrib.Melhoria: BO = DFC</strong><span>BO 18,252,205,831.25  DFC 18,252,205,831.25</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11b — Receita de Contribuições: BO = DFC</strong><span>BO 4,380,792,081.81  DFC 4,380,792,081.81</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11c — Receita Patrimonial: BO = DFC</strong><span>BO 952,250,243.43  DFC 952,250,243.43</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11d — Receita Agropecuária: BO = DFC</strong><span>BO 495  DFC 495</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11e — Receita Industrial: BO = DFC</strong><span>BO 2,317,415.81  DFC 2,317,415.81</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11f — Receita de Serviços: BO = DFC</strong><span>BO 1,751,997,083.53  DFC 1,751,997,083.53</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11h — Alienação de Bens: BO = DFC</strong><span>BO 1,037,685,022.65  DFC 1,037,685,022.65</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11i — Amortização de Empréstimos: BO = DFC</strong><span>BO 16,438,118.4  DFC 16,438,118.4</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11j — Operações de Crédito: BO = DFC</strong><span>BO 64,089,064.25  DFC 64,089,064.25</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11g — Transf.Recebidas: BO(Correntes+Capital) = DFC</strong><span>BO 5,158,646,823.23  DFC 5,158,646,823.23</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>12B — Variação da Dotação = Total Alterações (Créditos Adicionais)</strong><span>Variação 4,167,362,534  Créditos Adicionais 4,167,362,534</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>13a — Balancete: Ativo+VPD = Passivo+PL+VPA</strong><span>(Ativo+VPD) 187,897,089,408.66999  (Passivo+PL+VPA) 172,795,528,541.45001  Diferença 15,101,560,867.21998 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-3 — 7 linhas do PL do BP = 7 colunas da DMPL</strong><span>Não implementado nesta versão — bp.py expõe só o total agregado do PL, sem quebra por conta-mãe (231..237).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-5B — Passivo Anexo ajustado por RPNP</strong><span>Não implementado nesta versão — bp.py não expõe RPNP a Liquidar e Crédito Empenhado a Liquidar separados.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-6 — AF-PF (Anexo p.2) = Superávit por Fonte (p.4)</strong><span>Não implementado nesta versão — quadro de Superávit por Fonte não é gerado por nenhum módulo do projeto.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-9 — Inscrições RPNP/RPP: BF = BO</strong><span>Não implementado nesta versão — bo.py não modela coluna de inscrição do exercício corrente, só saldo remanescente.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-12A — Equação do Balanço Orçamentário (fórmula literal)</strong><span>Não implementado nesta versão — o próprio arquivo antigo já questionava se mede o mesmo que o achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' do BO — evitar duplicar/contradizer.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-13b — Controles Aprovação = Controles Execução</strong><span>Não implementado nesta versão — nenhuma planilha expõe a quebra de contas de controle 7/8 necessária.</span></div></div></div></div>
+    <div class="dem-body"><div class="aud-list" id="cruz-body"><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X1a/X1b — Caixa Inicial/Final: BF vs DFC</strong><span>Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04.</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>X2 — DFC: Geração Líquida (I+II+III) = Var. Caixa</strong><span>Geração 161,790,054.9100037  Var.Caixa 161,790,054.91</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>X6 — Resultado do Exercício: DMPL = DVP</strong><span>DMPL -15,101,560,867.22  DVP -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R1a — Resultado do Exercício: BP = DVP(III)</strong><span>BP -15,101,560,867.22  DVP -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R2 — Saldo Final DMPL = PL do BP</strong><span>DMPL -146,743,449,709.4  BP -146,743,449,709.4</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R1b — Resultado do Exercício: BP = DMPL(TOTAL)</strong><span>BP -15,101,560,867.22  DMPL -15,101,560,867.22</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL1 — Patrimônio Social e Capital Social: BP = DMPL</strong><span>BP 42,265,528,129.69  DMPL 42,265,528,129.69</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL2 — Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL</strong><span>BP 53,409,791.44  DMPL 53,409,791.44</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL3 — Reservas de Capital: BP = DMPL</strong><span>BP 11,961,938.59  DMPL 11,961,938.59</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL4 — Ajustes de Avaliação Patrimonial: BP = DMPL</strong><span>BP 584,213,821.56  DMPL 584,213,821.56</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL5 — Reservas de Lucros: BP = DMPL</strong><span>BP 19,180,972.75  DMPL 19,180,972.75</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL6 — Demais Reservas: BP = DMPL</strong><span>BP 1,781,387,639.12  DMPL 1,781,387,639.12</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>PL7 — Resultados Acumulados: BP = DMPL</strong><span>BP -191,459,132,002.55  DMPL -191,459,132,002.55</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R4a — Caixa: BP = DFC (Caixa Final)</strong><span>BP 5,622,119,596.65  DFC 5,622,119,596.65</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R7 — Receita Realizada: BF = BO</strong><span>BF 32,562,516,784.75  BO 32,562,516,784.75</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R8 — Despesa Paga: BF = BO</strong><span>BF 27,938,127,304.84  BO 27,938,127,304.84</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R10a — Pagamentos RPNP: BF = BO</strong><span>BF 1,078,420,744.36  BO 1,078,420,744.36</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>R10b — Pagamentos RPP: BF = BO</strong><span>BF 2,286,688,240.76  BO 2,286,688,240.76</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X3 — Receita Realizada (BO) vs VPA Total (DVP)</strong><span>BO 32,562,516,784.75  DVP(VPA) 104,659,077,123.44  Diferença -72,096,560,338.69 — esperada (regimes contábeis distintos).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X4 — Despesa Liquidada (BO) vs VPD Total (DVP)</strong><span>BO 28,206,266,682.67  DVP(VPD) 119,760,637,990.66  Diferença -91,554,371,307.99 — esperada (VPD inclui itens sem empenho).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>X5 — Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)</strong><span>BO 0.00  DVP -15,101,560,867.22  Diferença 15,101,560,867.22 — esperada (regimes contábeis distintos).</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11a — Impostos/Taxas/Contrib.Melhoria: BO = DFC</strong><span>BO 18,252,205,831.25  DFC 18,252,205,831.25</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11b — Receita de Contribuições: BO = DFC</strong><span>BO 4,380,792,081.81  DFC 4,380,792,081.81</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11c — Receita Patrimonial: BO = DFC</strong><span>BO 952,250,243.43  DFC 952,250,243.43</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11d — Receita Agropecuária: BO = DFC</strong><span>BO 495  DFC 495</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11e — Receita Industrial: BO = DFC</strong><span>BO 2,317,415.81  DFC 2,317,415.81</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11f — Receita de Serviços: BO = DFC</strong><span>BO 1,751,997,083.53  DFC 1,751,997,083.53</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11h — Alienação de Bens: BO = DFC</strong><span>BO 1,037,685,022.65  DFC 1,037,685,022.65</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11i — Amortização de Empréstimos: BO = DFC</strong><span>BO 16,438,118.4  DFC 16,438,118.4</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11j — Operações de Crédito: BO = DFC</strong><span>BO 64,089,064.25  DFC 64,089,064.25</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>11g — Transf.Recebidas: BO(Correntes+Capital) = DFC</strong><span>BO 5,158,646,823.23  DFC 5,158,646,823.23</span></div></div><div class="aud-item"><span class="chip c-ok">✔ OK</span><div class="aud-txt"><strong>12B — Variação da Dotação = Total Alterações (Créditos Adicionais)</strong><span>Variação 4,167,362,534  Créditos Adicionais 4,167,362,534</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>13a — Balancete: Ativo+VPD = Passivo+PL+VPA</strong><span>(Ativo+VPD) 187,897,089,408.66999  (Passivo+PL+VPA) 172,795,528,541.45001  Diferença 15,101,560,867.21998 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código).</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-5B — Passivo Anexo ajustado por RPNP</strong><span>Não implementado nesta versão — bp.py não expõe RPNP a Liquidar e Crédito Empenhado a Liquidar separados.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-6 — AF-PF (Anexo p.2) = Superávit por Fonte (p.4)</strong><span>Não implementado nesta versão — quadro de Superávit por Fonte não é gerado por nenhum módulo do projeto.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-9 — Inscrições RPNP/RPP: BF = BO</strong><span>Não implementado nesta versão — bo.py não modela coluna de inscrição do exercício corrente, só saldo remanescente.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-12A — Equação do Balanço Orçamentário (fórmula literal)</strong><span>Não implementado nesta versão — o próprio arquivo antigo já questionava se mede o mesmo que o achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' do BO — evitar duplicar/contradizer.</span></div></div><div class="aud-item"><span class="chip c-inf">ℹ INFO</span><div class="aud-txt"><strong>PEND-13b — Controles Aprovação = Controles Execução</strong><span>Não implementado nesta versão — nenhuma planilha expõe a quebra de contas de controle 7/8 necessária.</span></div></div></div></div>
   </details>
 
   <footer>Auditoria Consolidada — gerado automaticamente por auditoria_consolidada.py, sem consulta ao Oracle (lê os .xlsx já gerados por mestre.py/bo.py/bp.py/dfc.py/dmpl.py/dvp.py).</footer>
@@ -127,6 +127,321 @@ const CHIP_CLASS = {"OK": "c-ok", "ERRO": "c-err", "ALERTA": "c-alr", "INFO": "c
 const ICONES = {"OK": "✔", "ERRO": "✘", "ALERTA": "⚠", "INFO": "ℹ"};
 const MESES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-09-10T10:43:56",
+    "mes": 9,
+    "ano": 2026,
+    "totais": {
+      "OK": 64,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 13
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 28,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 10
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 161,790,054.9100037  Var.Caixa 161,790,054.91"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -15,101,560,867.22  DVP -15,101,560,867.22"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -15,101,560,867.22  DVP -15,101,560,867.22"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,743,449,709.4  BP -146,743,449,709.4"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -15,101,560,867.22  DMPL -15,101,560,867.22"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,409,791.44  DMPL 53,409,791.44"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,213,821.56  DMPL 584,213,821.56"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,459,132,002.55  DMPL -191,459,132,002.55"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 5,622,119,596.65  DFC 5,622,119,596.65"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 32,562,516,784.75  BO 32,562,516,784.75"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 27,938,127,304.84  BO 27,938,127,304.84"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,420,744.36  BO 1,078,420,744.36"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,286,688,240.76  BO 2,286,688,240.76"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 32,562,516,784.75  DVP(VPA) 104,659,077,123.44  Diferença -72,096,560,338.69 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 28,206,266,682.67  DVP(VPD) 119,760,637,990.66  Diferença -91,554,371,307.99 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -15,101,560,867.22  Diferença 15,101,560,867.22 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 18,252,205,831.25  DFC 18,252,205,831.25"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,380,792,081.81  DFC 4,380,792,081.81"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 952,250,243.43  DFC 952,250,243.43"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495  DFC 495"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,317,415.81  DFC 2,317,415.81"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,751,997,083.53  DFC 1,751,997,083.53"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,037,685,022.65  DFC 1,037,685,022.65"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 16,438,118.4  DFC 16,438,118.4"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,158,646,823.23  DFC 5,158,646,823.23"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 4,167,362,534  Créditos Adicionais 4,167,362,534"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 187,897,089,408.66999  (Passivo+PL+VPA) 172,795,528,541.45001  Diferença 15,101,560,867.21998 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — bp.py não expõe RPNP a Liquidar e Crédito Empenhado a Liquidar separados."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte não é gerado por nenhum módulo do projeto."
+      },
+      {
+        "codigo": "PEND-9",
+        "status": "INFO",
+        "titulo": "Inscrições RPNP/RPP: BF = BO",
+        "detalhe": "Não implementado nesta versão — bo.py não modela coluna de inscrição do exercício corrente, só saldo remanescente."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — o próprio arquivo antigo já questionava se mede o mesmo que o achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' do BO — evitar duplicar/contradizer."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — nenhuma planilha expõe a quebra de contas de controle 7/8 necessária."
+      }
+    ]
+  },
   {
     "gerado_em": "2026-09-10T05:02:30",
     "mes": 9,
