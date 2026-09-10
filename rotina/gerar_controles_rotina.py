@@ -63,6 +63,10 @@ CONTROLES = [
     {
         "numero":    "01",
         "titulo":    "Controle 1 — Contas 21 F Principal do exercício × 827110101",
+        "descricao": ("Verifica se os passivos do exercício atual (empenhos liquidados a pagar, contas 21XXXXXXX) "
+                      "têm correspondência exata na conta de controle 827110101. "
+                      "O saldo remanescente ao encerramento do exercício é inscrito em Restos a Pagar Processados (RPP). "
+                      "Base: MCASP — Passivo Circulante; Lei 4.320/1964, arts. 36 e 58–64."),
         "aba":       "C01",
         "sql":       "01-Controle 1 - Contas 21 F Principal do exercício x 827110101 LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -197,6 +201,11 @@ CONTROLES = [
     {
         "numero":    "02",
         "titulo":    "Controle 2 — Contas 21 F Ret do exercício × 827110201/827110203/63181",
+        "descricao": ("Verifica retenções do exercício atual (IR, INSS e outros encargos deduzidos do pagamento) "
+                      "contra as contas de controle: 827110201 (retenções do próprio GDF) e 827110203 (retenções de terceiros). "
+                      "A conta 631810000 representa RPNP de retenções de exercícios anteriores liquidados no corrente. "
+                      "Retenções são passivos extraorçamentários — não transitam como despesa orçamentária. "
+                      "Base: MCASP — PCE 06 (Retenções); NBC TSP 03."),
         "aba":       "C02",
         "sql":       "02-Controle 2 - Contas 21 F Ret do exercício x 827110201,827110203,63181 LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -207,6 +216,11 @@ CONTROLES = [
     {
         "numero":    "03",
         "titulo":    "Controle 3 — 21xxx98xx = 63211xxxx",
+        "descricao": ("Verifica a consistência entre os Restos a Pagar Não Processados (RPNP) de exercícios anteriores "
+                      "registrados no passivo (sufixo 98xx = RP de ano anterior) e as respectivas contas de controle (63211xxxx). "
+                      "Duas dimensões: principal (827110301 × 632110100) e retenções (827110303 × 632110300). "
+                      "Diferença indica RP inscrito sem lançamento de controle, ou baixa de RP sem atualização do passivo. "
+                      "Base: MCASP Cap. 6 — Restos a Pagar; Lei 4.320/1964, art. 36."),
         "aba":       "C03",
         "sql":       "03-Controle 3 - 21xxx98xx = 63211xxxx LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -220,6 +234,12 @@ CONTROLES = [
     {
         "numero":    "04",
         "titulo":    "Controle 4 — Contas 21 sem NE × 827110401",
+        "descricao": ("Verifica passivos (contas 21XXXXXXX) que não possuem Nota de Empenho (NE) associada, "
+                      "controlados pela conta 827110401. São valores extraorçamentários — recolhimentos compulsórios, "
+                      "caucões retidas de contratos, depósitos judiciais, empréstimos recebidos, etc. "
+                      "Diferença indica passivo orçamentário sem empenho (vedado pelo art. 60 da Lei 4.320/1964) "
+                      "ou extraorçamentário sem o controle 827110401 correspondente. "
+                      "Base: Lei 4.320/1964, arts. 3.º e 60; MCASP — Passivos Extraorçamentários."),
         "aba":       "C04",
         "sql":       "04-Controle 4 - Contas 21 sem NE x 827110401 LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -229,6 +249,11 @@ CONTROLES = [
     {
         "numero":    "05",
         "titulo":    "Controle 5 — Contas 21 em liquidação × 827110196",
+        "descricao": ("Verifica valores no estágio de liquidação — empenhos que receberam ateste/nota fiscal "
+                      "mas ainda não foram pagos — contra a conta de controle 827110196. "
+                      "A liquidação é estágio obrigatório entre o empenho e o pagamento (Lei 4.320/1964, art. 63): "
+                      "confirma entrega do bem ou serviço e autoriza o pagamento. "
+                      "Diferença indica valores pagos sem ateste formal, ou em liquidação sem empenho correspondente."),
         "aba":       "C05",
         "sql":       "05-Controle 5 - Contas 21 em liquidação  x 827110196 LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -241,6 +266,12 @@ CONTROLES = [
     {
         "numero":    "06",
         "titulo":    "Controle 6 — Contas 21 RPNP liquidado × 6313",
+        "descricao": ("Verifica se o RPNP inscrito em exercícios anteriores e liquidado no corrente exercício "
+                      "tem a correspondente Variação Patrimonial Diminutiva (VPD) registrada — conta 631300000. "
+                      "Quando um RPNP é liquidado, além da baixa no passivo (21XXXXXXX) deve haver o lançamento "
+                      "de VPD para refletir o custo no Resultado Patrimonial do período. "
+                      "Diferença indica baixa de RP sem o registro da despesa no resultado. "
+                      "Base: MCASP — Encerramento do Exercício; NBC TSP 01 — Apresentação das Demonstrações Contábeis."),
         "aba":       "C06",
         "sql":       "06-Controle 6 - Contas 21 RPNP liquidado x 6313 LANÇAMENTO.sql",
         "tipo":      "ug",
@@ -251,6 +282,12 @@ CONTROLES = [
     {
         "numero":    "08",
         "titulo":    "Controle 8 — Balancete INTRA",
+        "descricao": ("Verifica a consistência do balancete nas contas intragovernamentais (INTRA) — "
+                      "operações entre órgãos do próprio GDF. "
+                      "A soma algébrica das quatro classes (Ativo, Passivo/PL, VPD, VPA) deve ser zero para cada UG. "
+                      "Diferença indica que um órgão registrou a operação e o órgão contraparte não, "
+                      "gerando assimetria que impede a eliminação na consolidação. "
+                      "Base: MCASP Cap. 13 — Consolidação das Demonstrações Contábeis; IPC GDF."),
         "aba":       "C08",
         "sql":       "08-Controle 8 - Balancete INTRA.sql",
         "tipo":      "ug",
@@ -262,6 +299,11 @@ CONTROLES = [
     {
         "numero":    "09",
         "titulo":    "Controle 9 — Balancete Não INTRA",
+        "descricao": ("Verifica a consistência do balancete nas contas não intragovernamentais — "
+                      "operações com entidades externas ao GDF (fornecedores, servidores, União, etc.). "
+                      "Complementar ao C08: juntos cobrem a totalidade do balancete. "
+                      "A soma algébrica das quatro classes contábeis deve ser zero por UG. "
+                      "Base: MCASP — Equilíbrio Patrimonial; Lei 4.320/1964, art. 85."),
         "aba":       "C09",
         "sql":       "09-Controle 9 - Balancete Não INTRA.sql",
         "tipo":      "ug",
@@ -273,6 +315,13 @@ CONTROLES = [
     {
         "numero":    "10",
         "titulo":    "Controle 10 — Balanço Financeiro",
+        "default_so_diff": True,
+        "descricao":("Verifica a consistência do Balanço Financeiro: ingressos (receitas orçamentárias + "
+                      "receitas extraorçamentárias + saldo inicial) devem ser iguais a dispêndios (despesas orçamentárias + "
+                      "dispêndios extraorçamentários + saldo final). "
+                      "Diferença indica receita arrecadada não registrada, pagamento sem baixa de passivo, "
+                      "ou divergência entre o saldo contábil e o saldo bancário real. "
+                      "Base: Lei 4.320/1964, art. 103; MCASP Cap. 7 — Balanço Financeiro."),
         "aba":       "C10",
         "sql":       "10-Balanço-BF.sql",
         "tipo":      "ug",
@@ -305,6 +354,12 @@ CONTROLES = [
     {
         "numero":    "13",
         "titulo":    "Controle 13 — Balanço Patrimonial",
+        "default_so_diff": True,
+        "descricao": ("Verifica o equilíbrio do Balanço Patrimonial: Ativo Total = Passivo Total + Patrimônio Líquido. "
+                      "Cada grupo de contas é conferido individualmente por UG. "
+                      "Diferença indica lançamento sem contrapartida, conta que não transitou pelo Resultado Patrimonial, "
+                      "ou inconsistência entre o razão analítico e o balancete consolidado. "
+                      "Base: Lei 4.320/1964, art. 105; MCASP Cap. 8 — Balanço Patrimonial; NBC TSP 01."),
         "aba":       "C13",
         "sql":       "13-Balanço-BP.sql",
         "tipo":      "ug",
@@ -347,6 +402,12 @@ CONTROLES = [
     {
         "numero":    "14",
         "titulo":    "Controle 14 — 72119XXXX (Par Devedor/Credor)",
+        "descricao": ("Verifica o equilíbrio entre os pares devedor (72119XXXX) e credor (82119XXXX) "
+                      "das receitas intraorçamentárias — operações em que um órgão do GDF é o arrecadador "
+                      "e outro é o pagador. Cada par deve ter saldo zero líquido: o que um órgão reconhece como "
+                      "receita intraorçamentária, o outro deve registrar como despesa intraorçamentária. "
+                      "Diferença impede a eliminação na consolidação do GDF. "
+                      "Base: MCASP — Receitas Intraorçamentárias (sufixo 9 no PCASP); IPC GDF."),
         "aba":       "C14",
         "sql":       "14-72119XXXX.sql",
         "tipo":      "ug",
@@ -360,6 +421,12 @@ CONTROLES = [
     {
         "numero":    "15",
         "titulo":    "Controle 15 — Receita Negativa Saldo",
+        "descricao": ("Identifica contas de receita orçamentária com saldo negativo — situação anômala, "
+                      "pois contas de receita têm natureza credora e saldo positivo é o esperado. "
+                      "Saldo negativo pode indicar: estorno maior que o lançamento original, "
+                      "classificação equivocada de despesa como receita, ou lançamento na conta errada. "
+                      "Distorce o total de receitas e o Resultado Orçamentário. "
+                      "Base: MCASP — Natureza das Contas do PCASP; NBC TSP 03 — Receitas."),
         "aba":       "C15",
         "sql":       "15-Receita Negativa Saldo.sql",
         "tipo":      "detalhe",  # só negativos retornados são ocorrências
@@ -374,6 +441,12 @@ CONTROLES = [
     {
         "numero":    "16",
         "titulo":    "Controle 16 — 5221904XX",
+        "descricao": ("Monitora as contas 522190401 e 522190409 — Variações Patrimoniais Aumentativas (VPA) "
+                      "relativas a transferências ou outras receitas específicas do PCASP GDF. "
+                      "Verifica se o total acumulado nessas contas está dentro do esperado e sem lançamentos indevidos. "
+                      "Qualquer saldo inesperado indica receita reconhecida sem o fato gerador correspondente "
+                      "ou classificação equivocada de outra receita nessas rubricas. "
+                      "Base: MCASP — Variações Patrimoniais; NBC TSP 03; PCASP-GDF."),
         "aba":       "C16",
         "sql":       "16-5221904XX.sql",
         "tipo":      "ug",
@@ -384,6 +457,12 @@ CONTROLES = [
     {
         "numero":    "17",
         "titulo":    "Controle 17 — Inversão de Saldo",
+        "descricao": ("Identifica contas com saldo de natureza contrária ao definido pelo PCASP: "
+                      "ativo com saldo credor, passivo com saldo devedor, receita com saldo devedor, "
+                      "despesa com saldo credor, etc. "
+                      "Pode indicar lançamento na conta errada, estorno a maior, transação ainda em aberto "
+                      "ou erro de encerramento de período. É um alerta transversal — abrange todas as classes contábeis. "
+                      "Base: MCASP — PCASP, natureza e função das contas; NBC TSP 01."),
         "aba":       "C17",
         "sql":       "17-Inversão de Saldo.sql",
         "tipo":      "detalhe",  # só saldos invertidos (< 0) do mês corrente
@@ -399,6 +478,13 @@ CONTROLES = [
     {
         "numero":    "18",
         "titulo":    "Controle 18 — Previsão Adicional a Lançar",
+        "descricao": ("Identifica valores de créditos adicionais (suplementações, especiais ou extraordinários) "
+                      "aprovados administrativamente mas ainda sem o lançamento contábil correspondente. "
+                      "O MCASP exige o registro contábil simultâneo à abertura do crédito, "
+                      "pois o orçamento aprovado deve sempre refletir a execução registrada. "
+                      "Diferença gera divergência entre o orçamento vigente e o executado, "
+                      "podendo distorcer os indicadores de execução orçamentária. "
+                      "Base: Lei 4.320/1964, arts. 40–46; MCASP — Execução Orçamentária da Receita/Despesa; IPC GDF."),
         "aba":       "C18",
         "sql":       "18-Previsão Adicional a Lançar.sql",
         "tipo":      "detalhe",
@@ -702,6 +788,10 @@ def _escrever_resumo(ws, resultados: list[dict], mes: int, ano: int) -> None:
 
 # ── Painel HTML ───────────────────────────────────────────────────────────────
 PAINEL_DIR   = Path(__file__).parent.parent / "painel"
+
+# Lookups de nomes — preenchidos em main() após conexão Oracle
+_NOUG:    dict[str, str] = {}   # COUG  → NOUG
+_NOCONTA: dict[str, str] = {}   # COCONTACONTABIL → NOCONTACONTABIL
 MAX_ROWS_HTML = 2000          # salvaguarda para controles com muitas linhas
 
 _MESES_PT = ["","Janeiro","Fevereiro","Março","Abril","Maio","Junho",
@@ -777,11 +867,14 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
         ek0  = _he(k0)
         l0_contas = "|".join(sorted(conta_per_l0.get(k0, set())))
         d_contas_l0 = f' data-contas="{_he(l0_contas)}"' if cfc is not None else ""
+        _noug_sub = _NOUG.get(str(k0).strip(), "")
+        _noug_span = (f'<span class="ug-name">{_he(_noug_sub)}</span>'
+                      if _noug_sub else "")
         trs.append(
             f'<tr class="hier-l1" data-key="{ek0}" data-ug="{ek0}"{d_contas_l0}>'
             f'<td class="hier-cell">'
             f'<button class="hier-btn" data-key="{ek0}" onclick="toggleHier(this)">&#9654;</button>'
-            f'<span class="hier-lbl">{gl[0]} {_he(k0)}</span></td>'
+            f'<span class="hier-lbl">{gl[0]} {_he(k0)}{_noug_span}</span></td>'
             f'<td class="num hier-total">{_brl(tot0)}</td></tr>'
         )
         for k1, leaf_rows in sub.items():
@@ -840,16 +933,28 @@ def _html_ctrl_hierarquia(r: dict, rows: list, hier: dict) -> str:
 def _html_ctrl_section(r: dict) -> str:
     numero     = r["numero"]
     titulo     = _he(r["titulo"])
+    descricao  = _he(r.get("descricao", ""))
     chip       = r.get("chip", "inf")
     chip_cls   = {"ok": "c-ok", "err": "c-err", "inf": "c-inf"}.get(chip, "c-inf")
     chip_txt   = {"ok": "OK", "err": "COM DIFERENÇA", "inf": "OCORRÊNCIAS"}.get(chip, "INFO")
     tipo       = r["tipo"]
     n_ocorr    = r.get("n_ocorrencias", 0)
     n_diff     = r.get("n_diff", 0)
-    rows       = r.get("rows", [])
-    col_labels = r.get("col_labels", {})
-    col_aliases= r.get("col_aliases", [])
-    diff_set   = set(r.get("diff_cols", []))
+    rows          = r.get("rows", [])
+    col_labels    = r.get("col_labels", {})
+    col_aliases   = r.get("col_aliases", [])
+    diff_set      = set(r.get("diff_cols", []))
+    default_so_diff = r.get("default_so_diff", False)
+
+    # pré-filtra só as linhas com diferença quando configurado
+    if default_so_diff and diff_set:
+        def _row_has_diff(row):
+            for ci in diff_set:
+                v = row[ci] if len(row) > ci else None
+                if v is not None and v != 0 and v != "" and str(v).strip() not in ("0", "0.0", ""):
+                    return True
+            return False
+        rows = [row for row in rows if _row_has_diff(row)]
 
     # Para "ug": col 0=Gestão → seletor, col 1=Gestão Contáb. → linha,
     #            col 2=UG Contáb. → linha,    col 3=UG → seletor
@@ -912,7 +1017,7 @@ def _html_ctrl_section(r: dict) -> str:
 
     # ── barra de filtros do controle ──────────────────────────────────────────
     filter_html = ""
-    if uniq_ugs or uniq_gest or uniq_contas_hier:
+    if uniq_ugs or uniq_gest or uniq_contas_hier or diff_set:
         parts = []
         if uniq_ugs:
             opts = "\n".join(f'<option value="{_he(u)}">{_he(u)}</option>' for u in uniq_ugs)
@@ -933,6 +1038,11 @@ def _html_ctrl_section(r: dict) -> str:
                 f'<label for="sel-conta-{numero}">{_cfc_lbl}</label>'
                 f'<select id="sel-conta-{numero}" onchange="filtrarCtrl(\'{numero}\')">'
                 f'<option value="">&#8212; todas &#8212;</option>{opts}</select>')
+        if diff_set:
+            _diff_active = ' active' if default_so_diff else ''
+            parts.append(
+                f'<button id="btn-diff-{numero}" class="btn-diff{_diff_active}"'
+                f' onclick="toggleSoDiff(\'{numero}\')">S&#243; dif.</button>')
         parts.append(f'<button onclick="limparCtrl(\'{numero}\')">Limpar</button>')
         parts.append(f'<span class="ctrl-filter-info" id="info-{numero}"></span>')
         filter_html = f'<div class="ctrl-filter">{"".join(parts)}</div>'
@@ -990,18 +1100,52 @@ def _html_ctrl_section(r: dict) -> str:
                 is_row_id  = (i in row_id_set)
                 is_diff    = i in diff_set
                 is_txt_col = (i in text_col_set)
+                lbl_i      = col_labels.get(i, col_aliases[i] if i < len(col_aliases) else "")
+                is_ug_col  = lbl_i in ("UG", "UG Contáb.", "UG Contáb", "COUG")
+                is_cc_col  = ("Conta Cont" in lbl_i or lbl_i in ("Conta Contábil", "COCONTACONTABIL"))
                 if is_row_id:
-                    tr += f'<td class="ug-cell">{_he(val) if val is not None else ""}</td>'
+                    code_s = _he(val) if val is not None else ""
+                    sub = ""
+                    if is_ug_col and val is not None:
+                        nome = _NOUG.get(str(val).strip(), "")
+                        if nome:
+                            sub = f'<span class="ug-name">{_he(nome)}</span>'
+                    elif is_cc_col and val is not None:
+                        nome = _NOCONTA.get(str(val).strip(), "")
+                        if nome:
+                            sub = f'<span class="conta-name">{_he(nome)}</span>'
+                    tr += f'<td class="ug-cell">{code_s}{sub}</td>'
                 elif val is None:
                     tr += f'<td class="{"num diff-cell" if is_diff else "num"}"></td>'
                 elif is_txt_col:
-                    tr += f"<td>{_he(val)}</td>"
+                    # para colunas de código (conta contábil, UG) em colunas não-rowid
+                    code_s = _he(val)
+                    sub = ""
+                    if is_ug_col:
+                        nome = _NOUG.get(str(val).strip(), "")
+                        if nome:
+                            sub = f'<span class="ug-name">{_he(nome)}</span>'
+                    elif is_cc_col:
+                        nome = _NOCONTA.get(str(val).strip(), "")
+                        if nome:
+                            sub = f'<span class="conta-name">{_he(nome)}</span>'
+                    tr += f"<td>{code_s}{sub}</td>"
                 else:
                     try:
                         float(val)
                         tr += f'<td class="{"num diff-cell" if is_diff else "num"}">{_brl(val)}</td>'
                     except (TypeError, ValueError):
-                        tr += f"<td>{_he(val)}</td>"
+                        code_s = _he(val)
+                        sub = ""
+                        if is_ug_col:
+                            nome = _NOUG.get(str(val).strip(), "")
+                            if nome:
+                                sub = f'<span class="ug-name">{_he(nome)}</span>'
+                        elif is_cc_col:
+                            nome = _NOCONTA.get(str(val).strip(), "")
+                            if nome:
+                                sub = f'<span class="conta-name">{_he(nome)}</span>'
+                        tr += f"<td>{code_s}{sub}</td>"
             tr += "</tr>"
             trs.append(tr)
 
@@ -1013,11 +1157,13 @@ def _html_ctrl_section(r: dict) -> str:
                 f'<tbody>{"".join(trs)}</tbody>'
                 f'</table></div>{trunc}')
 
+    desc_html = (f'<p class="ctrl-desc">{descricao}</p>' if descricao else "")
     return (f'<details class="ctrl" id="ctrl-{numero}">\n'
             f'  <summary><span class="ctrl-num">C{numero}</span>'
             f'    {titulo}'
             f'    <span class="chip {chip_cls}">{chip_txt}</span></summary>\n'
             f'  <div class="ctrl-body">'
+            f'    {desc_html}'
             f'    {filter_html}'
             f'    <span class="ctrl-stats">{stats}</span>'
             f'    {body}'
@@ -1182,6 +1328,16 @@ footer{{font-size:11px;color:var(--t3);text-align:center;padding:14px;margin-top
 .tbl-hier tfoot tr.hier-total-row td{{
   background:var(--brand);color:#fff;font-weight:700;font-size:12px;
   position:sticky;bottom:0;z-index:1;border-top:2px solid var(--brand)}}
+.btn-diff{{font-size:10px;padding:3px 10px;border:1px solid var(--bd);border-radius:5px;
+          background:var(--s2);color:var(--t2);cursor:pointer;white-space:nowrap}}
+.btn-diff.active{{background:var(--err-bg);color:var(--err);border-color:var(--err-bd);font-weight:700}}
+.ctrl-desc{{font-size:11.5px;color:var(--t2);line-height:1.55;padding:8px 14px 6px;
+           border-left:3px solid var(--brand);background:var(--s1);border-radius:0 5px 5px 0;
+           margin:0 0 10px;font-style:italic}}
+.ug-name{{font-size:10px;color:var(--t3);font-weight:400;display:block;
+         white-space:normal;line-height:1.2;margin-top:2px}}
+.conta-name{{font-size:10px;color:var(--t3);font-weight:400;display:block;
+            white-space:normal;line-height:1.2;margin-top:2px}}
 </style>
 </head>
 <body>
@@ -1233,13 +1389,21 @@ function toggleHier(btn){{
   }});
 }}
 /* ── filtros por controle ── */
+function toggleSoDiff(num){{
+  var btn=document.getElementById('btn-diff-'+num);
+  if(!btn)return;
+  btn.classList.toggle('active');
+  filtrarCtrl(num);
+}}
 function filtrarCtrl(num){{
   var ugEl=document.getElementById('sel-ug-'+num);
   var gsEl=document.getElementById('sel-gest-'+num);
   var ctEl=document.getElementById('sel-conta-'+num);
+  var diffBtn=document.getElementById('btn-diff-'+num);
   var ug=ugEl?ugEl.value:'';
   var gs=gsEl?gsEl.value:'';
   var conta=ctEl?ctEl.value:'';
+  var soDiff=diffBtn&&diffBtn.classList.contains('active');
   var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
   if(!tbl)return;
   var isHier=tbl.classList.contains('tbl-hier');
@@ -1266,18 +1430,21 @@ function filtrarCtrl(num){{
     var vis=0,tot=0;
     tbl.querySelectorAll('tbody tr').forEach(function(tr){{
       var m=(!ug||tr.dataset.ug===ug)&&(!gs||tr.dataset.gest===gs);
+      if(m&&soDiff&&tr.classList.contains('ok-row'))m=false;
       tr.style.display=m?'':'none'; tot++;if(m)vis++;
     }});
-    if(info)info.textContent=(ug||gs)?vis+' de '+tot+' linha(s)':'';
+    if(info)info.textContent=(ug||gs||soDiff)?vis+' de '+tot+' linha(s)':'';
   }}
 }}
 function limparCtrl(num){{
   var ugEl=document.getElementById('sel-ug-'+num);
   var gsEl=document.getElementById('sel-gest-'+num);
   var ctEl=document.getElementById('sel-conta-'+num);
+  var diffBtn=document.getElementById('btn-diff-'+num);
   if(ugEl)ugEl.value='';
   if(gsEl)gsEl.value='';
   if(ctEl)ctEl.value='';
+  if(diffBtn)diffBtn.classList.remove('active');
   var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
   if(!tbl)return;
   if(tbl.classList.contains('tbl-hier')){{
@@ -1315,6 +1482,25 @@ def main() -> None:
 
     conn = conectar()
     try:
+        # ── lookups de nomes (UG e Conta Contábil) ────────────────────────────
+        global _NOUG, _NOCONTA
+        try:
+            cur = conn.cursor()
+            cur.execute(f"SELECT COUG, NOUG FROM MIL{args.ano}.UNIDADEGESTORA")
+            _NOUG = {str(r[0]).strip(): str(r[1] or "").strip() for r in cur}
+            cur.close()
+        except Exception:
+            pass
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                f"SELECT COCONTACONTABIL, NOCONTACONTABIL "
+                f"FROM MIL{args.ano}.VCONTACONTABIL")
+            _NOCONTA = {str(r[0]).strip(): str(r[1] or "").strip() for r in cur}
+            cur.close()
+        except Exception:
+            pass
+
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         nome_arq = f"Controles_Rotina_{args.ano}_{args.mes:02d}_{ts}.xlsx"
         caminho  = OUTPUT_DIR / nome_arq
