@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Motor de regras do relatorio_integridade.py.
+Motor de regras do relatorio_integridade_pdf_oficial.py.
 
 Reconstrução das regras originais (Regras_de_Integridade.txt, 13 regras) a
 partir de leitura direta dos PDFs oficiais -- os módulos originais que

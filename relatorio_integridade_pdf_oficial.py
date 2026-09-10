@@ -4,10 +4,17 @@
  RELATÓRIO DE INTEGRIDADE CONTÁBIL E ORÇAMENTÁRIA — Governo do Distrito Federal
 ================================================================================
 
-Lê os 6 demonstrativos OFICIAIS publicados em
+RENOMEADO em 10/09/2026 (era relatorio_integridade.py) para deixar explícito
+que este script é o ÚNICO dos três diagnósticos do projeto que NÃO toca no
+Oracle nem lê os .xlsx gerados por mestre.py/bo.py/bp.py/etc. — ele lê
+SÓ os 6 demonstrativos OFICIAIS já PUBLICADOS EM PDF na pasta
 "13 - DEMONSTRATIVOS CONTÁBEIS/{ano}/{subpasta}/Lista{Tipo} {mes:02d}.pdf"
 e aplica as regras de integridade cruzando-os entre si (leitor_pdf_oficial.py
-+ motor_regras.py), gerando Relatorio_Integridade.xlsx e .pdf.
++ motor_regras.py), gerando Relatorio_Integridade.xlsx/.pdf + o painel
+painel/painel_integridade_pdf_oficial.html. Os outros dois diagnósticos do
+projeto usam fontes diferentes: diag.py/diag_tipoagreg.py consultam o Oracle
+diretamente; auditoria_consolidada.py lê os .xlsx que mestre.py/bo.py/bp.py/
+dfc.py/dmpl.py/dvp.py/gerar_balancete.py já geraram (sem Oracle e sem PDF).
 
 REESCRITO em 18/08/2026: a versão anterior dependia de 5 módulos
 (leitor_dados_mensais.py, motor_regras.py, gerar_excel.py, gerar_pdf.py,
@@ -17,11 +24,11 @@ digitação manual em dados_mensais.xlsx: lê os PDFs oficiais diretamente,
 o que permite rodar sozinho na rotina noturna sem intervenção humana.
 
 Uso:
-    python relatorio_integridade.py --mes 7 --ano 2026
-    python relatorio_integridade.py --mes 7 --ano 2026 --formato pdf
+    python relatorio_integridade_pdf_oficial.py --mes 7 --ano 2026
+    python relatorio_integridade_pdf_oficial.py --mes 7 --ano 2026 --formato pdf
 ================================================================================
 """
-import argparse, sys
+import argparse, json, sys
 from datetime import datetime
 from pathlib import Path
 
@@ -48,6 +55,9 @@ from leitor_pdf_oficial import (carregar, PdfNaoEncontrado, pasta13_mudou,
                                 marcar_pasta13_processada, ultimo_mes_disponivel)
 from motor_regras import run_all_rules, Achado
 
+from saida.xlsx_html import fmt_brl
+from auditoria_consolidada import CSS as _CSS_BASE  # reaproveita o mesmo tema visual
+
 OUTPUT_DIR = Path(__file__).parent
 MESES = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',
          6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',
@@ -60,6 +70,15 @@ COR_STATUS = {
     'INFORMATIVO': ('1F4E78', 'DDEBF7'),
     'NAO_VERIF':   ('595959', 'E7E6E6'),
 }
+
+# ── Painel HTML: status do motor_regras.py (5 categorias) -> chip/ícone.
+#    DIVERGENTE/NAO_VERIF não existem no vocabulário OK/ERRO/ALERTA/INFO
+#    usado pelos outros painéis (saida/xlsx_html.py) -- mapeados à parte,
+#    com c-gray novo (CSS_EXTRA) para NAO_VERIF.
+ICONES_RI = {'OK': '✔', 'DIVERGENTE': '✘', 'ALERTA': '⚠',
+             'INFORMATIVO': 'ℹ', 'NAO_VERIF': '•'}
+CHIP_CLASS_RI = {'OK': 'c-ok', 'DIVERGENTE': 'c-err', 'ALERTA': 'c-alr',
+                  'INFORMATIVO': 'c-inf', 'NAO_VERIF': 'c-gray'}
 
 
 def _hx(h):
@@ -260,6 +279,223 @@ def gerar_pdf(achados, mes, ano, output_path):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+#  PAINEL HTML — mesmo padrão visual/de histórico do auditoria_consolidada.py
+#  e do gerar_balancete.py (seletor de execuções por data, snapshot em JSON).
+# ─────────────────────────────────────────────────────────────────────────────
+PAINEL_DIR = Path(__file__).parent / "painel"
+OUTPUT_HTML = PAINEL_DIR / "painel_integridade_pdf_oficial.html"
+DIR_HIST = PAINEL_DIR / "dados" / "integridade_pdf_oficial"
+N_HISTORICO = 24
+
+CSS_EXTRA = """
+.c-gray{background:var(--s2);color:var(--t2);border-color:var(--bd)}
+.kpi-row{grid-template-columns:repeat(5,1fr)}
+@media (max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+"""
+
+
+def salvar_historico(mes: int, ano: int, gerado_em: str, achados: list) -> None:
+    """Grava um snapshot desta execução em painel/dados/integridade_pdf_oficial/,
+    mesmo padrão do diag.py/auditoria_consolidada.py/gerar_balancete.py."""
+    DIR_HIST.mkdir(parents=True, exist_ok=True)
+    ts = gerado_em.replace("-", "").replace(":", "").replace("T", "_")[:15]
+    caminho = DIR_HIST / f"{ano}-{mes:02d}_{ts}.json"
+    doc = {
+        "gerado_em": gerado_em,
+        "mes": mes,
+        "ano": ano,
+        "achados": [
+            {"regra": a.regra, "status": a.status, "titulo": a.titulo,
+             "base_normativa": a.base_normativa,
+             "valor_a": a.valor_a, "rotulo_a": a.rotulo_a,
+             "valor_b": a.valor_b, "rotulo_b": a.rotulo_b,
+             "diferenca": a.diferenca, "observacao": a.observacao}
+            for a in achados
+        ],
+    }
+    caminho.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def carregar_historico(n: int = N_HISTORICO) -> list[dict]:
+    """Últimas n execuções (mais recente primeiro), para o seletor de datas."""
+    if not DIR_HIST.exists():
+        return []
+    arquivos = sorted(DIR_HIST.glob("*.json"), reverse=True)[:n]
+    result = []
+    for arq in arquivos:
+        try:
+            result.append(json.loads(arq.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+    return result
+
+
+def _kpi(rotulo: str, valor: int, cor_token: str, val_id: str) -> str:
+    return (f'<div class="kpi" style="--kpi-stripe:var({cor_token});--kpi-color:var({cor_token})">'
+            f'<div class="kpi-lbl">{rotulo}</div><div class="kpi-val" id="{val_id}">{valor}</div></div>')
+
+
+def _detalhe_txt(a) -> str:
+    partes = []
+    if a.get("rotulo_a") if isinstance(a, dict) else a.rotulo_a:
+        ra = a["rotulo_a"] if isinstance(a, dict) else a.rotulo_a
+        va = a["valor_a"] if isinstance(a, dict) else a.valor_a
+        partes.append(f"{ra}: {fmt_brl(va)}" if va is not None else ra)
+    rb = a["rotulo_b"] if isinstance(a, dict) else a.rotulo_b
+    vb = a["valor_b"] if isinstance(a, dict) else a.valor_b
+    if rb:
+        partes.append(f"{rb}: {fmt_brl(vb)}" if vb is not None else rb)
+    dif = a["diferenca"] if isinstance(a, dict) else a.diferenca
+    if dif is not None:
+        partes.append(f"Diferença: {fmt_brl(dif)}")
+    obs = a["observacao"] if isinstance(a, dict) else a.observacao
+    if obs:
+        partes.append(obs)
+    return "  |  ".join(partes)
+
+
+def _linha_achado_html(a) -> str:
+    status = a.status
+    chip = CHIP_CLASS_RI.get(status, "c-inf")
+    icone = ICONES_RI.get(status, "•")
+    label = STATUS_LABEL.get(status, status)
+    return (f'<div class="aud-item"><span class="chip {chip}">{icone} {label}</span>'
+            f'<div class="aud-txt"><strong>{a.regra} — {a.titulo}</strong>'
+            f'<span>{_detalhe_txt(a)}</span></div></div>')
+
+
+def gerar_html(mes: int, ano: int, achados: list) -> str:
+    agora_dt = datetime.now()
+    agora = agora_dt.strftime("%d/%m/%Y %H:%M:%S")
+    agora_iso = agora_dt.isoformat(timespec="seconds")
+
+    cont = {"OK": 0, "DIVERGENTE": 0, "ALERTA": 0, "INFORMATIVO": 0, "NAO_VERIF": 0}
+    for a in achados:
+        cont[a.status] = cont.get(a.status, 0) + 1
+
+    resultado_geral = (f"{cont['DIVERGENTE']} divergência(s), {cont['ALERTA']} alerta(s)"
+                        if (cont["DIVERGENTE"] or cont["ALERTA"]) else "nenhuma divergência ou alerta")
+
+    aud_html = "".join(_linha_achado_html(a) for a in achados)
+
+    salvar_historico(mes, ano, agora_iso, achados)
+    historico = carregar_historico()
+    js_data = (
+        f"const ICONES = {json.dumps(ICONES_RI, ensure_ascii=False)};\n"
+        f"const CHIP_CLASS = {json.dumps(CHIP_CLASS_RI, ensure_ascii=False)};\n"
+        f"const STATUS_LABEL = {json.dumps(STATUS_LABEL, ensure_ascii=False)};\n"
+        f"const MESES = {json.dumps(MESES, ensure_ascii=False)};\n"
+        f"var HISTORICO_FULL = {json.dumps(historico, ensure_ascii=False, indent=2)};"
+    )
+
+    return f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Integridade PDF Oficial</title>
+<style>{_CSS_BASE}{CSS_EXTRA}</style>
+</head>
+<body>
+<header class="hd">
+  <div><div class="hd-title">Integridade Contábil — PDFs Oficiais (GDF)</div>
+  <div class="hd-sub">{MESES[mes]}/{ano} · Fonte: PDFs publicados na pasta "13 - Demonstrativos Contábeis" (PSIAG550) — sem Oracle, sem xlsx interno</div></div>
+  <div class="hd-sub">Gerado em {agora}</div>
+</header>
+<main class="wrap">
+  <div class="run-wrap">
+    <span class="run-lbl">Execução</span>
+    <select id="run-select" onchange="loadRun(this.selectedIndex)"></select>
+    <span class="run-note">seletor troca a auditoria pela execução escolhida</span>
+  </div>
+
+  <div class="kpi-row">
+    {_kpi("Divergências", cont["DIVERGENTE"], "--err", "kpi-div")}
+    {_kpi("Alertas", cont["ALERTA"], "--wrn", "kpi-alr")}
+    {_kpi("OK", cont["OK"], "--ok", "kpi-ok")}
+    {_kpi("Informativos", cont["INFORMATIVO"], "--inf", "kpi-inf")}
+    {_kpi("Não Verificáveis", cont["NAO_VERIF"], "--t2", "kpi-nv")}
+  </div>
+
+  <details class="dem" open>
+    <summary>Regras de Integridade <span id="resultado-geral">RESULTADO: {resultado_geral}</span></summary>
+    <div class="dem-body"><div class="aud-list" id="aud-body">{aud_html}</div></div>
+  </details>
+
+  <footer>Integridade PDF Oficial — gerado automaticamente por relatorio_integridade_pdf_oficial.py (lê só os PDFs oficiais publicados, sem Oracle).</footer>
+</main>
+<script>
+{js_data}
+
+function fmtBRL(n){{
+  if (n === null || n === undefined) return '';
+  const neg = n < 0;
+  let s = Math.abs(n).toLocaleString('pt-BR', {{minimumFractionDigits:2, maximumFractionDigits:2}});
+  return (neg?'-':'') + s;
+}}
+
+function detalheTxt(a){{
+  const partes=[];
+  if(a.rotulo_a) partes.push(a.valor_a!=null ? `${{a.rotulo_a}}: ${{fmtBRL(a.valor_a)}}` : a.rotulo_a);
+  if(a.rotulo_b) partes.push(a.valor_b!=null ? `${{a.rotulo_b}}: ${{fmtBRL(a.valor_b)}}` : a.rotulo_b);
+  if(a.diferenca!=null) partes.push('Diferença: '+fmtBRL(a.diferenca));
+  if(a.observacao) partes.push(a.observacao);
+  return partes.join('  |  ');
+}}
+
+function renderRun(h){{
+  const set=(id,v)=>{{const el=document.getElementById(id); if(el) el.textContent=v||0;}};
+  const cont={{OK:0,DIVERGENTE:0,ALERTA:0,INFORMATIVO:0,NAO_VERIF:0}};
+  (h.achados||[]).forEach(a=>{{cont[a.status]=(cont[a.status]||0)+1;}});
+  set('kpi-div',cont.DIVERGENTE); set('kpi-alr',cont.ALERTA); set('kpi-ok',cont.OK);
+  set('kpi-inf',cont.INFORMATIVO); set('kpi-nv',cont.NAO_VERIF);
+  const rg=document.getElementById('resultado-geral');
+  if(rg){{
+    rg.textContent='RESULTADO: '+((cont.DIVERGENTE||cont.ALERTA)?`${{cont.DIVERGENTE}} divergência(s), ${{cont.ALERTA}} alerta(s)`:'nenhuma divergência ou alerta');
+  }}
+  const ab=document.getElementById('aud-body');
+  if(ab){{
+    ab.innerHTML=(h.achados||[]).map(a=>{{
+      const chip=CHIP_CLASS[a.status]||'c-inf';
+      const icone=ICONES[a.status]||'•';
+      const label=STATUS_LABEL[a.status]||a.status;
+      return `<div class="aud-item"><span class="chip ${{chip}}">${{icone}} ${{label}}</span>`+
+             `<div class="aud-txt"><strong>${{a.regra}} — ${{a.titulo}}</strong><span>${{detalheTxt(a)}}</span></div></div>`;
+    }}).join('');
+  }}
+}}
+
+function buildSelector(){{
+  const sel=document.getElementById('run-select');
+  if(!sel||!HISTORICO_FULL.length) return;
+  sel.innerHTML=HISTORICO_FULL.map((h,i)=>{{
+    const nDiv=(h.achados||[]).filter(a=>a.status==='DIVERGENTE').length;
+    let lbl='';
+    try{{
+      const d=new Date(h.gerado_em.replace('T',' '));
+      lbl=`${{MESES[h.mes]||h.mes}}/${{h.ano}} — ${{d.toLocaleDateString('pt-BR')}} ${{d.toLocaleTimeString('pt-BR',{{hour:'2-digit',minute:'2-digit'}})}}`;
+    }}catch(e){{lbl=h.gerado_em||String(i);}}
+    if(nDiv) lbl+=' ⚠ '+nDiv+' divergência(s)';
+    return `<option value="${{i}}">${{lbl}}</option>`;
+  }}).join('');
+}}
+
+function loadRun(idx){{
+  const h=HISTORICO_FULL[idx];
+  if(!h) return;
+  const sel=document.getElementById('run-select');
+  if(sel) sel.selectedIndex=idx;
+  renderRun(h);
+}}
+
+buildSelector();
+</script>
+</body>
+</html>
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 #  MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
@@ -337,6 +573,11 @@ def main():
         gerar_excel(achados, a.mes, a.ano, base.with_suffix('.xlsx'))
     if a.formato in ('ambos', 'pdf'):
         gerar_pdf(achados, a.mes, a.ano, base.with_suffix('.pdf'))
+
+    html = gerar_html(a.mes, a.ano, achados)
+    OUTPUT_HTML.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_HTML.write_text(html, encoding='utf-8')
+    print(f"  HTML salvo: {OUTPUT_HTML}")
 
     if a.somente_se_mudou:
         marcar_pasta13_processada(a.ano)

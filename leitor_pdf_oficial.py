@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Leitor dos demonstrativos contábeis OFICIAIS (PDFs publicados na pasta
-"13 - DEMONSTRATIVOS CONTÁBEIS"), para o relatorio_integridade.py.
+"13 - DEMONSTRATIVOS CONTÁBEIS"), para o relatorio_integridade_pdf_oficial.py.
 
 Substitui o antigo fluxo de entrada manual (dados_mensais.xlsx) por leitura
 direta dos PDFs -- elimina o passo de digitação todo mês e permite rodar

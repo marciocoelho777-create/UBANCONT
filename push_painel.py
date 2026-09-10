@@ -70,10 +70,16 @@ def html_alterados():
     )
     alterados = []
     for arq in locais:
+        if run(f'git check-ignore -q "{arq}"', check=False).returncode == 0:
+            continue  # arquivo proposital fora do git (ex.: arquivo histórico)
         if arq not in remoto:
             alterados.append(arq)
             continue
-        r2 = run(f'git diff {REMOTE}/{REMOTE_BRANCH} HEAD -- {arq}',
+        # Sem 2o ref: compara o blob do remoto contra o arquivo NO DISCO
+        # (working tree), nao contra o HEAD -- senao um .html recem-gerado
+        # mas ainda nao commitado localmente passava batido (HEAD ainda
+        # igual ao remoto) mesmo com o conteudo em disco ja diferente.
+        r2 = run(f'git diff {REMOTE}/{REMOTE_BRANCH} -- {arq}',
                  capture=True, check=False)
         if r2.stdout.strip():
             alterados.append(arq)
@@ -420,9 +426,20 @@ def publicar(arquivos):
         print('Push concluido para UBANCONT.')
 
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
         run(f'git checkout -q {branch_orig}', check=False)
         run(f'git branch -D {BRANCH_TMP}', check=False)
+        # Restaura no disco qualquer arquivo que o checkout de volta para
+        # branch_orig tenha removido -- acontece com arquivo PUBLICADO PELA
+        # PRIMEIRA VEZ: ele passa a existir (tracked) só no branch temporário
+        # _pub_painel, nunca foi commitado em branch_orig, então o checkout
+        # de volta desfaz o tracking e apaga o arquivo do working tree.
+        for arq in arquivos:
+            dst = Path(arq)
+            src_tmp = tmp / dst.name
+            if src_tmp.exists() and not dst.exists():
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src_tmp, dst)
+        shutil.rmtree(tmp, ignore_errors=True)
         if stashed:
             run('git stash pop -q', check=False)
 

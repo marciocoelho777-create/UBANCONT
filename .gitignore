@@ -30,7 +30,8 @@ painel/rotina_controles_*.html
 painel/auditoria_*.html
 !Relatorio_Integridade_*.xlsx
 *.pdf
-# Relatório de integridade (relatorio_integridade.py) -- só é regravado
+# Relatório de integridade (relatorio_integridade_pdf_oficial.py, renomeado
+# 10/09/2026, era relatorio_integridade.py) -- só é regravado
 # quando a pasta 13 muda (--somente-se-mudou), então cada versão que
 # existe já é um snapshot que vale versionar, ao contrário dos outros
 # Excel/PDF locais que mudam a cada execução sem sinalizar nada novo.
