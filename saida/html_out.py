@@ -244,6 +244,35 @@ def gerar_diag_tipoagreg(resultados: dict, mes: int, ano: int,
     _update(destino, js)
 
 
+_PAT_VS = re.compile(r'/\* VS-PDF-START \*/.*?/\* VS-PDF-END \*/', re.DOTALL)
+
+
+def gerar_vs_pdf(doc: dict, destino: Path | None = None) -> None:
+    """Atualiza o bloco VS-PDF no painel_classificacao.html."""
+    destino = destino or (PAINEL / "painel_classificacao.html")
+    if not destino.exists():
+        print(f"  [html] {destino.name} não encontrado — vs_pdf não atualizado")
+        return
+
+    achados = doc.get("achados", [])
+    js_block = (
+        f"/* VS-PDF-START */\n"
+        f"var VS_PDF_DATA = {json.dumps({'gerado_em': doc.get('gerado_em',''), 'mes': doc.get('mes'), 'ano': doc.get('ano'), 'achados': achados, 'n_diverg': doc.get('n_diverg', 0), 'n_erros': doc.get('n_erros', 0)}, ensure_ascii=False, indent=2)};\n"
+        f"/* VS-PDF-END */"
+    )
+    html = destino.read_text(encoding="utf-8")
+    if _PAT_VS.search(html):
+        html2 = _PAT_VS.sub(js_block, html)
+    else:
+        # Insere antes do </script> final se não existir o marcador
+        html2 = html.replace("/* AUTO-DATA-END */", f"/* AUTO-DATA-END */\n{js_block}")
+    if html2 == html:
+        print(f"  [html] VS-PDF: marcadores não encontrados em {destino.name}")
+        return
+    destino.write_text(html2, encoding="utf-8")
+    print(f"  HTML (vs_pdf): {destino}")
+
+
 def gerar_classificacao(doc: dict, destino: Path | None = None) -> None:
     """Atualiza painel_classificacao.html com os dados do run atual."""
     destino = destino or (PAINEL / "painel_classificacao.html")

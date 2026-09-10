@@ -30,6 +30,9 @@ Add-Content $LOG "  Rodando mes=$mes ano=$ano"
 # 3. Monitor de classificação (gera painel_classificacao.html)
 & $PYTHON monitor_classificacao.py --mes $mes --ano $ano 2>&1 | Tee-Object -Append -FilePath $LOG
 
+# 3b. Monitor vs PDF (compara banco com PDFs oficiais → painel_classificacao.html)
+& $PYTHON monitor_vs_pdf.py --mes $mes --ano $ano 2>&1 | Tee-Object -Append -FilePath $LOG
+
 # 4. Auditoria consolidada (gera auditoria_consolidada.html)
 & $PYTHON auditoria_consolidada.py --mes $mes --ano $ano 2>&1 | Tee-Object -Append -FilePath $LOG
 
