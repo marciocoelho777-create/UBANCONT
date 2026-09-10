@@ -579,6 +579,36 @@ footer {
     </div>
   </div>
 
+  <!-- 4e· Banco vs PDF oficial -->
+  <div class="card" id="card-vs-pdf">
+    <div class="card-hd">
+      Banco vs PDF oficial — divergências
+      <span id="vs-pdf-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="vs-pdf-wrap">
+      <table id="tbl-vs-pdf">
+        <thead>
+          <tr>
+            <th>Demo</th>
+            <th>Campo</th>
+            <th class="r">Banco (Oracle)</th>
+            <th class="r">PDF oficial</th>
+            <th class="r">Diferença</th>
+            <th>PDF arquivo</th>
+            <th>Data do PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-vs-pdf"></tbody>
+      </table>
+      <p id="vs-pdf-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Banco e PDFs oficiais conferem — sem divergências
+      </p>
+      <p id="vs-pdf-none" style="display:none;color:var(--t3);padding:.5rem 0">
+        Aguardando execução de <code>monitor_vs_pdf.py</code>
+      </p>
+    </div>
+  </div>
+
   <!-- 5· Campos de classificação por registro -->
   <div class="card">
     <div class="card-hd">
@@ -1137,6 +1167,10 @@ var HISTORICO_FULL = [
 ];
 /* AUTO-DATA-END */
 
+/* VS-PDF-START */
+var VS_PDF_DATA = null;
+/* VS-PDF-END */
+
 const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const CAMPOS_K = ['INCATEGORIA','CONATUREZA','COFONTE','COUO','COFUNCAO'];
@@ -1355,6 +1389,62 @@ function renderRun(data){
     } else {
       ortTbody.innerHTML='';
       if(ortOk) ortOk.style.display='';
+    }
+  }
+
+  /* Banco vs PDF oficial */
+  const vpData = (typeof VS_PDF_DATA !== 'undefined' && VS_PDF_DATA) ? VS_PDF_DATA : null;
+  const vpBadge  = document.getElementById('vs-pdf-badge');
+  const vpOk     = document.getElementById('vs-pdf-ok');
+  const vpNone   = document.getElementById('vs-pdf-none');
+  const vpTbody  = document.getElementById('tbody-vs-pdf');
+  if(vpTbody){
+    if(!vpData){
+      vpTbody.innerHTML='';
+      if(vpOk)   vpOk.style.display='none';
+      if(vpNone) vpNone.style.display='';
+      if(vpBadge) vpBadge.innerHTML=`<span class="badge b-muted">sem dados</span>`;
+    } else {
+      const divs = (vpData.achados||[]).filter(a=>a.diferenca!==null&&a.diferenca!==undefined);
+      const errs = (vpData.achados||[]).filter(a=>a.diferenca===null||a.diferenca===undefined);
+      if(vpNone) vpNone.style.display='none';
+      if(divs.length===0 && errs.length===0){
+        vpTbody.innerHTML='';
+        if(vpOk) vpOk.style.display='';
+        if(vpBadge) vpBadge.innerHTML=`<span class="badge b-ok">conferem</span>`;
+      } else {
+        if(vpOk) vpOk.style.display='none';
+        if(vpBadge){
+          const erStr = errs.length ? ` · ${errs.length} erro(s) de extração` : '';
+          vpBadge.innerHTML = divs.length
+            ? `<span class="badge b-err">${divs.length} divergência(s)${erStr}</span>`
+            : `<span class="badge b-wrn">${errs.length} erro(s) de extração</span>`;
+        }
+        const _brlAbs = v => v===null||v===undefined ? '—' : (v<0?'<span style="color:var(--err)">':'')+_brl(Math.abs(v))+(v<0?'</span>':'');
+        vpTbody.innerHTML=[...divs,...errs].map(a=>{
+          const isDiverg = a.diferenca!==null&&a.diferenca!==undefined;
+          const fname = a.pdf_arquivo ? a.pdf_arquivo.split(/[\\/]/).pop() : '—';
+          if(isDiverg){
+            const difNeg = a.diferenca < 0;
+            return `<tr>
+              <td><span class="badge b-muted">${a.demo||'?'}</span></td>
+              <td>${(a.rotulo||'').replace(/</g,'&lt;')}</td>
+              <td class="r">${_brl(a.valor_banco)}</td>
+              <td class="r">${_brl(a.valor_pdf)}</td>
+              <td class="r" style="color:var(--err);font-weight:600">${difNeg?'':'+'}${_brl(a.diferenca)}</td>
+              <td style="font-size:11px;word-break:break-all">${fname}</td>
+              <td style="font-size:11px;white-space:nowrap">${a.pdf_data||'—'}</td>
+            </tr>`;
+          } else {
+            return `<tr>
+              <td><span class="badge b-muted">${a.demo||'?'}</span></td>
+              <td colspan="4" style="color:var(--t3);font-size:12px">⚠ ${(a.erro||'erro desconhecido').replace(/</g,'&lt;')}</td>
+              <td style="font-size:11px">${fname}</td>
+              <td style="font-size:11px">${a.pdf_data||'—'}</td>
+            </tr>`;
+          }
+        }).join('');
+      }
     }
   }
 
