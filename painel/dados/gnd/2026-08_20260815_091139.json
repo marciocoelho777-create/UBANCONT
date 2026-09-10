@@ -1,0 +1,72 @@
+{
+  "gerado_em": "2026-08-15T09:11:39",
+  "mes": 8,
+  "ano": 2026,
+  "faixas_com_gnd": 34,
+  "origem_listas": "oracle:ITEMBALANCO",
+  "listas_lidas_em": "2026-08-15T09:09:24",
+  "total": -14408920.040000001,
+  "ocorrencias": [
+    {
+      "mes": 6,
+      "conta": 622130300,
+      "valor": 1922061.96,
+      "registros": 1,
+      "documentos": [
+        {
+          "documento": "2026NL12224",
+          "ug": 170101,
+          "gestao": 17901,
+          "conta_corrente": "2239011030282028517000510000000033903702",
+          "valor": 1922061.96,
+          "dc": "C",
+          "natureza_origem": "33903702",
+          "fonte_natureza": "conta-corrente",
+          "gnd_esperado": "3"
+        }
+      ]
+    },
+    {
+      "mes": 8,
+      "conta": 622920104,
+      "valor": 1134760.68,
+      "registros": 1,
+      "documentos": []
+    },
+    {
+      "mes": 3,
+      "conta": 951210500,
+      "valor": 935646.67,
+      "registros": 1,
+      "documentos": []
+    },
+    {
+      "mes": 5,
+      "conta": 622130300,
+      "valor": 129929.04,
+      "registros": 1,
+      "documentos": []
+    },
+    {
+      "mes": 1,
+      "conta": 951210500,
+      "valor": -3616417.47,
+      "registros": 1,
+      "documentos": []
+    },
+    {
+      "mes": 4,
+      "conta": 951210500,
+      "valor": -4547474.46,
+      "registros": 1,
+      "documentos": []
+    },
+    {
+      "mes": 6,
+      "conta": 951210500,
+      "valor": -10367426.46,
+      "registros": 1,
+      "documentos": []
+    }
+  ]
+}

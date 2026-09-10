@@ -528,7 +528,33 @@ footer {
     </div>
   </div>
 
-  <!-- 4b· Ortografia do ITEMBALANCO -->
+  <!-- 4b· Mudanças no ITEMBALANCO (últimos 15 dias) -->
+  <div class="card" id="card-mudancas-ib">
+    <div class="card-hd">
+      Mudanças no ITEMBALANCO — últimos 15 dias
+      <span id="mud-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="mud-wrap">
+      <table id="tbl-mudancas">
+        <thead>
+          <tr>
+            <th>Demo</th>
+            <th>Cód. Item</th>
+            <th>Nome</th>
+            <th>Tipo de mudança</th>
+            <th>Conta afetada</th>
+            <th>Referência</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-mudancas"></tbody>
+      </table>
+      <p id="mud-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Nenhuma mudança detectada nos últimos 15 dias
+      </p>
+    </div>
+  </div>
+
+  <!-- 4d· Ortografia do ITEMBALANCO -->
   <div class="card" id="card-ortografia">
     <div class="card-hd">
       Ortografia do ITEMBALANCO
@@ -549,6 +575,36 @@ footer {
       </table>
       <p id="ort-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
         ✅ Nenhum problema de ortografia detectado
+      </p>
+    </div>
+  </div>
+
+  <!-- 4e· Banco vs PDF oficial -->
+  <div class="card" id="card-vs-pdf">
+    <div class="card-hd">
+      Banco vs PDF oficial — divergências
+      <span id="vs-pdf-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="vs-pdf-wrap">
+      <table id="tbl-vs-pdf">
+        <thead>
+          <tr>
+            <th>Demo</th>
+            <th>Campo</th>
+            <th class="r">Banco (Oracle)</th>
+            <th class="r">PDF oficial</th>
+            <th class="r">Diferença</th>
+            <th>PDF arquivo</th>
+            <th>Data do PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-vs-pdf"></tbody>
+      </table>
+      <p id="vs-pdf-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ Banco e PDFs oficiais conferem — sem divergências
+      </p>
+      <p id="vs-pdf-none" style="display:none;color:var(--t3);padding:.5rem 0">
+        Aguardando execução de <code>monitor_vs_pdf.py</code>
       </p>
     </div>
   </div>
@@ -747,13 +803,33 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-09-08T13:14:50",
+  "gerado_em": "2026-09-10T05:03:28",
   "mes": 9,
   "ano": 2026,
   "por_demonstrativo": {},
   "achados": [],
   "gnd_errado": [],
   "historico": [
+    {
+      "gerado_em": "2026-09-10T05:03:28",
+      "n": 0,
+      "por_dem": {}
+    },
+    {
+      "gerado_em": "2026-09-09T17:28:41",
+      "n": 0,
+      "por_dem": {}
+    },
+    {
+      "gerado_em": "2026-09-09T09:52:33",
+      "n": 0,
+      "por_dem": {}
+    },
+    {
+      "gerado_em": "2026-09-08T15:23:24",
+      "n": 0,
+      "por_dem": {}
+    },
     {
       "gerado_em": "2026-09-08T13:14:50",
       "n": 0,
@@ -763,29 +839,10 @@ const CDATA = {
       "gerado_em": "2026-09-06T09:56:50",
       "n": 0,
       "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-05T21:50:32",
-      "n": 0,
-      "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-04T10:47:12",
-      "n": 0,
-      "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-03T06:42:30",
-      "n": 0,
-      "por_dem": {}
-    },
-    {
-      "gerado_em": "2026-09-02T06:01:41",
-      "n": 0,
-      "por_dem": {}
     }
   ]
 };
+const MUDANCAS_IB = [];
 const ORTOGRAFIA = [
   {
     "demo": "DFC",
@@ -796,34 +853,6 @@ const ORTOGRAFIA = [
         "tipo": "capitalização",
         "detalhe": "primeira letra minúscula",
         "sugestoes": []
-      }
-    ]
-  },
-  {
-    "demo": "DFC",
-    "coitembalanco": 50201000000,
-    "noitembalanco": "Juros e Correção Monetária da Divída Externa",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
-      }
-    ]
-  },
-  {
-    "demo": "DFC",
-    "coitembalanco": 50301000000,
-    "noitembalanco": "Outros Encargos da Divída",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
       }
     ]
   },
@@ -848,48 +877,6 @@ const ORTOGRAFIA = [
         "tipo": "capitalização",
         "detalhe": "primeira letra minúscula",
         "sugestoes": []
-      }
-    ]
-  },
-  {
-    "demo": "BO",
-    "coitembalanco": 30101020000,
-    "noitembalanco": "Juros e Encargos da Divída",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
-      }
-    ]
-  },
-  {
-    "demo": "BO",
-    "coitembalanco": 40101020000,
-    "noitembalanco": "Juros e Encargos da Divída",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
-      }
-    ]
-  },
-  {
-    "demo": "DFC",
-    "coitembalanco": 50101000000,
-    "noitembalanco": "Juros e Correção Monetária da Divída Interna",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
       }
     ]
   },
@@ -930,20 +917,6 @@ const ORTOGRAFIA = [
     ]
   },
   {
-    "demo": "BO",
-    "coitembalanco": 50101020000,
-    "noitembalanco": "Juros e Encargos da Divída",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
-      }
-    ]
-  },
-  {
     "demo": "BP",
     "coitembalanco": 10101000000,
     "noitembalanco": "Caixa e Equivalentes de  Caixa",
@@ -952,20 +925,6 @@ const ORTOGRAFIA = [
         "tipo": "espaços",
         "detalhe": "espaço duplo",
         "sugestoes": []
-      }
-    ]
-  },
-  {
-    "demo": "BO",
-    "coitembalanco": 20101020000,
-    "noitembalanco": "Juros e Encargos da Divída",
-    "problemas": [
-      {
-        "tipo": "ortografia",
-        "detalhe": "\"Divída\"",
-        "sugestoes": [
-          "divida"
-        ]
       }
     ]
   },
@@ -1038,6 +997,34 @@ const ORTOGRAFIA = [
 ];
 var HISTORICO_FULL = [
   {
+    "gerado_em": "2026-09-10T05:03:28",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-09-09T17:28:41",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-09-09T09:52:33",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-09-08T15:23:24",
+    "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
     "gerado_em": "2026-09-08T13:14:50",
     "mes": 9,
     "ano": 2026,
@@ -1082,6 +1069,13 @@ var HISTORICO_FULL = [
   {
     "gerado_em": "2026-09-01T09:39:19",
     "mes": 9,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-09-09T17:27:53",
+    "mes": 8,
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
@@ -1169,304 +1163,120 @@ var HISTORICO_FULL = [
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
-  },
-  {
-    "gerado_em": "2026-08-26T09:20:05",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-25T13:35:41",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-24T13:51:51",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-24T13:38:49",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-08-22T09:36:23",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {
-      "BO": {
-        "n": 2,
-        "valor": 2051991.0
-      }
-    },
-    "achados": [
-      {
-        "mes": 6,
-        "conta": 622130300,
-        "valor": 1922061.96,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      },
-      {
-        "mes": 5,
-        "conta": 622130300,
-        "valor": 129929.04,
-        "registros": 1,
-        "campos": {
-          "INCATEGORIA": null,
-          "CONATUREZA": null,
-          "COFONTE": null,
-          "COUO": null,
-          "COFUNCAO": 80
-        },
-        "zerados": [
-          "INCATEGORIA"
-        ],
-        "some_de": [
-          "BO"
-        ],
-        "permanece_em": [],
-        "incerto_em": [
-          "BF"
-        ]
-      }
-    ]
   }
 ];
 /* AUTO-DATA-END */
+
+/* VS-PDF-START */
+var VS_PDF_DATA = {
+  "gerado_em": "2026-09-10T11:11:07",
+  "mes": 8,
+  "ano": 2026,
+  "achados": [
+    {
+      "demo": "BO",
+      "rotulo": "Receita Realizada",
+      "valor_banco": 31607122017.61,
+      "valor_pdf": 31086635004.66,
+      "diferenca": 520487012.95000076,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\04 - Balanço Orçamentário\ListaBalancoOrcamentario 08.pdf",
+      "pdf_data": "28/08/2026 13:32"
+    },
+    {
+      "demo": "BO",
+      "rotulo": "Despesa Empenhada",
+      "valor_banco": 31080433486.84,
+      "valor_pdf": 30568881883.38,
+      "diferenca": 511551603.4599991,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\04 - Balanço Orçamentário\ListaBalancoOrcamentario 08.pdf",
+      "pdf_data": "28/08/2026 13:32"
+    },
+    {
+      "demo": "BO",
+      "rotulo": "Despesa Liquidada",
+      "valor_banco": 27596684119.65,
+      "valor_pdf": 26858813963.62,
+      "diferenca": 737870156.0300026,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\04 - Balanço Orçamentário\ListaBalancoOrcamentario 08.pdf",
+      "pdf_data": "28/08/2026 13:32"
+    },
+    {
+      "demo": "BO",
+      "rotulo": "Despesa Paga",
+      "valor_banco": 25466016929.4,
+      "valor_pdf": 25159123140.82,
+      "diferenca": 306893788.58000183,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\04 - Balanço Orçamentário\ListaBalancoOrcamentario 08.pdf",
+      "pdf_data": "28/08/2026 13:32"
+    },
+    {
+      "demo": "BF",
+      "rotulo": "Receita Orçamentária",
+      "valor_banco": 31607122017.61,
+      "valor_pdf": 31086635004.66,
+      "diferenca": 520487012.95000076,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\01 - Balanço Financeiro\ListaBalancoFinanceiro 08.pdf",
+      "pdf_data": "28/08/2026 14:06"
+    },
+    {
+      "demo": "BF",
+      "rotulo": "Despesa Orçamentária (Paga)",
+      "valor_banco": 25466016929.4,
+      "valor_pdf": 25159123140.82,
+      "diferenca": 306893788.58000183,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\01 - Balanço Financeiro\ListaBalancoFinanceiro 08.pdf",
+      "pdf_data": "28/08/2026 14:06"
+    },
+    {
+      "demo": "BF",
+      "rotulo": "Caixa Final (Exceto RPPS + RPPS + Depósitos Restituíveis)",
+      "valor_banco": 7162528897.43,
+      "valor_pdf": 7027671277.360001,
+      "diferenca": 134857620.0699997,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\01 - Balanço Financeiro\ListaBalancoFinanceiro 08.pdf",
+      "pdf_data": "28/08/2026 14:06"
+    },
+    {
+      "demo": "BP",
+      "rotulo": "Ativo Total",
+      "valor_banco": 70220723434.06,
+      "valor_pdf": 69748408843.66,
+      "diferenca": 472314590.3999939,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\02 - Balanço Patrimonial\ListaBalancoPatrimonial 08.pdf",
+      "pdf_data": "28/08/2026 13:52"
+    },
+    {
+      "demo": "BP",
+      "rotulo": "Patrimônio Líquido",
+      "valor_banco": -146554209848.64,
+      "valor_pdf": -146473819231.79,
+      "diferenca": -80390616.8500061,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\02 - Balanço Patrimonial\ListaBalancoPatrimonial 08.pdf",
+      "pdf_data": "28/08/2026 13:52"
+    },
+    {
+      "demo": "DVP",
+      "rotulo": "Resultado Patrimonial do Período",
+      "valor_banco": 0.0,
+      "valor_pdf": -14842570851.94,
+      "diferenca": 14842570851.94,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\03 - Variação Patrimonial\ListaVariacaoPatrimonial 08.pdf",
+      "pdf_data": "28/08/2026 14:19"
+    },
+    {
+      "demo": "DFC",
+      "rotulo": "Caixa e Equivalente de Caixa Final",
+      "valor_banco": 7162528897.43,
+      "valor_pdf": 7027671277.36,
+      "diferenca": 134857620.07000065,
+      "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\05 - Fluxo de Caixa\ListaFluxoCaixa 08.pdf",
+      "pdf_data": "28/08/2026 14:52"
+    }
+  ],
+  "n_diverg": 11,
+  "n_erros": 0
+};
+/* VS-PDF-END */
 
 const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -1602,6 +1412,55 @@ function renderRun(data){
     </tr>`).join('');
   }
 
+  /* Mudanças no ITEMBALANCO */
+  const mudData = (typeof MUDANCAS_IB !== 'undefined') ? MUDANCAS_IB : [];
+  const mudBadge  = document.getElementById('mud-badge');
+  const mudOk     = document.getElementById('mud-ok');
+  const mudTbody  = document.getElementById('tbody-mudancas');
+  const MUD_LABEL = {
+    item_novo:        {txt: 'Item novo',          cls: 'b-ok'},
+    item_removido:    {txt: 'Item removido',       cls: 'b-err'},
+    conta_adicionada: {txt: 'Conta adicionada',   cls: 'b-wrn'},
+    conta_removida:   {txt: 'Conta removida',     cls: 'b-wrn'},
+    nome_alterado:    {txt: 'Nome alterado',       cls: 'b-wrn'},
+  };
+  if(mudBadge){
+    if(mudData.length){
+      const nNov = mudData.filter(m=>m.tipo_mud==='item_novo').length;
+      const nRem = mudData.filter(m=>m.tipo_mud==='item_removido').length;
+      const nOut = mudData.length - nNov - nRem;
+      let partes = [];
+      if(nNov) partes.push(`${nNov} novo${nNov>1?'s':''}`);
+      if(nRem) partes.push(`${nRem} removido${nRem>1?'s':''}`);
+      if(nOut) partes.push(`${nOut} alteração${nOut>1?'ões':''}`);
+      mudBadge.innerHTML=`<span class="badge b-wrn">${mudData.length} mudança${mudData.length>1?'s':''}: ${partes.join(', ')}</span>`;
+    } else {
+      mudBadge.innerHTML=`<span class="badge b-ok">sem mudanças</span>`;
+    }
+  }
+  if(mudTbody){
+    if(mudData.length){
+      if(mudOk) mudOk.style.display='none';
+      mudTbody.innerHTML=mudData.map(m=>{
+        const lbl = MUD_LABEL[m.tipo_mud]||{txt:m.tipo_mud,cls:'b-muted'};
+        const nomeCell = m.tipo_mud==='nome_alterado'
+          ? `<span style="color:var(--err);text-decoration:line-through;font-size:11px">${(m.nome_anterior||'').replace(/</g,'&lt;')}</span><br>${(m.noitembalanco||'').replace(/</g,'&lt;')}`
+          : (m.noitembalanco||'').replace(/</g,'&lt;');
+        return `<tr>
+          <td><span class="badge b-muted">${m.demo||'?'}</span></td>
+          <td><code>${m.coitembalanco||'—'}</code></td>
+          <td style="max-width:300px;word-break:break-word">${nomeCell}</td>
+          <td><span class="badge ${lbl.cls}">${lbl.txt}</span></td>
+          <td><code style="font-size:11px">${(m.conta||'—').replace(/</g,'&lt;')}</code></td>
+          <td style="font-size:11px;white-space:nowrap">${m.desde||'—'}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      mudTbody.innerHTML='';
+      if(mudOk) mudOk.style.display='';
+    }
+  }
+
   /* Ortografia do ITEMBALANCO */
   const ortData = (typeof ORTOGRAFIA !== 'undefined') ? ORTOGRAFIA : [];
   const ortBadge = document.getElementById('ort-badge');
@@ -1637,6 +1496,62 @@ function renderRun(data){
     } else {
       ortTbody.innerHTML='';
       if(ortOk) ortOk.style.display='';
+    }
+  }
+
+  /* Banco vs PDF oficial */
+  const vpData = (typeof VS_PDF_DATA !== 'undefined' && VS_PDF_DATA) ? VS_PDF_DATA : null;
+  const vpBadge  = document.getElementById('vs-pdf-badge');
+  const vpOk     = document.getElementById('vs-pdf-ok');
+  const vpNone   = document.getElementById('vs-pdf-none');
+  const vpTbody  = document.getElementById('tbody-vs-pdf');
+  if(vpTbody){
+    if(!vpData){
+      vpTbody.innerHTML='';
+      if(vpOk)   vpOk.style.display='none';
+      if(vpNone) vpNone.style.display='';
+      if(vpBadge) vpBadge.innerHTML=`<span class="badge b-muted">sem dados</span>`;
+    } else {
+      const divs = (vpData.achados||[]).filter(a=>a.diferenca!==null&&a.diferenca!==undefined);
+      const errs = (vpData.achados||[]).filter(a=>a.diferenca===null||a.diferenca===undefined);
+      if(vpNone) vpNone.style.display='none';
+      if(divs.length===0 && errs.length===0){
+        vpTbody.innerHTML='';
+        if(vpOk) vpOk.style.display='';
+        if(vpBadge) vpBadge.innerHTML=`<span class="badge b-ok">conferem</span>`;
+      } else {
+        if(vpOk) vpOk.style.display='none';
+        if(vpBadge){
+          const erStr = errs.length ? ` · ${errs.length} erro(s) de extração` : '';
+          vpBadge.innerHTML = divs.length
+            ? `<span class="badge b-err">${divs.length} divergência(s)${erStr}</span>`
+            : `<span class="badge b-wrn">${errs.length} erro(s) de extração</span>`;
+        }
+        const _brlAbs = v => v===null||v===undefined ? '—' : (v<0?'<span style="color:var(--err)">':'')+_brl(Math.abs(v))+(v<0?'</span>':'');
+        vpTbody.innerHTML=[...divs,...errs].map(a=>{
+          const isDiverg = a.diferenca!==null&&a.diferenca!==undefined;
+          const fname = a.pdf_arquivo ? a.pdf_arquivo.split(/[\\/]/).pop() : '—';
+          if(isDiverg){
+            const difNeg = a.diferenca < 0;
+            return `<tr>
+              <td><span class="badge b-muted">${a.demo||'?'}</span></td>
+              <td>${(a.rotulo||'').replace(/</g,'&lt;')}</td>
+              <td class="r">${_brl(a.valor_banco)}</td>
+              <td class="r">${_brl(a.valor_pdf)}</td>
+              <td class="r" style="color:var(--err);font-weight:600">${difNeg?'':'+'}${_brl(a.diferenca)}</td>
+              <td style="font-size:11px;word-break:break-all">${fname}</td>
+              <td style="font-size:11px;white-space:nowrap">${a.pdf_data||'—'}</td>
+            </tr>`;
+          } else {
+            return `<tr>
+              <td><span class="badge b-muted">${a.demo||'?'}</span></td>
+              <td colspan="4" style="color:var(--t3);font-size:12px">⚠ ${(a.erro||'erro desconhecido').replace(/</g,'&lt;')}</td>
+              <td style="font-size:11px">${fname}</td>
+              <td style="font-size:11px">${a.pdf_data||'—'}</td>
+            </tr>`;
+          }
+        }).join('');
+      }
     }
   }
 

@@ -1,0 +1,258 @@
+{
+  "gerado_em": "2026-09-08T15:23:24",
+  "mes": 9,
+  "ano": 2026,
+  "por_demonstrativo": {},
+  "achados": [],
+  "gnd_errado": [],
+  "ortografia": [
+    {
+      "demo": "DFC",
+      "coitembalanco": 30403000000,
+      "noitembalanco": "a Municípios",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 50201000000,
+      "noitembalanco": "Juros e Correção Monetária da Divída Externa",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 50301000000,
+      "noitembalanco": "Outros Encargos da Divída",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30401000000,
+      "noitembalanco": "a União",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30402000000,
+      "noitembalanco": "a Estados e Distrito Federal",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 30101020000,
+      "noitembalanco": "Juros e Encargos da Divída",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 40101020000,
+      "noitembalanco": "Juros e Encargos da Divída",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 50101000000,
+      "noitembalanco": "Juros e Correção Monetária da Divída Interna",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30102000000,
+      "noitembalanco": "de Estados e Distrito Federal",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30103000000,
+      "noitembalanco": "de Municípios",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 10102079902,
+      "noitembalanco": "TOTAL  (VII) = (V + VI)",
+      "problemas": [
+        {
+          "tipo": "espaços",
+          "detalhe": "espaço duplo",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 50101020000,
+      "noitembalanco": "Juros e Encargos da Divída",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "BP",
+      "coitembalanco": 10101000000,
+      "noitembalanco": "Caixa e Equivalentes de  Caixa",
+      "problemas": [
+        {
+          "tipo": "espaços",
+          "detalhe": "espaço duplo",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 20101020000,
+      "noitembalanco": "Juros e Encargos da Divída",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"Divída\"",
+          "sugestoes": [
+            "divida"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "DVP",
+      "coitembalanco": 20200000000,
+      "noitembalanco": "BENEFÍCIOS PREVIDENCIÁRIOS E ASSISTENCIAIS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"PREVIDENCIÁRIOS\"",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30101000000,
+      "noitembalanco": "da União",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BP-Empresa",
+      "coitembalanco": 10402000000,
+      "noitembalanco": "DIREITOS CONVÊNIADOS E OUTROS INSTRUM. CONGÊNERES",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"CONVÊNIADOS\"",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DRE",
+      "coitembalanco": 10602040000,
+      "noitembalanco": "INCORPORAÇÃO/DESINCOR. DE DIREITOS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"DESINCOR\"",
+          "sugestoes": [
+            "desancar",
+            "desanco",
+            "desancora"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "BP-Empresa",
+      "coitembalanco": 10102020400,
+      "noitembalanco": "CRÉDITOS PARCELADOS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"PARCELADOS\"",
+          "sugestoes": [
+            "aparcelados"
+          ]
+        }
+      ]
+    }
+  ]
+}

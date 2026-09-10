@@ -1,0 +1,50 @@
+{
+  "gerado_em": "2026-08-16T15:16:53",
+  "mes": 8,
+  "ano": 2026,
+  "escopo": "Consolidado",
+  "totais": {
+    "ERRO": 0,
+    "ALERTA": 0,
+    "OK": 2,
+    "INFO": 2,
+    "TOTAL": 4
+  },
+  "indicadores": {
+    "resultado_exercicio": -14349416055.48
+  },
+  "achados": [
+    {
+      "status": "INFO",
+      "modulo": "DVP",
+      "codigo": "DVP-01",
+      "titulo": "Resultado Patrimonial (encerramento do exercício só em dezembro)",
+      "detalhe": "VPA 97,395,950,780.78  −  VPD 111,745,366,836.26  =  -14,349,416,055.48  — a 891XXXXXX só fecha o exercício em dezembro; a validação do resultado neste período fica com os cruzamentos X6 (DMPL) e R1a (BP)  |  Lançamentos parciais na 891 (não é encerramento, não entra na comparação): UG 130101 256,016.48",
+      "valor": -14349416055.48
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02a",
+      "titulo": "VPA Total positivo",
+      "detalhe": "97,395,950,780.78",
+      "valor": 97395950780.78
+    },
+    {
+      "status": "OK",
+      "modulo": "DVP",
+      "codigo": "DVP-02b",
+      "titulo": "VPD Total positivo",
+      "detalhe": "111,745,366,836.26",
+      "valor": 111745366836.26
+    },
+    {
+      "status": "INFO",
+      "modulo": "DVP",
+      "codigo": "DVP-03",
+      "titulo": "Cobertura dos subtotais detalhados",
+      "detalhe": "VPA: subtotais 58,199,755,932.09 de 97,395,950,780.78 | VPD: subtotais 42,139,828,573.80 de 111,745,366,836.26 — o restante não é aberto por grupo neste diagnóstico",
+      "valor": 100339584505.89
+    }
+  ]
+}

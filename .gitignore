@@ -1,0 +1,67 @@
+# Renomear para .gitignore na raiz do repositório.
+
+# ── Credenciais — o motivo número um de vazamento em repositório ───────────
+config_local.py
+*.env
+.env*
+credenciais*
+*_secret*
+token*
+
+# ── Instant Client e ambiente ─────────────────────────────────────────────
+instantclient*/
+.venv/
+__pycache__/
+*.pyc
+
+# ── Saídas pesadas ou com dado detalhado ──────────────────────────────────
+# O painel usa só os JSON de painel/dados/. Os Excel ficam locais: são
+# grandes, mudam inteiros a cada execução e inflam o histórico do Git para
+# sempre. Nada que entra no Git sai depois.
+*.xlsx
+*.xls
+*.log
+ARQ*GERADOS*/
+saida_local/
+
+# ── Exceção: os dados do painel entram ────────────────────────────────────
+!painel/dados/*.json
+painel/rotina_controles_*.html
+painel/auditoria_*.html
+!Relatorio_Integridade_*.xlsx
+*.pdf
+# Relatório de integridade (relatorio_integridade.py) -- só é regravado
+# quando a pasta 13 muda (--somente-se-mudou), então cada versão que
+# existe já é um snapshot que vale versionar, ao contrário dos outros
+# Excel/PDF locais que mudam a cada execução sem sinalizar nada novo.
+# (Precisa vir DEPOIS do "*.pdf" acima -- regras de .gitignore usam a
+# última que casar, uma exceção antes da regra geral não tem efeito.)
+!Relatorio_Integridade_*.pdf
+*.exe
+*.xls
+*.sql
+!rotina/*.sql
+*.bat
+*.zip
+*.txt
+_cache/
+files*/
+arq antigos/
+diagnosticos do claude antigos/
+lançamento controle obras SISGEPAT/
+13 - DEMONSTRATIVOS CONTÁBEIS/
+mestre*.py
+mestreult*.py
+diag23.py
+auditoria_*.py
+patch_*.py
+gnd.py
+atualizar_mes.py
+MONITOR_GND.md
+conciliacao_siggo_sisgepat*.py
+mestre ultimo.py
+
+# ── Auditoria Consolidada (18/08/2026): só o HTML gerado entra no git,
+#    a fonte Python fica só local (mesmo padrão de auditoria_*.py acima).
+cruzamentos_completo.py
+saida/xlsx_html.py
