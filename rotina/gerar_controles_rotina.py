@@ -1550,16 +1550,18 @@ def main() -> None:
                 chip   = "err" if n_diff else "ok"
                 status = f"{n_diff} UG(s) c/ diferença" if n_diff else "OK"
                 resultados_html.append({
-                    "numero":      ctrl["numero"],
-                    "titulo":      ctrl["titulo"],
-                    "tipo":        "ug",
-                    "n_ocorrencias": len(rows),
-                    "n_diff":      n_diff,
-                    "chip":        chip,
-                    "col_labels":  col_labels,
-                    "diff_cols":   ctrl.get("diff_cols", []),
-                    "col_aliases": col_aliases,
-                    "rows":        rows,
+                    "numero":         ctrl["numero"],
+                    "titulo":         ctrl["titulo"],
+                    "descricao":      ctrl.get("descricao", ""),
+                    "default_so_diff": ctrl.get("default_so_diff", False),
+                    "tipo":           "ug",
+                    "n_ocorrencias":  len(rows),
+                    "n_diff":         n_diff,
+                    "chip":           chip,
+                    "col_labels":     col_labels,
+                    "diff_cols":      ctrl.get("diff_cols", []),
+                    "col_aliases":    col_aliases,
+                    "rows":           rows,
                 })
             else:
                 _escrever_aba_detalhe(ws, ctrl, col_aliases, rows,
@@ -1574,19 +1576,21 @@ def main() -> None:
                 ug_col   = _find_col(col_labels, {"UG"})
                 gest_col = _find_col(col_labels, {"Gestão", "Gestão Contáb.", "Gestão Contáb"})
                 resultados_html.append({
-                    "numero":      ctrl["numero"],
-                    "titulo":      ctrl["titulo"],
-                    "tipo":        "detalhe",
-                    "n_ocorrencias": len(rows),
-                    "chip":        chip,
-                    "col_labels":  col_labels,
-                    "diff_cols":   ctrl.get("diff_cols", []),
-                    "col_aliases": col_aliases,
-                    "rows":        rows,
-                    "ug_col":      ug_col,
-                    "gest_col":    gest_col,
+                    "numero":         ctrl["numero"],
+                    "titulo":         ctrl["titulo"],
+                    "descricao":      ctrl.get("descricao", ""),
+                    "default_so_diff": ctrl.get("default_so_diff", False),
+                    "tipo":           "detalhe",
+                    "n_ocorrencias":  len(rows),
+                    "chip":           chip,
+                    "col_labels":     col_labels,
+                    "diff_cols":      ctrl.get("diff_cols", []),
+                    "col_aliases":    col_aliases,
+                    "rows":           rows,
+                    "ug_col":         ug_col,
+                    "gest_col":       gest_col,
                     "detalhe_row_id_cols": ctrl.get("detalhe_row_id_cols", []),
-                    "hierarquia":  ctrl.get("hierarquia"),
+                    "hierarquia":     ctrl.get("hierarquia"),
                 })
 
             print(f"    → {len(rows)} linha(s)  |  {status}")
