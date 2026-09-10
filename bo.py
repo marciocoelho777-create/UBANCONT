@@ -440,7 +440,12 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
         SC 621200000 - SD 621300000-621399999, com NatRec prefixo '999'
       Superavit Financeiro: col2 = SD 522130100-522130199 (faixa completa,
         sem filtro de fonte -- ja validado e batendo)
-      Reabertura Cred. Adic.: col2 = SD 522120202
+      Reabertura Cred. Adic.: col2 = SD 522120202 + 522120203 + 522120302 +
+        522120303 (ajuste em 10/09/2026, IPC 7 item L30 -- planilha oficial
+        incluiu 3 contas novas a esse item; antes so contava 522120202.
+        Nao confundir com as contas 522120100/201/301 do Quadro por Tipos de
+        Creditos Adicionais em _sql_creditos_item(), que sao colunas
+        diferentes do relatorio e nao mudaram)
     """
     filtro_o = f"AND o.COUG = {coug}" if coug else ""
     cur = conn.cursor()
@@ -468,7 +473,7 @@ def buscar_saldos_exercicios_anteriores(conn, mes, ano, coug):
                      THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
                      ELSE 0 END) AS SUPERAVIT_FINANCEIRO,
           SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-                          AND o.COCONTACONTABIL = 522120202
+                          AND o.COCONTACONTABIL IN (522120202, 522120203, 522120302, 522120303)
                      THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
                      ELSE 0 END) AS REABERTURA_CREDITOS
         FROM MIL{ano}.LANCAMENTOCONTABIL o
