@@ -140,10 +140,34 @@ def regra_04_caixa_bp_dfc_bf(d: Demonstrativos):
     bp, dfc, bf = d.t("BP"), d.t("DFC"), d.t("BF")
     (caixa_bp,), _ = valores(bp, "Caixa e Equivalentes de Caixa", 1)
     (caixa_dfc,), _ = valores(dfc, "Caixa e Equivalente de Caixa Final", 1)
-    i_seg = pos(bf, "SALDO PARA O EXERCÍCIO SEGUINTE")
-    (caixa_bf_ex_rpps,), _ = valores(bf, "Caixa e Equivalentes de Caixa (Exceto RPPS)", 1, inicio=i_seg)
-    (caixa_bf_rpps,), _ = valores(bf, "CAIXA E EQUIVALENTES DE CAIXA RPPS", 1, inicio=i_seg)
-    (dep_rest_bf,), _ = valores(bf, "Depósitos Restituíveis e Valores Vinculados", 1, inicio=i_seg)
+    # Busca só "EXERCÍCIO SEGUINTE" (não o rótulo completo "SALDO PARA O
+    # EXERCÍCIO SEGUINTE") porque no PDF novo por mês fechado (10/09/2026
+    # em diante) esse rótulo cai bem em cima da linha de corte esq/dirt
+    # (ver _texto_completo() em leitor_pdf_oficial.py) e "SALDO PARA O"
+    # fica só no recorte esquerdo -- a parte "EXERCÍCIO SEGUINTE" sozinha
+    # sobrevive inteira dentro do recorte direito.
+    i_seg = pos(bf, "EXERCÍCIO SEGUINTE")
+    # Os sufixos ("RPPS)", "RPPS", "Vinculados") somem da extração dessas 3
+    # linhas no PDF novo por mês fechado (10/09/2026 em diante) -- provável
+    # quebra de linha na coluna estreita do PDF (o começo do rótulo fica
+    # sozinho, o resto desaparece em vez de vir na linha seguinte). Cada
+    # busca tenta primeiro o rótulo completo (layout antigo por tipo) e cai
+    # para o prefixo truncado como fallback -- ainda específico o bastante
+    # junto com inicio=i_seg (maiúsculas de "CAIXA E EQUIVALENTES DE CAIXA"
+    # distinguem da linha anterior "Caixa e Equivalentes de Caixa (Exceto",
+    # que é minúscula/mista).
+    try:
+        (caixa_bf_ex_rpps,), _ = valores(bf, "Caixa e Equivalentes de Caixa (Exceto RPPS)", 1, inicio=i_seg)
+    except ValueError:
+        (caixa_bf_ex_rpps,), _ = valores(bf, "Caixa e Equivalentes de Caixa (Exceto", 1, inicio=i_seg)
+    try:
+        (caixa_bf_rpps,), _ = valores(bf, "CAIXA E EQUIVALENTES DE CAIXA RPPS", 1, inicio=i_seg)
+    except ValueError:
+        (caixa_bf_rpps,), _ = valores(bf, "CAIXA E EQUIVALENTES DE CAIXA", 1, inicio=i_seg)
+    try:
+        (dep_rest_bf,), _ = valores(bf, "Depósitos Restituíveis e Valores Vinculados", 1, inicio=i_seg)
+    except ValueError:
+        (dep_rest_bf,), _ = valores(bf, "Depósitos Restituíveis e Valores", 1, inicio=i_seg)
     # A conciliação só fecha exato incluindo Depósitos Restituíveis e
     # Valores Vinculados (confirmado empiricamente em 18/08/2026, mês
     # 07/2026: sem esse componente sobrava uma diferença de R$ 8.457.361,41
@@ -204,7 +228,14 @@ def regra_07_receita_bf_bo(d: Demonstrativos):
 
 def regra_08_despesa_bf_bo(d: Demonstrativos):
     bf, bo = d.t("BF"), d.t("BO")
-    vals_bf, _ = valores(bf, "DESPESA ORÇAMENTÁRIA", 2)
+    # No PDF novo por mês fechado (10/09/2026 em diante), o "D" inicial de
+    # "DESPESA ORÇAMENTÁRIA" cai bem em cima da linha de corte esq/dirt (o
+    # mesmo acontece com "DISPÊNDIO" na linha de cima) e some da extração
+    # -- fallback sem o "D".
+    try:
+        vals_bf, _ = valores(bf, "DESPESA ORÇAMENTÁRIA", 2)
+    except ValueError:
+        vals_bf, _ = valores(bf, "ESPESA ORÇAMENTÁRIA", 2)
     desp_bf = vals_bf[0]
     i = pos(bo, "SUBTOTAL DAS DESPESAS")
     vals, _ = valores(bo, "SUBTOTAL DAS DESPESAS", 6, inicio=i)
@@ -292,11 +323,23 @@ def regra_12b_variacao_dotacao(d: Demonstrativos):
     i3 = pos(bo, "SUBTOTAL DAS DESPESAS")
     vals_desp, _ = valores(bo, "SUBTOTAL DAS DESPESAS", 6, inicio=i3)
     var_dotacao = vals_desp[1] - vals_desp[0]
-    # Ancora depois da última linha de dados ("RESERVA DE CONTIGÊNCIA",
-    # grafia oficial sem o 'n') -- a palavra "TOTAL" aparece antes disso
-    # dentro do próprio cabeçalho da coluna ("TOTAL DE ALTERAÇÕES"), o que
-    # pegava um valor errado se buscado logo após o título do quadro.
-    i4 = pos(bo, "RESERVA DE CONTIGÊNCIA")
+    # Ancora primeiro no cabeçalho do "QUADRO POR TIPOS DE CRÉDITOS
+    # ADICIONAIS" -- o PDF novo por mês fechado (10/09/2026 em diante) tem
+    # DUAS ocorrências de "RESERVA DE CONTINGÊNCIA" no documento (uma na
+    # tabela-resumo de despesas, outra dentro do próprio quadro); sem essa
+    # âncora, pos() pega a 1a (errada) e o "TOTAL" seguinte cai numa linha
+    # totalmente diferente ("TOTAL (XV) = (XIII+XIV)"), lendo 0,00 no lugar
+    # do Total de Alterações real. Depois disso, busca a última linha de
+    # dados do quadro ("RESERVA DE CONTIGÊNCIA" -- grafia com erro de
+    # digitação no PDF antigo por tipo; o PDF novo corrigiu para
+    # "CONTINGÊNCIA" -- aceita as duas) -- a palavra "TOTAL" aparece antes
+    # disso dentro do próprio cabeçalho da coluna ("TOTAL DE ALTERAÇÕES"),
+    # o que pegava um valor errado se buscado logo após o título do quadro.
+    i_quadro = pos(bo, "QUADRO POR TIPOS DE CRÉDITOS ADICIONAIS")
+    try:
+        i4 = pos(bo, "RESERVA DE CONTIGÊNCIA", a_partir_de=i_quadro)
+    except ValueError:
+        i4 = pos(bo, "RESERVA DE CONTINGÊNCIA", a_partir_de=i_quadro)
     vals_creditos, _ = valores(bo, "TOTAL", 8, inicio=i4)
     total_creditos = vals_creditos[-1]  # coluna (h) = Total de Alterações
     return [_cmp("12b", "Variação da Dotação (Atualizada−Inicial) = Total de Créditos Adicionais",
@@ -380,7 +423,13 @@ def regra_17_dfc_geracao_liquida(d: Demonstrativos):
     (op,), _ = valores(dfc, "Fluxo de Caixa Líq. das Atividades Operacionais(I)", 1)
     (inv,), _ = valores(dfc, "Fluxo de Caixa Líq. das Ativ. de Investimento (II)", 1)
     (fin,), _ = valores(dfc, "Fluxo de Caixa Líq.das Ativ. Financiamento (III)", 1)
-    (geracao,), _ = valores(dfc, "GERAÇAO LÍQUIDA DE CAIXA E EQUIVALENTE (I+II+III)", 1)
+    # "GERAÇAO" (sem til) e a grafia do PDF antigo por tipo; o PDF novo por
+    # mes fechado (10/09/2026 em diante) corrigiu para "GERAÇÃO" -- aceita
+    # as duas.
+    try:
+        (geracao,), _ = valores(dfc, "GERAÇAO LÍQUIDA DE CAIXA E EQUIVALENTE (I+II+III)", 1)
+    except ValueError:
+        (geracao,), _ = valores(dfc, "GERAÇÃO LÍQUIDA DE CAIXA E EQUIVALENTE (I+II+III)", 1)
     (caixa_ini,), _ = valores(dfc, "Caixa e Equivalente de Caixa Inicial", 1)
     (caixa_fim,), _ = valores(dfc, "Caixa e Equivalente de Caixa Final", 1)
     calc_soma = op + inv + fin

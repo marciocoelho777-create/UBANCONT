@@ -34,6 +34,18 @@ SUBPASTA_PREFIXO = {
     "DMPL": ("06 - DMPL",                 "ListaDMPL"),
 }
 
+# Layout NOVO (a partir de 10/09/2026): pasta por mês FECHADO, com os 6 PDFs
+# juntos em nomes curtos -- ex.: "13 - DEMONSTRATIVOS CONTÁBEIS/2026/08- agosto/
+# bfagosto.pdf". Só existe para agosto/2026 até agora (usuário confirmou que
+# é o fechamento oficial do mês); checado com prioridade sobre o layout
+# antigo por tipo (SUBPASTA_PREFIXO) quando existir, pois o antigo pode
+# conter só um corte parcial do mês (visto em 28/08/2026, meio do mês).
+PREFIXO_CURTO = {"BF": "bf", "BP": "bp", "DVP": "vp", "BO": "bo",
+                 "DFC": "dfc", "DMPL": "dmpl"}
+MESES_PASTA = {1: "janeiro", 2: "fevereiro", 3: "marco", 4: "abril",
+               5: "maio", 6: "junho", 7: "julho", 8: "agosto",
+               9: "setembro", 10: "outubro", 11: "novembro", 12: "dezembro"}
+
 
 class PdfNaoEncontrado(Exception):
     pass
@@ -41,7 +53,12 @@ class PdfNaoEncontrado(Exception):
 
 def _localizar_pdf(tipo: str, mes: int, ano: int) -> Path:
     subpasta, prefixo = SUBPASTA_PREFIXO[tipo]
-    candidatos = [
+    nome_mes = MESES_PASTA.get(mes)
+    candidatos = []
+    if nome_mes:
+        candidatos.append(RAIZ_PASTA13 / str(ano) / f"{mes:02d}- {nome_mes}"
+                           / f"{PREFIXO_CURTO[tipo]}{nome_mes}.pdf")
+    candidatos += [
         RAIZ_PASTA13 / str(ano) / subpasta / f"{prefixo} {mes:02d}.pdf",
         RAIZ_PASTA13 / str(ano) / f"{prefixo} {mes:02d}.pdf",
     ]
@@ -72,6 +89,19 @@ def _texto_completo(caminho: Path, tipo: str | None = None) -> str:
     with pdfplumber.open(caminho) as pdf:
         for idx, pg in enumerate(pdf.pages):
             if idx in duas_col:
+                # NAO usar pg.extract_text() (pagina inteira sem corte) como
+                # fallback aqui -- testado e revertido em 10/09/2026: quando
+                # as duas colunas nao tem a mesma altura de linha (comum no
+                # layout novo por mes fechado), o extract_text() sem corte
+                # EMBARALHA linhas de uma coluna com a outra, duplicando
+                # rotulos com valores TROCADOS -- um bug pior do que o que
+                # tentava resolver (ver git blame / commit deste comentario:
+                # regra_04 do BF leu Depositos Restituiveis errado por causa
+                # disso). Rotulo que cai em cima da linha de corte deve ser
+                # resolvido com uma âncora mais curta/deslocada (ver
+                # regra_04_caixa_bp_dfc_bf em motor_regras.py, que busca só
+                # "EXERCÍCIO SEGUINTE" em vez de "SALDO PARA O EXERCÍCIO
+                # SEGUINTE" por esse motivo), não reintroduzir este fallback.
                 meio = pg.width / 2
                 esq = pg.crop((0, 0, meio, pg.height)).extract_text() or ""
                 dirt = pg.crop((meio, 0, pg.width, pg.height)).extract_text() or ""
@@ -88,7 +118,16 @@ def _texto_completo(caminho: Path, tipo: str | None = None) -> str:
 # isolado nesse contexto é o sinal de subtração da fórmula, não uma
 # célula vazia/zerada -- se fosse aceito, a busca por fallback pegaria
 # esse "-" como o primeiro valor (0.0) em vez do valor real logo depois.
-_NUM = r"(-?[\d\.]+,\d{2})"
+#
+# O "-\s*" (em vez de só "-") tolera o layout visto a partir de 10/09/2026
+# na pasta por mês fechado ("08- agosto/bpagosto.pdf" etc.), que imprime
+# negativo como "- 146.554.209.848,64" (com espaço depois do sinal) em vez
+# de "-146.473.819.231,79" (sem espaço, layout antigo por tipo). Sem essa
+# tolerância, o regex não casava o "-" (por causa do espaço) e o fallback
+# de busca por token pegava só a parte positiva "146.554.209.848,64" —
+# bug real encontrado no regra_18c (BP), inflava a soma em 2x|PL| porque
+# o sinal do Patrimônio Líquido virava positivo.
+_NUM = r"(-\s*[\d\.]+,\d{2}|[\d\.]+,\d{2})"
 
 
 def _num(s: str) -> float:
@@ -96,7 +135,7 @@ def _num(s: str) -> float:
     if s in ("-", "", "—"):
         return 0.0
     neg = s.startswith("-")
-    s = s.lstrip("-").replace(".", "").replace(",", ".")
+    s = s.lstrip("-").strip().replace(".", "").replace(",", ".")
     v = float(s)
     return -v if neg else v
 

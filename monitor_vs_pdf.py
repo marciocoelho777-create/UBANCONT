@@ -193,7 +193,13 @@ def _comparar(conn, mes, ano) -> list[dict]:
 
     try:
         txt_bf = demos.t("BF")
-        vals_desp_bf, _ = pdf_valores(txt_bf, "DESPESA ORÇAMENTÁRIA", 2)
+        # Mesmo fallback de regra_08_despesa_bf_bo em motor_regras.py: o "D"
+        # inicial cai na linha de corte esq/dirt no PDF novo por mês fechado
+        # (10/09/2026 em diante) e some da extração.
+        try:
+            vals_desp_bf, _ = pdf_valores(txt_bf, "DESPESA ORÇAMENTÁRIA", 2)
+        except ValueError:
+            vals_desp_bf, _ = pdf_valores(txt_bf, "ESPESA ORÇAMENTÁRIA", 2)
         desp_orcam_pdf = vals_desp_bf[0]
         d = _cmp("BF", "Despesa Orçamentária (Paga)",
                  bo.get("DESPESA_PAGA"), desp_orcam_pdf, bf_path)
@@ -203,16 +209,36 @@ def _comparar(conn, mes, ano) -> list[dict]:
 
     try:
         txt_bf = demos.t("BF")
-        i_seg = pdf_pos(txt_bf, "SALDO PARA O EXERCÍCIO SEGUINTE")
-        vals_caixa, _ = pdf_valores(txt_bf,
-                                     "Caixa e Equivalentes de Caixa (Exceto RPPS)", 1,
-                                     inicio=i_seg)
-        vals_rpps, _ = pdf_valores(txt_bf,
-                                    "CAIXA E EQUIVALENTES DE CAIXA RPPS", 1,
-                                    inicio=i_seg)
-        vals_dep, _ = pdf_valores(txt_bf,
-                                   "Depósitos Restituíveis e Valores Vinculados", 1,
-                                   inicio=i_seg)
+        # Mesmo fallback de regra_04_caixa_bp_dfc_bf em motor_regras.py: no
+        # PDF novo por mês fechado (10/09/2026 em diante) "SALDO PARA O
+        # EXERCÍCIO SEGUINTE" cai na linha de corte esq/dirt (usa só
+        # "EXERCÍCIO SEGUINTE"), e os sufixos "RPPS)"/"RPPS"/"Vinculados"
+        # das 3 linhas seguintes somem da extração (fallback truncado).
+        i_seg = pdf_pos(txt_bf, "EXERCÍCIO SEGUINTE")
+        try:
+            vals_caixa, _ = pdf_valores(txt_bf,
+                                         "Caixa e Equivalentes de Caixa (Exceto RPPS)", 1,
+                                         inicio=i_seg)
+        except ValueError:
+            vals_caixa, _ = pdf_valores(txt_bf,
+                                         "Caixa e Equivalentes de Caixa (Exceto", 1,
+                                         inicio=i_seg)
+        try:
+            vals_rpps, _ = pdf_valores(txt_bf,
+                                        "CAIXA E EQUIVALENTES DE CAIXA RPPS", 1,
+                                        inicio=i_seg)
+        except ValueError:
+            vals_rpps, _ = pdf_valores(txt_bf,
+                                        "CAIXA E EQUIVALENTES DE CAIXA", 1,
+                                        inicio=i_seg)
+        try:
+            vals_dep, _ = pdf_valores(txt_bf,
+                                       "Depósitos Restituíveis e Valores Vinculados", 1,
+                                       inicio=i_seg)
+        except ValueError:
+            vals_dep, _ = pdf_valores(txt_bf,
+                                       "Depósitos Restituíveis e Valores", 1,
+                                       inicio=i_seg)
         caixa_pdf_tot = vals_caixa[0] + vals_rpps[0] + vals_dep[0]
         d = _cmp("BF", "Caixa Final (Exceto RPPS + RPPS + Depósitos Restituíveis)",
                  bf.get("CAIXA_FINAL"), caixa_pdf_tot, bf_path)
