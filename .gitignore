@@ -25,12 +25,19 @@ ARQ*GERADOS*/
 saida_local/
 
 # ── Exceção: os dados do painel entram ────────────────────────────────────
+# (faltava o "!" nestas duas -- sem ele viravam regra de IGNORAR, não de
+# exceção. Como painel/*.html já estava rastreado de antes (git ignora
+# só o que nunca foi commitado), o efeito ficou invisível para os arquivos
+# "atuais" -- só os snapshots NOVOS (nunca commitados) silenciosamente
+# nunca entravam no "git add", inclusive quando listados explicitamente
+# no Passo 5 da rotina noturna. Corrigido em 11/09/2026.)
 !painel/dados/*.json
-painel/rotina_controles_*.html
-painel/auditoria_*.html
+!painel/rotina_controles_*.html
+!painel/auditoria_*.html
 !Relatorio_Integridade_*.xlsx
 *.pdf
-# Relatório de integridade (relatorio_integridade.py) -- só é regravado
+# Relatório de integridade (relatorio_integridade_pdf_oficial.py, renomeado
+# 10/09/2026, era relatorio_integridade.py) -- só é regravado
 # quando a pasta 13 muda (--somente-se-mudou), então cada versão que
 # existe já é um snapshot que vale versionar, ao contrário dos outros
 # Excel/PDF locais que mudam a cada execução sem sinalizar nada novo.
