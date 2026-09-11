@@ -939,6 +939,37 @@ def buscar_rp_processados(conn, mes, ano, coug):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+#  INSCRICAO DE RP NO EXERCICIO CORRENTE (mes 13, SD) — mesmas contas/logica
+#  ja validadas em mestre.py (BF, linhas INSCRICAO_RPNP/INSCRICAO_RPP): conta
+#  531700000 (RPNP) / 532700000 (RPP). NAO faz parte do leiaute oficial do
+#  Anexo 12 (Quadro 3/4 so mostram Inscritos EXERC.ANTERIORES, colunas (a)/
+#  (b) — a inscricao do exercicio CORRENTE so acontece no fechamento,
+#  INMES=13, e normalmente fica zerada durante o ano). Adicionada apenas
+#  como celula informativa extra (mesmo padrao da celula "Equilibrio" em
+#  ws2), usada pelo cruzamento PEND-9/R-INSC em cruzamentos_completo.py
+#  para conferir contra a mesma conta ja exposta pelo BF.
+# ─────────────────────────────────────────────────────────────────────────────
+def buscar_inscricao_rp_exercicio(conn, mes, ano, coug):
+    filtro_o = f"AND o.COUG = {coug}" if coug else ""
+    cur = conn.cursor()
+    sql = f"""
+        SELECT
+            SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes} AND o.COCONTACONTABIL = 531700000
+                 THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
+                 ELSE 0 END) AS INSCRICAO_RPNP,
+            SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes} AND o.COCONTACONTABIL = 532700000
+                 THEN DECODE(o.INDEBITOCREDITO,'D',o.VALANCAMENTO,'C',-o.VALANCAMENTO,0)
+                 ELSE 0 END) AS INSCRICAO_RPP
+        FROM MIL{ano}.LANCAMENTOCONTABIL o
+        WHERE 1=1 {filtro_o}
+    """
+    cur.execute(sql)
+    rpnp, rpp = cur.fetchone()
+    cur.close()
+    return {'INSCRICAO_RPNP': float(rpnp or 0), 'INSCRICAO_RPP': float(rpp or 0)}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 #  CALCULO DOS TOTAIS DERIVADOS
 #  Reproduz as somas de linha do PDF modelo: subtotais de bloco (Correntes/
 #  Capital), SUBTOTAL (III)=(I+II), SUBTOTAL c/Refin (V), TOTAL (VII),
@@ -1184,7 +1215,7 @@ def calcular_rp_processados(rp_raw):
 
 
 def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
-                   creditos_raw, rpnp_raw, rpp_raw):
+                   creditos_raw, rpnp_raw, rpp_raw, inscricao_rp=None):
     """
     Combina os 5 quadros e resolve o ajuste de equilibrio entre o lado da
     Receita e o lado da Despesa (MCASP 9a Ed., item 2.4.1):
@@ -1238,6 +1269,7 @@ def calcular_tudo(receitas_raw, opcred_raw, saldos_ant_raw, despesas_raw,
         'receitas': receitas, 'despesas': despesas,
         'creditos_adicionais': creditos,
         'rp_nao_processados': rpnp, 'rp_processados': rpp,
+        'inscricao_rp': inscricao_rp or {'INSCRICAO_RPNP': 0.0, 'INSCRICAO_RPP': 0.0},
     }
 
 
@@ -1453,6 +1485,7 @@ def gerar_excel(t, mes, ano, ug_label, output_path, achados=None):
     wb = openpyxl.Workbook()
     rec = t['receitas']; des = t['despesas']
     cred = t['creditos_adicionais']; rpnp = t['rp_nao_processados']; rpp = t['rp_processados']
+    insc_rp = t.get('inscricao_rp', {'INSCRICAO_RPNP': 0.0, 'INSCRICAO_RPP': 0.0})
 
     # ── ABA 1: RECEITAS ─────────────────────────────────────────────────
     ws = wb.active; ws.title = 'Receitas'
@@ -1650,6 +1683,18 @@ def gerar_excel(t, mes, ano, ug_label, output_path, achados=None):
         if cat == 'capital':
             _linha_rpp(ws4, r, nome, rpp[nome], 1); r += 1
     _linha_rpp(ws4, r, 'TOTAL', rpp['TOTAL'], 0, bold=True, bg=F_GRAY); r += 1
+
+    # Celulas informativas extras — Inscricao de RP no exercicio corrente
+    # (contas 531700000/532700000, mesma fonte ja validada no BF/mestre.py).
+    # NAO faz parte do leiaute oficial do Anexo 12 (ver nota em
+    # buscar_inscricao_rp_exercicio); usada so pelo cruzamento com o BF.
+    r += 2
+    cel(ws4, r, 1, 'Inscrição no Exercício (RPNP) — conta 531700000:', sz=8)
+    cel(ws4, r, 2, insc_rp.get('INSCRICAO_RPNP', 0.0), sz=8, ha='right', fmt=FMT_BRL)
+    r += 1
+    cel(ws4, r, 1, 'Inscrição no Exercício (RPP) — conta 532700000:', sz=8)
+    cel(ws4, r, 2, insc_rp.get('INSCRICAO_RPP', 0.0), sz=8, ha='right', fmt=FMT_BRL)
+    r += 1
 
     # ── ABA 5: AUDITORIA ─────────────────────────────────────────────────
     if achados:
@@ -2549,13 +2594,14 @@ def main():
     creditos_raw  = buscar_creditos_adicionais(conn, a.mes, a.ano, a.ug)
     rpnp_raw      = buscar_rp_nao_processados(conn, a.mes, a.ano, a.ug)
     rpp_raw       = buscar_rp_processados(conn, a.mes, a.ano, a.ug)
+    inscricao_rp_raw = buscar_inscricao_rp_exercicio(conn, a.mes, a.ano, a.ug)
     achado_defasagem = auditoria_defasagem_balancogeral(conn, a.ano, a.mes, a.ug)
     saldo_521920500, saldo_521920500_ant = buscar_saldo_521920500(conn, a.mes, a.ano)
     conn.close()
 
     print("\n[3/4] Calculando totais derivados...")
     t = calcular_tudo(receitas_raw, opcred_raw, saldos_raw, despesas_raw,
-                       creditos_raw, rpnp_raw, rpp_raw)
+                       creditos_raw, rpnp_raw, rpp_raw, inscricao_rp=inscricao_rp_raw)
     achados = auditoria_integridade(t, saldo_521920500=saldo_521920500,
                                      saldo_521920500_ant=saldo_521920500_ant,
                                      mes=a.mes, ano=a.ano)
