@@ -476,17 +476,23 @@ CONTROLES = [
         "detalhe_row_id_cols": [4, 1, 2],
     },
     {
-        "numero":    "18",
-        "titulo":    "Controle 18 — Previsão Adicional a Lançar",
+        "numero":    "18a",
+        "titulo":    "Controle 18a — Previsão Adicional a Lançar (521920500)",
         "descricao": ("Identifica valores de créditos adicionais (suplementações, especiais ou extraordinários) "
-                      "aprovados administrativamente mas ainda sem o lançamento contábil correspondente. "
-                      "O MCASP exige o registro contábil simultâneo à abertura do crédito, "
-                      "pois o orçamento aprovado deve sempre refletir a execução registrada. "
-                      "Diferença gera divergência entre o orçamento vigente e o executado, "
-                      "podendo distorcer os indicadores de execução orçamentária. "
+                      "aprovados administrativamente mas ainda sem o lançamento contábil correspondente na "
+                      "previsão da receita por fonte de recurso. Conta de trânsito (PCASP 521920500, grupo "
+                      "\"Controle por Lançamentos\" da previsão da receita) que recebe QUALQUER crédito adicional "
+                      "aprovado — por superávit financeiro, excesso de arrecadação, operação de crédito, anulação "
+                      "de dotação etc. — antes de ser detalhado/classificado por fonte específica (contas "
+                      "521920300/521920400). O MCASP exige o registro contábil simultâneo à abertura do crédito; "
+                      "saldo ≠ 0 revela dotação aprovada ainda não reclassificada e explica o gap do equilíbrio "
+                      "orçamentário (Previsão Atualizada × Dotação Atualizada). "
+                      "Não confundir com o Controle 18b (821191201): são pendências diferentes que só coincidem "
+                      "em estarem \"aguardando classificação\" no mesmo processo de créditos adicionais — os "
+                      "saldos não são um par de débito/crédito da mesma operação e não devem ser somados. "
                       "Base: Lei 4.320/1964, arts. 40–46; MCASP — Execução Orçamentária da Receita/Despesa; IPC GDF."),
-        "aba":       "C18",
-        "sql":       "18-Previsão Adicional a Lançar.sql",
+        "aba":       "C18a",
+        "sql":       "18a-Previsão Adicional a Lançar.sql",
         "tipo":      "detalhe",
         "diff_cols": [3],
         "col_labels": {0: "Nome Conta Contábil",
@@ -502,7 +508,36 @@ CONTROLES = [
             "grupo_labels":    ["UG", "Gestão"],
             "saldo_col":       3,
             "detalhe_cols":    [0, 1],
-            "conta_filter_col": 1,   # Conta Contábil — vira seletor de filtro
+        },
+    },
+    {
+        "numero":    "18b",
+        "titulo":    "Controle 18b — Superávit por Fonte a Classificar (821191201)",
+        "descricao": ("Controle específico (PCASP 821191201, grupo \"Controle de Créditos por Superávit\") para a "
+                      "fatia dos créditos adicionais financiada por superávit financeiro apurado no balanço "
+                      "patrimonial do exercício anterior (Lei 4.320/1964, art. 43 §1º, I) que ainda não foi "
+                      "classificada por fonte de recurso. É um universo mais restrito que o do Controle 18a: só "
+                      "cobre a origem \"superávit financeiro\", não qualquer crédito adicional. "
+                      "Não é o espelho contábil (débito/crédito da mesma operação) da conta 521920500 do "
+                      "Controle 18a — são pendências diferentes que apenas coincidem em estarem \"aguardando "
+                      "classificação\" dentro do mesmo processo de créditos adicionais; por isso os saldos não "
+                      "devem ser somados nem comparados diretamente entre os dois controles. "
+                      "Base: Lei 4.320/1964, art. 43; MCASP — Créditos Adicionais; PCASP-GDF."),
+        "aba":       "C18b",
+        "sql":       "18b-Superávit por Fonte a Classificar.sql",
+        "tipo":      "detalhe",
+        "diff_cols": [3],
+        "col_labels": {0: "Nome Conta Contábil",
+                       1: "Conta Contábil",
+                       2: "Gestão",
+                       3: "Saldo",
+                       4: "UG"},
+        "detalhe_row_id_cols": [4, 2],
+        "hierarquia": {
+            "grupo_cols":      [4, 2],
+            "grupo_labels":    ["UG", "Gestão"],
+            "saldo_col":       3,
+            "detalhe_cols":    [0, 1],
         },
     },
 ]
