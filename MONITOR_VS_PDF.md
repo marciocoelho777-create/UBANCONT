@@ -1,5 +1,5 @@
 # Monitor vs PDF — 09/2026
-Gerado em 2026-09-14T10:44:29
+Gerado em 2026-09-15T04:44:57
 
 
 ## Erros de extração (1)
