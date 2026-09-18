@@ -34,12 +34,33 @@ SUBPASTA_PREFIXO = {
     "DMPL": ("06 - DMPL",                 "ListaDMPL"),
 }
 
-# Layout NOVO (a partir de 10/09/2026): pasta por mês FECHADO, com os 6 PDFs
-# juntos em nomes curtos -- ex.: "13 - DEMONSTRATIVOS CONTÁBEIS/2026/08- agosto/
-# bfagosto.pdf". Só existe para agosto/2026 até agora (usuário confirmou que
-# é o fechamento oficial do mês); checado com prioridade sobre o layout
-# antigo por tipo (SUBPASTA_PREFIXO) quando existir, pois o antigo pode
-# conter só um corte parcial do mês (visto em 28/08/2026, meio do mês).
+# Layout OFICIAL DEFINITIVO a partir de 18/09/2026: pasta por mês, com os 6
+# PDFs juntos dentro de "{mes:02d} - {NomeMes}/", nomeados
+# "{NN} - {Demonstrativo} {mes:02d}.pdf" -- ex.: "13 - DEMONSTRATIVOS
+# CONTÁBEIS/2026/09 - Setembro/04 - Balanço Orçamentário 09.pdf".
+# Reorganização feita pela área de contabilidade "para facilitar a análise
+# por mês" (pedido do usuário em 18/09/2026), retroativa a todos os meses
+# de 2026 já publicados (01 a 09 conferidos nessa data) -- substitui tanto
+# o layout antigo por tipo (SUBPASTA_PREFIXO) quanto o layout curto
+# temporário (PREFIXO_CURTO/MESES_PASTA, que só existiu para agosto/2026
+# antes desta reorganização). Checado com prioridade; os layouts antigos
+# ficam como fallback (ex.: 2025, que ainda usa os PDFs "ListaXxx 13.pdf"
+# soltos na raiz do ano).
+MESES_PASTA_CAP = {1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
+                    5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
+                    9: "Setembro", 10: "Outubro", 11: "Novembro",
+                    12: "Dezembro"}
+NUMERO_NOME_MES = {
+    "BF":   ("01", "Balanço Financeiro"),
+    "BP":   ("02", "Balanço Patrimonial"),
+    "DVP":  ("03", "Variações Patrimoniais"),
+    "BO":   ("04", "Balanço Orçamentário"),
+    "DFC":  ("05", "Fluxos de Caixa"),
+    "DMPL": ("06", "DMPL"),
+}
+
+# Layout curto temporário (10/09/2026 a 18/09/2026, só existiu para
+# agosto/2026) -- mantido só como fallback, ver comentário acima.
 PREFIXO_CURTO = {"BF": "bf", "BP": "bp", "DVP": "vp", "BO": "bo",
                  "DFC": "dfc", "DMPL": "dmpl"}
 MESES_PASTA = {1: "janeiro", 2: "fevereiro", 3: "marco", 4: "abril",
@@ -54,7 +75,12 @@ class PdfNaoEncontrado(Exception):
 def _localizar_pdf(tipo: str, mes: int, ano: int) -> Path:
     subpasta, prefixo = SUBPASTA_PREFIXO[tipo]
     nome_mes = MESES_PASTA.get(mes)
+    nome_mes_cap = MESES_PASTA_CAP.get(mes)
+    numero, nome_demo = NUMERO_NOME_MES[tipo]
     candidatos = []
+    if nome_mes_cap:
+        candidatos.append(RAIZ_PASTA13 / str(ano) / f"{mes:02d} - {nome_mes_cap}"
+                           / f"{numero} - {nome_demo} {mes:02d}.pdf")
     if nome_mes:
         candidatos.append(RAIZ_PASTA13 / str(ano) / f"{mes:02d}- {nome_mes}"
                            / f"{PREFIXO_CURTO[tipo]}{nome_mes}.pdf")
