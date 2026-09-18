@@ -523,14 +523,23 @@ def buscar_saldo_521920500(conn, mes, ano):
 #  A Natureza da Despesa ocupa os ultimos 8 caracteres (posicoes 33-40,
 #  1-indexed para SUBSTR Oracle); o GND e o 2o digito dessa Natureza
 #  (estrutura c.g.mm.ee.dd do PCASP) -> SUBSTR(COCONTACORRENTE,34,1).
-#  A conta 622920104 (Paga) usa tipo "16 - Numero do Empenho" (11 digitos)
-#  e por isso continua filtrada via JOIN com NOTAEMPENHO (NUNE), igual ao
-#  padrao do DFC.
+#  A conta 622130400 (Paga) usa o MESMO tipo de conta corrente das demais
+#  (20 - Celula da Despesa com ND Detalhado), filtro direto por GND na celula.
+#  ATE 14/09/2026 esta coluna usava 622920104 ("Empenhos Liquidados Pagos",
+#  tipo "16 - Numero do Empenho", exigia JOIN com NOTAEMPENHO/NUNE); trocada
+#  em 15/09/2026 por indicacao do IPC 7 (Coluna 5 do Balanco Orcamentario).
+#  As duas contas medem o mesmo valor -- confirmado mes a mes pelo controle
+#  BO-05 em controles/bo.py -- entao a troca nao muda o total, so simplifica
+#  a query (sem JOIN). 622130400 CONTINUA tambem dentro da soma de Liquidada
+#  (col4): Liquidada e um total CUMULATIVO (tudo que ja foi liquidado, pago
+#  ou nao), Paga e um detalhamento/subconjunto dela, nao uma soma a parte --
+#  medido em 15/09/2026: 622130300 sozinha = R$242,7 mi, MUITO menor que
+#  Paga = R$28,1 bi; tirar 622130400 de Liquidada quebraria Liquidada >= Paga.
 #    col1 Dotacao Inicial    : SD 522110000
 #    col2 Dotacao Atualizada : SD 522110000 + SD 522120000 - SC 522150000 + SD 522190000
 #    col3 Desp. Empenhadas   : SC 622130100-622130699, filtro por GND na celula
 #    col4 Desp. Liquidadas   : SC 622130300+622130400+622130700, filtro por GND na celula
-#    col5 Desp. Pagas        : SC 622920104, filtro por GND via NOTAEMPENHO (NUNE)
+#    col5 Desp. Pagas        : SC 622130400, filtro por GND na celula
 #  Reserva (GND 9, cod. 9.9.99.99.99) nao tem empenho -> so dotacao.
 # ─────────────────────────────────────────────────────────────────────────────
 # ─────────────────────────────────────────────────────────────────────────────
@@ -550,15 +559,15 @@ def buscar_saldo_521920500(conn, mes, ano):
 #  A Natureza da Despesa ocupa os ultimos 8 caracteres (posicoes 33-40,
 #  1-indexed para SUBSTR Oracle); o GND e o 2o digito dessa Natureza
 #  (estrutura c.g.mm.ee.dd do PCASP) -> SUBSTR(COCONTACORRENTE,34,1).
-#  A conta 622920104 (Paga) usa tipo "16 - Numero do Empenho" (11 digitos)
-#  e por isso continua filtrada via JOIN com NOTAEMPENHO (NUNE), igual ao
-#  padrao do DFC.
+#  A conta 622130400 (Paga) usa o MESMO tipo de conta corrente das demais
+#  (20 - Celula da Despesa com ND Detalhado), filtro direto por GND na celula.
+#  Trocada de 622920104 em 15/09/2026 -- ver nota completa no bloco acima.
 #    col1 Dotacao Inicial    : SD 522110000-522119999, filtro GND na celula
 #    col2 Dotacao Atualizada : SD 522110000-522129999 - SC 522150000-522159999
 #                               + SD 522190000-522199999, filtro GND na celula
 #    col3 Desp. Empenhadas   : SC 622130100-622130699, filtro por GND na celula
 #    col4 Desp. Liquidadas   : SC 622130300+622130400+622130700, filtro por GND na celula
-#    col5 Desp. Pagas        : SC 622920104, filtro por GND via NOTAEMPENHO (NUNE)
+#    col5 Desp. Pagas        : SC 622130400, filtro por GND na celula
 #  Reserva (GND 9, cod. 9.9.99.99.99) nao tem empenho -> so dotacao.
 #
 #  NOTA SOBRE PEQUENAS DIFERENCAS RESIDUAIS vs. O RELATORIO OFICIAL:
@@ -579,7 +588,6 @@ def buscar_saldo_521920500(conn, mes, ano):
 # ─────────────────────────────────────────────────────────────────────────────
 def _sql_despesa_item(gnd, mes, ano, reserva=False):
     cond_celula = f"SUBSTR(o.COCONTACORRENTE,34,1) = '{gnd}'"
-    cond_ne     = f"SUBSTR(ne.CONATUREZA,2,1) = '{gnd}'"
 
     dot_inicial = f"""
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
@@ -606,7 +614,18 @@ def _sql_despesa_item(gnd, mes, ano, reserva=False):
          ELSE 0 END)"""
 
     if reserva:
-        # Reserva de Contingencia / RPPS: nao ha empenho (cod. 9.9.99.99.99)
+        # Reserva de Contingencia / RPPS: nao ha empenho (cod. 9.9.99.99.99).
+        # Lista Equacoes atualizada em 17/09/2026 passou a detalhar Empenhada/
+        # Liquidada/Paga p/ estes 2 itens (incl. funcao=99/subfuncao=999|997,
+        # p/ excluir um lancamento errado achado na subfuncao 451 c/ GND 7),
+        # mas isso e so documentacao mais precisa da formula -- verificado ao
+        # vivo em 17/09/2026 (mes 9/2026): mesmo so com o filtro de GND na
+        # celula (sem funcao/subfuncao), Empenhada/Liquidada/Paga somam 0 nas
+        # contas 622130000-622139999 p/ GND '7' e '9', entao o atalho abaixo
+        # continua correto. Se um mes futuro passar a ter saldo real aqui, a
+        # constante hardcoded "0" vai mascarar esse valor -- reabrir e trocar
+        # pelo calculo completo (com os filtros de funcao/subfuncao da lista)
+        # se isso acontecer.
         return dot_inicial, dot_atual, "0", "0", "0"
 
     empenhada = f"""
@@ -616,6 +635,13 @@ def _sql_despesa_item(gnd, mes, ano, reserva=False):
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0)
          ELSE 0 END)"""
 
+    # Liquidada = 622130300 (Liquidado a Pagar) + 622130400 (Liquidado Pago)
+    # + 622130700 (RP Processados) -- total CUMULATIVO liquidado até a data,
+    # independente de já ter sido pago ou não (622130400 continua aqui: "já
+    # paga" não deixa de ser "liquidada", são cumulativas, não mutuamente
+    # exclusivas -- ver medição real em 15/09/2026: 622130300 sozinha =
+    # R$242,7 mi, MUITO menor que Paga = R$28,1 bi; removê-la daqui quebraria
+    # Liquidada >= Paga).
     liquidada = f"""
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
               AND o.COCONTACONTABIL IN (622130300,622130400,622130700)
@@ -623,14 +649,20 @@ def _sql_despesa_item(gnd, mes, ano, reserva=False):
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0)
          ELSE 0 END)"""
 
+    # Paga = 622130400 ("CRÉDITO EMPENHADO LIQUIDADO PAGO"), trocada de
+    # 622920104 ("EMPENHOS LIQUIDADOS PAGOS") em 15/09/2026 por indicação do
+    # IPC 7 (Coluna 5 do Balanço Orçamentário). As duas contas medem
+    # exatamente o mesmo valor (confirmado mês a mês pelo controle BO-05 em
+    # controles/bo.py) -- 622130400 é o MESMO componente que já soma dentro
+    # de Liquidada acima (Paga é um subconjunto/detalhamento de Liquidada,
+    # não uma soma à parte); ela usa o mesmo tipo de conta corrente "20 -
+    # Célula da Despesa com ND Detalhado" de Empenhada/Liquidada, então filtra
+    # por {cond_celula} direto, sem precisar do JOIN via NUNE/NOTAEMPENHO que
+    # 622920104 exigia (conta corrente tipo "16 - Número do Empenho").
     paga = f"""
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-              AND o.COCONTACONTABIL = 622920104
-              AND EXISTS (SELECT 1 FROM {ne_union(ano)} ne
-                          WHERE ne.NUNE     = SUBSTR(o.COCONTACORRENTE,1,11)
-                            AND ne.COUG     = o.COUGCONTAB
-                            AND ne.COGESTAO = o.COGESTAOCONTAB
-                            AND {cond_ne})
+              AND o.COCONTACONTABIL = 622130400
+              AND {cond_celula}
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0)
          ELSE 0 END)"""
 

@@ -1,0 +1,330 @@
+{
+  "gerado_em": "2026-09-18T04:33:18",
+  "mes": 9,
+  "ano": 2026,
+  "por_demonstrativo": {},
+  "achados": [],
+  "gnd_errado": [],
+  "mudancas_ib": [
+    {
+      "tipo_mud": "item_novo",
+      "demo": "BO",
+      "coitembalanco": 20106020100,
+      "noitembalanco": "Dívida Mobiliária Externa",
+      "conta": "         ",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "item_novo",
+      "demo": "BO",
+      "coitembalanco": 20106010200,
+      "noitembalanco": "Outras Dívidas Internas",
+      "conta": "         ",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "item_novo",
+      "demo": "BO",
+      "coitembalanco": 20106010100,
+      "noitembalanco": "Dívida Mobiliária Interna",
+      "conta": "         ",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "item_novo",
+      "demo": "BO",
+      "coitembalanco": 20106020200,
+      "noitembalanco": "Outras Dívidas Externas",
+      "conta": "         ",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 10102080300,
+      "noitembalanco": "Reabertura de Créditos Adicionais",
+      "conta": "522120203",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 10102080300,
+      "noitembalanco": "Reabertura de Créditos Adicionais",
+      "conta": "522120302",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 10102080300,
+      "noitembalanco": "Reabertura de Créditos Adicionais",
+      "conta": "522120303",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 20103000000,
+      "noitembalanco": "RESERVA DE CONTINGÊNCIA (X)",
+      "conta": "622130700",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 20103000000,
+      "noitembalanco": "RESERVA DE CONTINGÊNCIA (X)",
+      "conta": "622130400",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 20104000000,
+      "noitembalanco": "RESERVA DO RPPS",
+      "conta": "622130700",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_adicionada",
+      "demo": "BO",
+      "coitembalanco": 20104000000,
+      "noitembalanco": "RESERVA DO RPPS",
+      "conta": "622130400",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20101020000,
+      "noitembalanco": "Juros e Encargos da Dívida",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20104000000,
+      "noitembalanco": "RESERVA DO RPPS",
+      "conta": "000000000",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20104000000,
+      "noitembalanco": "RESERVA DO RPPS",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20102010000,
+      "noitembalanco": "Investimentos",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20101010000,
+      "noitembalanco": "Pessoal e Encargos Sociais",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20102030000,
+      "noitembalanco": "Amortização da Dívida",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20102020000,
+      "noitembalanco": "Inversões Financeiras",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20103000000,
+      "noitembalanco": "RESERVA DE CONTINGÊNCIA (X)",
+      "conta": "000000000",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20103000000,
+      "noitembalanco": "RESERVA DE CONTINGÊNCIA (X)",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    },
+    {
+      "tipo_mud": "conta_removida",
+      "demo": "BO",
+      "coitembalanco": 20101030000,
+      "noitembalanco": "Outras Despesas Correntes",
+      "conta": "622920104",
+      "desde": "2026-09-09"
+    }
+  ],
+  "ortografia": [
+    {
+      "demo": "DFC",
+      "coitembalanco": 30403000000,
+      "noitembalanco": "a Municípios",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30401000000,
+      "noitembalanco": "a União",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30402000000,
+      "noitembalanco": "a Estados e Distrito Federal",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30102000000,
+      "noitembalanco": "de Estados e Distrito Federal",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30103000000,
+      "noitembalanco": "de Municípios",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BO",
+      "coitembalanco": 10102079902,
+      "noitembalanco": "TOTAL  (VII) = (V + VI)",
+      "problemas": [
+        {
+          "tipo": "espaços",
+          "detalhe": "espaço duplo",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BP",
+      "coitembalanco": 10101000000,
+      "noitembalanco": "Caixa e Equivalentes de  Caixa",
+      "problemas": [
+        {
+          "tipo": "espaços",
+          "detalhe": "espaço duplo",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DVP",
+      "coitembalanco": 20200000000,
+      "noitembalanco": "BENEFÍCIOS PREVIDENCIÁRIOS E ASSISTENCIAIS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"PREVIDENCIÁRIOS\"",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DFC",
+      "coitembalanco": 30101000000,
+      "noitembalanco": "da União",
+      "problemas": [
+        {
+          "tipo": "capitalização",
+          "detalhe": "primeira letra minúscula",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "BP-Empresa",
+      "coitembalanco": 10402000000,
+      "noitembalanco": "DIREITOS CONVÊNIADOS E OUTROS INSTRUM. CONGÊNERES",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"CONVÊNIADOS\"",
+          "sugestoes": []
+        }
+      ]
+    },
+    {
+      "demo": "DRE",
+      "coitembalanco": 10602040000,
+      "noitembalanco": "INCORPORAÇÃO/DESINCOR. DE DIREITOS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"DESINCOR\"",
+          "sugestoes": [
+            "desancar",
+            "desanco",
+            "desancora"
+          ]
+        }
+      ]
+    },
+    {
+      "demo": "BP-Empresa",
+      "coitembalanco": 10102020400,
+      "noitembalanco": "CRÉDITOS PARCELADOS",
+      "problemas": [
+        {
+          "tipo": "ortografia",
+          "detalhe": "\"PARCELADOS\"",
+          "sugestoes": [
+            "aparcelados"
+          ]
+        }
+      ]
+    }
+  ]
+}

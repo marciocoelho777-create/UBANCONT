@@ -6,9 +6,17 @@ Contas baseadas no bo.py original (GDF/SIGGO):
   Dotação Atualizada: 522110000..522129999 (SD) - 522150000..522159999 (SC) + 522190000..522199999 (SD)
   Empenhada         : 622130000..622139999 (SC)
   Liquidada         : 622130300, 622130400, 622130700 (SC)
-  Paga              : 622920104 (SC)
+  Paga              : 622130400 (SC)
   Pgtos RPÑP        : 631400000 + 631820000 (SC)
   Pgtos RPP         : 6322XXXXX (SC)
+
+CORREÇÃO 15/09/2026 — Coluna 5 (Paga): 622920104 → 622130400 (IPC 7)
+---------------------------------------------------------------------
+Mesma troca feita em controles/bo.py (ver nota completa lá): Paga passou a
+usar SC 622130400 em vez de 622920104, por indicação do IPC 7. As duas
+contas medem o mesmo valor (confirmado pelo controle BO-05 em
+controles/bo.py). 622130400 CONTINUA também dentro de Liquidada — é um
+total cumulativo, não mutuamente exclusivo com Paga.
 
 CORREÇÃO 12/08/2026 — reclassificação de 6322XXXXX
 --------------------------------------------------
@@ -85,9 +93,11 @@ SELECT
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
     AS DESP_LIQUIDADA,
 
-    -- Paga (SC 622920104) — 6322XXXXX NÃO entra aqui: item 2.04.02 da Lista
+    -- Paga (SC 622130400, "CRÉDITO EMPENHADO LIQUIDADO PAGO") — trocada de
+    -- 622920104 em 15/09/2026 (IPC 7). 6322XXXXX NÃO entra aqui: item
+    -- 2.04.02 da Lista.
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
-              AND o.COCONTACONTABIL = 622920104
+              AND o.COCONTACONTABIL = 622130400
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
     AS DESPESA_PAGA,
 

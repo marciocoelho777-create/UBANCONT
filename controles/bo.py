@@ -6,9 +6,28 @@ Contas baseadas no bo.py original (GDF/SIGGO):
   Dotação Atualizada: 522110000..522129999 (SD) - 522150000..522159999 (SC) + 522190000..522199999 (SD)
   Empenhada         : 622130000..622139999 (SC)
   Liquidada         : 622130300, 622130400, 622130700 (SC)
-  Paga              : 622920104 (SC)
+  Paga              : 622130400 (SC)
   Pgtos RPÑP        : 631400000 + 631820000 (SC)
   Pgtos RPP         : 6322XXXXX (SC)
+
+CORREÇÃO 15/09/2026 — Coluna 5 (Paga): 622920104 → 622130400 (IPC 7)
+---------------------------------------------------------------------
+Por indicação do IPC 7 (Coluna 5 do Balanço Orçamentário), a Paga passou a
+usar SC 622130400 ("Crédito Empenhado Liquidado Pago") em vez de 622920104
+("Empenhos Liquidados Pagos"). As duas contas medem exatamente o mesmo
+valor — confirmado mês a mês pelo controle BO-05 abaixo, que agora compara
+justamente essas duas fontes para continuar vigiando essa igualdade.
+
+622130400 CONTINUA também dentro da soma de Liquidada — tentei tirá-la de
+lá primeiro (raciocínio: "já paga, não devia contar como só liquidada"),
+mas os números reais de 15/09/2026 provam que isso quebraria tudo:
+622130300 sozinha = R$242,7 mi, muitíssimo menor que Paga = R$28,1 bi.
+Liquidada é um total CUMULATIVO (tudo que já foi liquidado, pago ou não);
+Paga é um detalhamento/subconjunto dela, não uma soma à parte — a mesma
+lógica que já valia antes desta troca, quando Paga vinha de 622920104
+(conta diferente mas de valor idêntico ao componente 622130400 de
+Liquidada; ver nota de 12/08/2026 abaixo, que já registrava a Paga
+"R$1,92 bi ABAIXO da Liquidada" — a mesma relação de hoje).
 
 CORREÇÃO 12/08/2026 — reclassificação de 6322XXXXX
 --------------------------------------------------
@@ -70,17 +89,32 @@ SELECT
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
     AS DESP_EMPENHADA,
 
-    -- Liquidada (SC 622130300/400/700)
+    -- Liquidada (SC 622130300/400/700) — total CUMULATIVO liquidado até a
+    -- data, pago ou não; 622130400 CONTINUA aqui mesmo após virar a fonte de
+    -- Paga (ver nota de topo do arquivo: tirá-la quebraria Liquidada >= Paga).
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
               AND o.COCONTACONTABIL IN (622130300,622130400,622130700)
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
     AS DESP_LIQUIDADA,
 
-    -- Paga (SC 622920104) — 6322XXXXX NÃO entra aqui: item 2.04.02 da Lista
+    -- Paga (SC 622130400, "CRÉDITO EMPENHADO LIQUIDADO PAGO") — trocada de
+    -- 622920104 ("EMPENHOS LIQUIDADOS PAGOS") em 15/09/2026 por indicação do
+    -- IPC 7 (Coluna 5 do BO). 6322XXXXX NÃO entra aqui: item 2.04.02 da Lista.
+    SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
+              AND o.COCONTACONTABIL = 622130400
+         THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
+    AS DESPESA_PAGA,
+
+    -- BO-05: SC 622920104 sozinha ("EMPENHOS LIQUIDADOS PAGOS", fonte antiga
+    -- de DESPESA_PAGA até 14/09/2026) comparada com a nova DESPESA_PAGA
+    -- (622130400, "CRÉDITO EMPENHADO LIQUIDADO PAGO"). Os nomes oficiais das
+    -- duas contas sugerem que ambas medem "pago", por vias de lançamento
+    -- diferentes; a troca da Coluna 5 assume que elas sempre convergem — este
+    -- controle continua vigiando isso mês a mês.
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
               AND o.COCONTACONTABIL = 622920104
          THEN DECODE(o.INDEBITOCREDITO,'C',o.VALANCAMENTO,'D',-o.VALANCAMENTO,0) ELSE 0 END)
-    AS DESPESA_PAGA,
+    AS SALDO_622920104,
 
     -- Pagamentos RPÑP (SC 631400000 + 631820000) — item 2.04.01
     SUM(CASE WHEN o.INMES BETWEEN 1 AND {mes}
@@ -279,5 +313,28 @@ def auditar(conn, mes, ano):
         achados.append(achado_alerta("BO", "BO-04",
             "Não foi possível verificar 521920500 (C18)",
             f"{type(e).__name__}: {e}"))
+
+    # BO-05: DESPESA_PAGA (622130400, fonte oficial da Coluna 5 desde
+    # 15/09/2026 — ver nota de topo do arquivo) x SC 622920104 ("Empenhos
+    # Liquidados Pagos", fonte antiga). Criada em 15/09/2026 a pedido do
+    # usuário para confirmar a equivalência antes da troca; mantida depois
+    # da troca como vigia contínua — se as duas um dia divergirem, é sinal
+    # de que a equivalência que justificou a mudança parou de valer.
+    # Reportado como ALERTA (não ERRO): não redefine a Coluna 5 sozinho, só
+    # avisa para investigar.
+    dif_pago = t["DESPESA_PAGA"] - t["SALDO_622920104"]
+    if abs(dif_pago) < D("0.02"):
+        achados.append(achado_ok("BO", "BO-05",
+            "SC 622130400 (Despesa Paga) = SC 622920104",
+            f"622130400 {t['DESPESA_PAGA']:,.2f}  =  622920104 {t['SALDO_622920104']:,.2f}",
+            valor=t["DESPESA_PAGA"]))
+    else:
+        achados.append(achado_alerta("BO", "BO-05",
+            "SC 622130400 (Despesa Paga) ≠ SC 622920104 — investigar",
+            f"622130400 {t['DESPESA_PAGA']:,.2f}  ≠  622920104 {t['SALDO_622920104']:,.2f}  "
+            f"Diferença: {dif_pago:,.2f} — a Coluna 5 (Paga) do BO usa 622130400 "
+            f"desde 15/09/2026 (IPC 7); as duas contas pararam de convergir, "
+            f"investigar antes de confiar na Coluna 5 deste mês.",
+            valor=dif_pago))
 
     return achados, t
