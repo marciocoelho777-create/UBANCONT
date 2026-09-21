@@ -199,6 +199,28 @@ CONTROLES = [
         },
     },
     {
+        "numero":    "01b",
+        "titulo":    "Controle 1b — Contas 21XXXXXXX sem cobertura no C01 (gap finder)",
+        "descricao": ("Diagnóstico complementar ao C01: identifica subcontas 21XXXXXXX com movimento "
+                      "em LANCAMENTOCONTABIL que NÃO foram enumeradas na fórmula DIFERENÇA do C01 e, portanto, "
+                      "podem estar causando as diferenças no batimento com 827110101. "
+                      "Se aparecerem contas aqui com saldo relevante, elas precisam ser incluídas "
+                      "na fórmula da DIFERENÇA do C01 ou explicadas como extraorçamentárias sem 827110101."),
+        "aba":       "C01b",
+        "sql":       "C01b-GAP - Contas 21 não cobertas pelo Controle 1.sql",
+        "tipo":      "detalhe",
+        "diff_cols": [3],
+        "col_labels": {
+            0: "Conta Contábil",
+            1: "Nome Conta",
+            2: "N. UGs",
+            3: "Saldo Líquido",
+            4: "Total Débito",
+            5: "Total Crédito",
+        },
+        "detalhe_row_id_cols": [0, 1],
+    },
+    {
         "numero":    "02",
         "titulo":    "Controle 2 — Contas 21 F Ret do exercício × 827110201/827110203/63181",
         "descricao": ("Verifica retenções do exercício atual (IR, INSS e outros encargos deduzidos do pagamento) "
@@ -280,6 +302,26 @@ CONTROLES = [
                        5: "631300000", 6: "218924002", 7: "218914002"},
     },
     {
+        "numero":    "06b",
+        "titulo":    "Controle 6b — Variantes 218914XXX / 218924XXX fora do escopo do C06",
+        "descricao": ("O C06 cobre apenas as contas 218914002 e 218924002 (RPNP a pagar em liquidação). "
+                      "Este controle verifica se existem outras subcontas das famílias "
+                      "218914XXX e 218924XXX com saldo no exercício. "
+                      "Se aparecerem contas aqui, o escopo do C06 precisa ser ampliado para incluí-las "
+                      "no batimento com 631300000."),
+        "aba":       "C06b",
+        "sql":       "C06b-Variantes 218914-218924.sql",
+        "tipo":      "detalhe",
+        "diff_cols": [2],
+        "col_labels": {
+            0: "Conta Contábil",
+            1: "Nome Conta",
+            2: "Saldo",
+            3: "N. UGs",
+        },
+        "detalhe_row_id_cols": [0, 1],
+    },
+    {
         "numero":    "08",
         "titulo":    "Controle 8 — Balancete INTRA",
         "descricao": ("Verifica a consistência do balancete nas contas intragovernamentais (INTRA) — "
@@ -295,6 +337,29 @@ CONTROLES = [
         "col_labels": {**_UG, 4: "DIFERENÇA (CL1+2+3+4)",
                        5: "Cl.4 VPA", 6: "Cl.3 VPD",
                        7: "Cl.2 Passivo/PL", 8: "Cl.1 Ativo"},
+    },
+    {
+        "numero":    "08b",
+        "titulo":    "Controle 8b — Batimento INTRA por conta contábil (NET entre todas as UGs)",
+        "descricao": ("Para cada conta intragovernamental (5.º dígito = 2, classes 1–4), "
+                      "a soma dos movimentos de TODAS as UGs deve ser zero: se UG A debitou "
+                      "a conta X (INTRA), UG B deve ter creditado a mesma conta X (INTRA). "
+                      "Saldo ≠ 0 significa que uma UG registrou a operação sem a contrapartida "
+                      "da UG parceira — erro real de escrituração, ao contrário do C08 por UG "
+                      "que é estruturalmente não-zero por misturar pernas INTRA e não-INTRA. "
+                      "Ordenado pelo maior desequilíbrio absoluto."),
+        "aba":       "C08b",
+        "sql":       "C08b-Batimento INTRA por Conta.sql",
+        "tipo":      "detalhe",
+        "diff_cols": [4],
+        "col_labels": {
+            0: "Conta Contábil",
+            1: "Nome Conta",
+            2: "UGs saldo +",
+            3: "UGs saldo −",
+            4: "Saldo Líquido Total",
+        },
+        "detalhe_row_id_cols": [0, 1],
     },
     {
         "numero":    "09",
@@ -473,6 +538,28 @@ CONTROLES = [
                        3: "Saldo",
                        4: "UG"},
         # UG (4) vira seletor; UG + Conta Contábil + Conta Corrente ficam na linha
+        "detalhe_row_id_cols": [4, 1, 2],
+    },
+    {
+        "numero":    "17b",
+        "titulo":    "Controle 17b — Inversão de Saldo Classe 2 (Passivo com saldo devedor)",
+        "descricao": ("Complementa o C17, que verifica apenas a Classe 1 (Ativo). "
+                      "Identifica contas do Passivo (Classe 2) com saldo de natureza devedora — "
+                      "situação anômala, pois passivos têm natureza credora. "
+                      "Saldo devedor no passivo pode indicar: baixa superior ao saldo inscrito, "
+                      "pagamento sem o empenho/liquidação correspondente, ou lançamento invertido. "
+                      "Base: MCASP — PCASP, natureza das contas de Passivo; NBC TSP 01."),
+        "aba":       "C17b",
+        "sql":       "C17b-Inversão de Saldo Passivo.sql",
+        "tipo":      "detalhe",
+        "diff_cols": [3],
+        "col_labels": {
+            0: "Ind. Inversão Saldo",
+            1: "Conta Contábil",
+            2: "Conta Corrente",
+            3: "Saldo",
+            4: "UG",
+        },
         "detalhe_row_id_cols": [4, 1, 2],
     },
     {
