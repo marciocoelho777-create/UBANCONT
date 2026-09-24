@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Monitor de Classificação</title>
+<title>Monitor de erros de TI, inconsistências e alterações na estrutura do balanço</title>
 <style>
 /* ── Design tokens ── */
 :root {
@@ -368,7 +368,7 @@ footer {
 <!-- ── Header ── -->
 <header class="hd">
   <div>
-    <div class="hd-title">Monitor de Classificação</div>
+    <div class="hd-title">Monitor de erros de TI, inconsistências e alterações na estrutura do balanço</div>
     <div class="hd-sub">GDF · Demonstrativos Contábeis 2026</div>
   </div>
   <div id="hd-meta" class="hd-meta">
@@ -825,7 +825,7 @@ footer {
 </main>
 
 <footer>
-  Monitor de Classificação · GDF 2026 ·
+  Monitor de erros de TI, inconsistências e alterações na estrutura do balanço · GDF 2026 ·
   <code>monitor_classificacao.py</code> ·
   dados em <code>painel/dados/classificacao/</code>
 </footer>
@@ -1767,41 +1767,41 @@ var VS_PDF_DATA = {
 
 /* INTEGR-PDF-START */
 var INTEGR_PDF_DATA = {
-  "gerado_em": "2026-09-24T08:24:09",
+  "gerado_em": "2026-09-24T14:02:23",
   "mes": 9,
   "ano": 2026,
-  "n_diverg": 6,
-  "n_alerta": 1,
-  "n_ok": 35,
+  "n_diverg": 0,
+  "n_alerta": 0,
+  "n_ok": 42,
   "n_nao_verif": 0,
   "achados": [
     {
       "regra": "1",
       "titulo": "Resultado Patrimonial: DVP = BP",
-      "status": "DIVERGENTE",
-      "valor_a": -13986627705.17,
+      "status": "OK",
+      "valor_a": -14023509140.92,
       "rotulo_a": "DVP - Resultado Patrimonial (III)",
-      "valor_b": -13979410073.83,
+      "valor_b": -14023509140.92,
       "rotulo_b": "BP - Resultado do Exercício",
       "observacao": ""
     },
     {
       "regra": "1b",
       "titulo": "Resultado do Exercício: DVP = DMPL (coluna TOTAL)",
-      "status": "DIVERGENTE",
-      "valor_a": -13986627705.17,
+      "status": "OK",
+      "valor_a": -14023509140.92,
       "rotulo_a": "DVP - Resultado Patrimonial (III)",
-      "valor_b": -15484195906.83,
+      "valor_b": -14023509140.92,
       "rotulo_b": "DMPL - Resultado do exercício (TOTAL)",
       "observacao": ""
     },
     {
       "regra": "2",
       "titulo": "Saldo Final da DMPL = Patrimônio Líquido do BP",
-      "status": "DIVERGENTE",
-      "valor_a": -147071752266.32,
+      "status": "OK",
+      "valor_a": -145624230377.67,
       "rotulo_a": "DMPL - Saldos finais (TOTAL)",
-      "valor_b": -145580143102.0,
+      "valor_b": -145624230377.67,
       "rotulo_b": "BP - Patrimônio Líquido",
       "observacao": ""
     },
@@ -1818,8 +1818,8 @@ var INTEGR_PDF_DATA = {
     {
       "regra": "3",
       "titulo": "Coluna DMPL x linha BP — Adiantamento para Futuro Aumento de Capital",
-      "status": "DIVERGENTE",
-      "valor_a": 29855685.42,
+      "status": "OK",
+      "valor_a": 53438133.1,
       "rotulo_a": "DMPL - Adiantamento para Futuro Aumento de Capital",
       "valor_b": 53438133.1,
       "rotulo_b": "BP - Adiantamento para Futuro Aumento de Capital",
@@ -1838,8 +1838,8 @@ var INTEGR_PDF_DATA = {
     {
       "regra": "3",
       "titulo": "Coluna DMPL x linha BP — Ajustes de Avaliação Patrimonial",
-      "status": "DIVERGENTE",
-      "valor_a": 584322674.88,
+      "status": "OK",
+      "valor_a": 584213821.56,
       "rotulo_a": "DMPL - Ajustes de Avaliação Patrimonial",
       "valor_b": 584213821.56,
       "rotulo_b": "BP - Ajustes de Avaliação Patrimonial",
@@ -1868,10 +1868,10 @@ var INTEGR_PDF_DATA = {
     {
       "regra": "3",
       "titulo": "Coluna DMPL x linha BP — Resultado Acumulado",
-      "status": "DIVERGENTE",
-      "valor_a": -191763989306.77,
+      "status": "OK",
+      "valor_a": -190339941012.48,
       "rotulo_a": "DMPL - Resultado Acumulado",
-      "valor_b": -190295853736.81,
+      "valor_b": -190339941012.48,
       "rotulo_b": "BP - Resultado Acumulado",
       "observacao": ""
     },
@@ -1879,9 +1879,9 @@ var INTEGR_PDF_DATA = {
       "regra": "4a",
       "titulo": "Caixa e Equiv. de Caixa: BP = DFC (Caixa Final)",
       "status": "OK",
-      "valor_a": 6550734641.57,
+      "valor_a": 6579582708.71,
       "rotulo_a": "BP - Caixa e Equiv. de Caixa",
-      "valor_b": 6550734641.57,
+      "valor_b": 6579582708.71,
       "rotulo_b": "DFC - Caixa e Equivalente de Caixa Final",
       "observacao": ""
     },
@@ -1889,9 +1889,9 @@ var INTEGR_PDF_DATA = {
       "regra": "4b",
       "titulo": "Caixa e Equiv. de Caixa: BP = BF (Caixa+RPPS+Dep.Restituíveis, saldo seguinte)",
       "status": "OK",
-      "valor_a": 6550734641.57,
+      "valor_a": 6579582708.71,
       "rotulo_a": "BP - Caixa e Equiv. de Caixa",
-      "valor_b": 6550734641.570001,
+      "valor_b": 6579582708.71,
       "rotulo_b": "BF - Caixa (Exceto RPPS) + Caixa RPPS + Dep. Restituíveis",
       "observacao": ""
     },
@@ -1899,9 +1899,9 @@ var INTEGR_PDF_DATA = {
       "regra": "5a",
       "titulo": "Ativo do Anexo (Financeiro+Permanente) = Ativo Total do BP",
       "status": "OK",
-      "valor_a": 69190971685.26,
+      "valor_a": 69224101738.0,
       "rotulo_a": "Anexo BP - Ativo Financeiro + Permanente",
-      "valor_b": 69190971685.26,
+      "valor_b": 69224101738.0,
       "rotulo_b": "BP - ATIVO (corpo do balanço)",
       "observacao": ""
     },
@@ -1909,19 +1909,19 @@ var INTEGR_PDF_DATA = {
       "regra": "6",
       "titulo": "Superávit Financeiro = Ativo Financeiro − Passivo Financeiro",
       "status": "INFORMATIVO",
-      "valor_a": 2526913615.91,
+      "valor_a": 2334251546.1099997,
       "rotulo_a": "Anexo BP - Ativo Financeiro − Passivo Financeiro",
       "valor_b": null,
       "rotulo_b": "",
-      "observacao": "Só é o Superávit Financeiro oficial (para abertura de crédito adicional) no fechamento do exercício (dezembro), por fonte de recursos — aqui é o total consolidado, informativo. Saldo Patrimonial (III) do anexo, para referência: -149,138,198,456.78"
+      "observacao": "Só é o Superávit Financeiro oficial (para abertura de crédito adicional) no fechamento do exercício (dezembro), por fonte de recursos — aqui é o total consolidado, informativo. Saldo Patrimonial (III) do anexo, para referência: -149,324,803,984.84"
     },
     {
       "regra": "7",
       "titulo": "Receita Orçamentária: BF = Receitas Realizadas do BO",
       "status": "OK",
-      "valor_a": 34353558428.96,
+      "valor_a": 34406720565.31,
       "rotulo_a": "BF - Receita Orçamentária",
-      "valor_b": 34353558428.96,
+      "valor_b": 34406720565.31,
       "rotulo_b": "BO - Receitas Realizadas",
       "observacao": ""
     },
@@ -1929,9 +1929,9 @@ var INTEGR_PDF_DATA = {
       "regra": "8",
       "titulo": "Despesa Orçamentária: BF = Despesas Pagas do BO",
       "status": "OK",
-      "valor_a": 28811293255.6,
+      "valor_a": 28846426329.48,
       "rotulo_a": "BF - Despesa Orçamentária",
-      "valor_b": 28811293255.6,
+      "valor_b": 28846426329.48,
       "rotulo_b": "BO - Despesas Pagas",
       "observacao": ""
     },
@@ -1939,9 +1939,9 @@ var INTEGR_PDF_DATA = {
       "regra": "10a",
       "titulo": "Pagamento de RPÑP (não processados): BF = BO",
       "status": "OK",
-      "valor_a": 1078459626.1,
+      "valor_a": 1078470183.6,
       "rotulo_a": "BF - Pagamentos de RPÑP",
-      "valor_b": 1078459626.1,
+      "valor_b": 1078470183.6,
       "rotulo_b": "BO - RP Não Proc. Pagos",
       "observacao": ""
     },
@@ -1959,9 +1959,9 @@ var INTEGR_PDF_DATA = {
       "regra": "11",
       "titulo": "Receitas: BO x DFC — Impostos, Taxas e Contribuições de Melhoria",
       "status": "OK",
-      "valor_a": 19623391697.46,
+      "valor_a": 19661954853.02,
       "rotulo_a": "BO - IMPOSTOS, TAXAS E CONTRIBUIÇÕES DE MELHORIA (Realizadas)",
-      "valor_b": 19623391697.46,
+      "valor_b": 19661954853.02,
       "rotulo_b": "DFC - Impostos, Taxas e Contribuições de Melhoria",
       "observacao": ""
     },
@@ -1969,9 +1969,9 @@ var INTEGR_PDF_DATA = {
       "regra": "11",
       "titulo": "Receitas: BO x DFC — Receita de Contribuições",
       "status": "OK",
-      "valor_a": 4399274502.0,
+      "valor_a": 4399445454.27,
       "rotulo_a": "BO - RECEITA CONTRIBUIÇÕES (Realizadas)",
-      "valor_b": 4399274502.0,
+      "valor_b": 4399445454.27,
       "rotulo_b": "DFC - Receita de Contribuições",
       "observacao": ""
     },
@@ -1979,9 +1979,9 @@ var INTEGR_PDF_DATA = {
       "regra": "11",
       "titulo": "Receitas: BO x DFC — Receita Patrimonial",
       "status": "OK",
-      "valor_a": 924987044.08,
+      "valor_a": 926084828.83,
       "rotulo_a": "BO - RECEITA PATRIMONIAL (Realizadas)",
-      "valor_b": 924987044.08,
+      "valor_b": 926084828.83,
       "rotulo_b": "DFC - Receita Patrimonial",
       "observacao": ""
     },
@@ -1999,9 +1999,9 @@ var INTEGR_PDF_DATA = {
       "regra": "11",
       "titulo": "Receitas: BO x DFC — Receita Industrial",
       "status": "OK",
-      "valor_a": 2421823.28,
+      "valor_a": 2429597.68,
       "rotulo_a": "BO - RECEITA INDUSTRIAL (Realizadas)",
-      "valor_b": 2421823.28,
+      "valor_b": 2429597.68,
       "rotulo_b": "DFC - Receita Industrial",
       "observacao": ""
     },
@@ -2009,9 +2009,9 @@ var INTEGR_PDF_DATA = {
       "regra": "11",
       "titulo": "Receitas: BO x DFC — Receita de Serviços",
       "status": "OK",
-      "valor_a": 1774671157.9,
+      "valor_a": 1780766546.23,
       "rotulo_a": "BO - RECEITA DE SERVIÇOS (Realizadas)",
-      "valor_b": 1774671157.9,
+      "valor_b": 1780766546.23,
       "rotulo_b": "DFC - Receita de Serviços",
       "observacao": ""
     },
@@ -2019,7 +2019,7 @@ var INTEGR_PDF_DATA = {
       "regra": "12a",
       "titulo": "Superávit Orçamentário = ΔDotação(Despesa) − ΔPrevisão(Receita)",
       "status": "INFORMATIVO",
-      "valor_a": 2081980076.3099976,
+      "valor_a": 2119871741.3099976,
       "rotulo_a": "Calculado (ΔDotação − ΔPrevisão)",
       "valor_b": 0.0,
       "rotulo_b": "BO - SUPERÁVIT (XIII) reportado",
@@ -2029,9 +2029,9 @@ var INTEGR_PDF_DATA = {
       "regra": "12b",
       "titulo": "Variação da Dotação (Atualizada−Inicial) = Total de Créditos Adicionais",
       "status": "OK",
-      "valor_a": 4250983981.0,
+      "valor_a": 4298875646.0,
       "rotulo_a": "BO - Dotação Atualizada − Inicial",
-      "valor_b": 4250983981.0,
+      "valor_b": 4298875646.0,
       "rotulo_b": "BO - Total de Alterações (Créditos Adicionais)",
       "observacao": ""
     },
@@ -2041,7 +2041,7 @@ var INTEGR_PDF_DATA = {
       "status": "OK",
       "valor_a": 64089064.25,
       "rotulo_a": "BO - Operações de Crédito (Receita Realizada)",
-      "valor_b": 2431409050.46,
+      "valor_b": 2434940932.64,
       "rotulo_b": "BO - Despesas de Capital (Empenhadas)",
       "observacao": "Operações de crédito não podem superar despesas de capital, salvo créditos suplementares/especiais com finalidade precisa aprovados por maioria absoluta do Legislativo (ressalva constitucional não verificável automaticamente aqui)."
     },
@@ -2049,49 +2049,49 @@ var INTEGR_PDF_DATA = {
       "regra": "15",
       "titulo": "Empenhado ≥ Liquidado ≥ Pago — Despesas Correntes",
       "status": "OK",
-      "valor_a": 30157991993.76,
+      "valor_a": 30400340846.73,
       "rotulo_a": "Despesas Correntes - Empenhada",
-      "valor_b": 27620118041.48,
+      "valor_b": 27716402401.24,
       "rotulo_b": "Despesas Correntes - Liquidada",
-      "observacao": "Paga: 27,364,143,779.96. Sequência respeitada."
+      "observacao": "Paga: 27,396,079,477.66. Sequência respeitada."
     },
     {
       "regra": "15",
       "titulo": "Empenhado ≥ Liquidado ≥ Pago — Despesas de Capital",
       "status": "OK",
-      "valor_a": 2431409050.46,
+      "valor_a": 2434940932.64,
       "rotulo_a": "Despesas de Capital - Empenhada",
-      "valor_b": 1470729754.72,
+      "valor_b": 1477828816.84,
       "rotulo_b": "Despesas de Capital - Liquidada",
-      "observacao": "Paga: 1,447,149,475.64. Sequência respeitada."
+      "observacao": "Paga: 1,450,346,851.82. Sequência respeitada."
     },
     {
       "regra": "15",
       "titulo": "Empenhado ≥ Liquidado ≥ Pago — Subtotal das Despesas",
       "status": "OK",
-      "valor_a": 32589401044.22,
+      "valor_a": 32835281779.37,
       "rotulo_a": "Subtotal das Despesas - Empenhada",
-      "valor_b": 29090847796.2,
+      "valor_b": 29194231218.08,
       "rotulo_b": "Subtotal das Despesas - Liquidada",
-      "observacao": "Paga: 28,811,293,255.60. Sequência respeitada."
+      "observacao": "Paga: 28,846,426,329.48. Sequência respeitada."
     },
     {
       "regra": "16",
       "titulo": "Resultado Orçamentário = Receitas Realizadas − Despesas Empenhadas",
       "status": "INFORMATIVO",
-      "valor_a": 34353558428.96,
+      "valor_a": 34406720565.31,
       "rotulo_a": "BO - Receitas Realizadas",
-      "valor_b": 32589401044.22,
+      "valor_b": 32835281779.37,
       "rotulo_b": "BO - Despesas Empenhadas",
-      "observacao": "Resultado superavitário: 1,764,157,384.74"
+      "observacao": "Resultado superavitário: 1,571,438,785.94"
     },
     {
       "regra": "17a",
       "titulo": "DFC: Geração Líquida = Operacional + Investimento + Financiamento",
       "status": "OK",
-      "valor_a": 1090405099.83,
+      "valor_a": 1119253166.9699998,
       "rotulo_a": "DFC - Soma dos 3 fluxos",
-      "valor_b": 1090405099.83,
+      "valor_b": 1119253166.97,
       "rotulo_b": "DFC - Geração Líquida reportada",
       "observacao": ""
     },
@@ -2099,9 +2099,9 @@ var INTEGR_PDF_DATA = {
       "regra": "17b",
       "titulo": "DFC: Geração Líquida = Caixa Final − Caixa Inicial",
       "status": "OK",
-      "valor_a": 1090405099.83,
+      "valor_a": 1119253166.97,
       "rotulo_a": "DFC - Geração Líquida reportada",
-      "valor_b": 1090405099.83,
+      "valor_b": 1119253166.9700003,
       "rotulo_b": "DFC - Caixa Final − Caixa Inicial",
       "observacao": ""
     },
@@ -2109,9 +2109,9 @@ var INTEGR_PDF_DATA = {
       "regra": "18a",
       "titulo": "BP: Ativo Circulante + Não Circulante = Ativo Total",
       "status": "OK",
-      "valor_a": 69190971685.26001,
+      "valor_a": 69224101738.0,
       "rotulo_a": "Soma AC+ANC",
-      "valor_b": 69190971685.26,
+      "valor_b": 69224101738.0,
       "rotulo_b": "BP - ATIVO",
       "observacao": ""
     },
@@ -2119,9 +2119,9 @@ var INTEGR_PDF_DATA = {
       "regra": "18b",
       "titulo": "BP: Ativo = Passivo + Patrimônio Líquido",
       "status": "OK",
-      "valor_a": 69190971685.26,
+      "valor_a": 69224101738.0,
       "rotulo_a": "BP - ATIVO",
-      "valor_b": 69190971685.26,
+      "valor_b": 69224101738.0,
       "rotulo_b": "BP - PASSIVO E PATRIMÔNIO LÍQUIDO",
       "observacao": ""
     },
@@ -2129,9 +2129,9 @@ var INTEGR_PDF_DATA = {
       "regra": "18c",
       "titulo": "BP: Passivo Circulante + Não Circulante + PL = Passivo e PL Total",
       "status": "OK",
-      "valor_a": 69190971685.26001,
+      "valor_a": 69224101737.99997,
       "rotulo_a": "Soma PC+PNC+PL",
-      "valor_b": 69190971685.26,
+      "valor_b": 69224101738.0,
       "rotulo_b": "BP - PASSIVO E PATRIMÔNIO LÍQUIDO",
       "observacao": ""
     },
@@ -2140,20 +2140,20 @@ var INTEGR_PDF_DATA = {
       "titulo": "TI — Data do PDF — Balanço Financeiro",
       "status": "OK",
       "valor_a": 9.0,
-      "rotulo_a": "Balanço Financeiro: mês no PDF (22/09/2026)",
+      "rotulo_a": "Balanço Financeiro: mês no PDF (23/09/2026)",
       "valor_b": 9.0,
       "rotulo_b": "Mês de referência esperado",
-      "observacao": "Data coerente: 22/09/2026"
+      "observacao": "Data coerente: 23/09/2026"
     },
     {
       "regra": "20-BP",
       "titulo": "TI — Data do PDF — Balanço Patrimonial",
       "status": "OK",
       "valor_a": 9.0,
-      "rotulo_a": "Balanço Patrimonial: mês no PDF (22/09/2026)",
+      "rotulo_a": "Balanço Patrimonial: mês no PDF (23/09/2026)",
       "valor_b": 9.0,
       "rotulo_b": "Mês de referência esperado",
-      "observacao": "Data coerente: 22/09/2026"
+      "observacao": "Data coerente: 23/09/2026"
     },
     {
       "regra": "20-DVP",
@@ -2170,58 +2170,58 @@ var INTEGR_PDF_DATA = {
       "titulo": "TI — Data do PDF — Balanço Orçamentário",
       "status": "OK",
       "valor_a": 9.0,
-      "rotulo_a": "Balanço Orçamentário: mês no PDF (22/09/2026)",
+      "rotulo_a": "Balanço Orçamentário: mês no PDF (23/09/2026)",
       "valor_b": 9.0,
       "rotulo_b": "Mês de referência esperado",
-      "observacao": "Data coerente: 22/09/2026"
+      "observacao": "Data coerente: 23/09/2026"
     },
     {
       "regra": "20-DFC",
       "titulo": "TI — Data do PDF — Fluxos de Caixa",
       "status": "OK",
       "valor_a": 9.0,
-      "rotulo_a": "Fluxos de Caixa: mês no PDF (22/09/2026)",
+      "rotulo_a": "Fluxos de Caixa: mês no PDF (23/09/2026)",
       "valor_b": 9.0,
       "rotulo_b": "Mês de referência esperado",
-      "observacao": "Data coerente: 22/09/2026"
+      "observacao": "Data coerente: 23/09/2026"
     },
     {
       "regra": "20-DMPL",
-      "titulo": "TI — Data incompatível com mês de referência — DMPL",
-      "status": "ALERTA",
-      "valor_a": 8.0,
-      "rotulo_a": "DMPL: mês no PDF (26/08/2026)",
+      "titulo": "TI — Data do PDF — DMPL",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "DMPL: mês no PDF (23/09/2026)",
       "valor_b": 9.0,
-      "rotulo_b": "Mês de referência esperado: 09/2026",
-      "observacao": "PDF 'DMPL' reporta posição em 26/08/2026 mas o mês de referência é 09/2026. Possível arquivo de mês anterior não substituído na pasta 13."
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 23/09/2026"
     },
     {
       "regra": "21a",
       "titulo": "TI — DVP: Soma categorias VPA = Total VPA declarado",
       "status": "OK",
-      "valor_a": 107815406085.06,
+      "valor_a": 107908497756.16998,
       "rotulo_a": "Soma de 7 categorias VPA",
-      "valor_b": 107815406085.06,
+      "valor_b": 107908497756.17,
       "rotulo_b": "Total VPA declarado no PDF",
-      "observacao": "Impostos/Taxas/Contrib. Melhoria: 23,733,923,206.48; Contribuições: 3,161,358,599.18; Exploração/Venda Bens e Serviços: 1,874,435,348.10; VPA Financeiras: 3,971,136,653.74; Transferências Recebidas: 40,737,651,551.00; Valorização/Ganhos c/ Ativos: 1,181,990,377.69; Outras VPA: 33,154,910,348.87"
+      "observacao": "Impostos/Taxas/Contrib. Melhoria: 23,770,397,145.45; Contribuições: 3,161,636,806.67; Exploração/Venda Bens e Serviços: 1,880,423,303.47; VPA Financeiras: 3,973,082,160.24; Transferências Recebidas: 40,779,085,122.85; Valorização/Ganhos c/ Ativos: 1,182,107,182.70; Outras VPA: 33,161,766,034.79"
     },
     {
       "regra": "21b",
       "titulo": "TI — DVP: Soma categorias VPD = Total VPD declarado",
       "status": "OK",
-      "valor_a": 121802033790.23,
+      "valor_a": 121932006897.09001,
       "rotulo_a": "Soma de 9 categorias VPD",
-      "valor_b": 121802033790.23,
+      "valor_b": 121932006897.09,
       "rotulo_b": "Total VPD declarado no PDF",
-      "observacao": "Pessoal e Encargos: 10,834,144,215.93; Benefícios Previdenciários: 5,440,981,670.68; Uso de Bens/Serviços/Capital: 7,483,381,666.13; VPD Financeiras: 727,787,422.04; Transferências Concedidas: 38,713,780,547.84; Desvalorização/Perda de Ativos: 3,113,960,753.52; Tributárias: 292,772,653.19; Custo Merc./Prod./Serv.: 50,340.00; Outras VPD: 55,195,174,520.90"
+      "observacao": "Pessoal e Encargos: 10,836,122,703.78; Benefícios Previdenciários: 5,441,214,924.57; Uso de Bens/Serviços/Capital: 7,515,828,200.64; VPD Financeiras: 727,787,473.64; Transferências Concedidas: 38,756,233,094.17; Desvalorização/Perda de Ativos: 3,114,379,635.23; Tributárias: 292,772,653.19; Custo Merc./Prod./Serv.: 50,340.00; Outras VPD: 55,247,617,871.87"
     },
     {
       "regra": "21c",
       "titulo": "TI — DVP Qualitativas: Soma itens = Total declarado",
       "status": "OK",
-      "valor_a": 17409956141.71,
+      "valor_a": 17422415466.25,
       "rotulo_a": "Soma de 4 itens qualitativos",
-      "valor_b": 17409956141.71,
+      "valor_b": 17422415466.25,
       "rotulo_b": "Total Variações Qualitativas declarado",
       "observacao": ""
     }
