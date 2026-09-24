@@ -609,6 +609,36 @@ footer {
     </div>
   </div>
 
+  <!-- 4b· Integridade Técnica dos PDFs Oficiais (TI/datas/subtotais) -->
+  <div class="card" id="card-integr-pdf">
+    <div class="card-hd">
+      Integridade técnica dos PDFs oficiais (TI)
+      <span id="integr-pdf-badge"></span>
+    </div>
+    <div class="tbl-wrap" id="integr-pdf-wrap">
+      <table id="tbl-integr-pdf">
+        <thead>
+          <tr>
+            <th>Regra</th>
+            <th>Verificação</th>
+            <th>Status</th>
+            <th class="r">Valor A</th>
+            <th class="r">Valor B</th>
+            <th class="r">Diferença</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-integr-pdf"></tbody>
+      </table>
+      <p id="integr-pdf-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
+        ✅ PDFs oficiais sem divergências nem alertas técnicos
+      </p>
+      <p id="integr-pdf-none" style="display:none;color:var(--t3);padding:.5rem 0">
+        Aguardando execução de <code>relatorio_integridade_pdf_oficial.py</code>
+      </p>
+    </div>
+  </div>
+
   <!-- 5· Campos de classificação por registro -->
   <div class="card">
     <div class="card-hd">
@@ -803,7 +833,7 @@ footer {
 <script>
 /* AUTO-DATA-START */
 const CDATA = {
-  "gerado_em": "2026-09-21T14:03:28",
+  "gerado_em": "2026-09-24T04:34:14",
   "mes": 9,
   "ano": 2026,
   "por_demonstrativo": {},
@@ -811,32 +841,32 @@ const CDATA = {
   "gnd_errado": [],
   "historico": [
     {
-      "gerado_em": "2026-09-21T14:03:28",
+      "gerado_em": "2026-09-24T04:34:14",
       "n": 0,
       "por_dem": {}
     },
     {
-      "gerado_em": "2026-09-21T13:18:37",
+      "gerado_em": "2026-09-23T07:48:20",
       "n": 0,
       "por_dem": {}
     },
     {
-      "gerado_em": "2026-09-18T04:33:18",
+      "gerado_em": "2026-09-22T05:05:01",
       "n": 0,
       "por_dem": {}
     },
     {
-      "gerado_em": "2026-09-17T05:02:51",
+      "gerado_em": "2026-09-09T17:28:41",
       "n": 0,
       "por_dem": {}
     },
     {
-      "gerado_em": "2026-09-16T13:27:17",
+      "gerado_em": "2026-09-09T09:52:33",
       "n": 0,
       "por_dem": {}
     },
     {
-      "gerado_em": "2026-09-15T04:33:32",
+      "gerado_em": "2026-09-08T15:23:24",
       "n": 0,
       "por_dem": {}
     }
@@ -1454,70 +1484,21 @@ const ORTOGRAFIA = [
 ];
 var HISTORICO_FULL = [
   {
-    "gerado_em": "2026-09-21T14:03:28",
+    "gerado_em": "2026-09-24T04:34:14",
     "mes": 9,
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
   },
   {
-    "gerado_em": "2026-09-21T13:18:37",
+    "gerado_em": "2026-09-23T07:48:20",
     "mes": 9,
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
   },
   {
-    "gerado_em": "2026-09-18T04:33:18",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-17T05:02:51",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-16T13:27:17",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-15T04:33:32",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-14T10:34:42",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-14T09:58:19",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-11T04:33:17",
-    "mes": 9,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
-    "gerado_em": "2026-09-10T05:03:28",
+    "gerado_em": "2026-09-22T05:05:01",
     "mes": 9,
     "ano": 2026,
     "por_demonstrativo": {},
@@ -1594,13 +1575,6 @@ var HISTORICO_FULL = [
     "achados": []
   },
   {
-    "gerado_em": "2026-09-10T17:22:39",
-    "mes": 8,
-    "ano": 2026,
-    "por_demonstrativo": {},
-    "achados": []
-  },
-  {
     "gerado_em": "2026-09-09T17:27:53",
     "mes": 8,
     "ano": 2026,
@@ -1620,120 +1594,640 @@ var HISTORICO_FULL = [
     "ano": 2026,
     "por_demonstrativo": {},
     "achados": []
+  },
+  {
+    "gerado_em": "2026-08-31T06:17:46",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-30T05:00:48",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-29T07:52:51",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-28T16:09:43",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-28T05:58:13",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T16:06:58",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T14:26:15",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
+  },
+  {
+    "gerado_em": "2026-08-27T14:15:35",
+    "mes": 8,
+    "ano": 2026,
+    "por_demonstrativo": {},
+    "achados": []
   }
 ];
 /* AUTO-DATA-END */
 
 /* VS-PDF-START */
 var VS_PDF_DATA = {
-  "gerado_em": "2026-09-21T14:15:23",
+  "gerado_em": "2026-09-24T08:00:48",
   "mes": 9,
   "ano": 2026,
   "achados": [
     {
       "demo": "BO",
       "rotulo": "Receita Realizada",
-      "valor_banco": 33717612673.22,
-      "valor_pdf": 33173932054.21,
-      "diferenca": 543680619.0100021,
+      "valor_banco": 34406720565.31,
+      "valor_pdf": 34353558428.96,
+      "diferenca": 53162136.349998474,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\04 - Balanço Orçamentário 09.pdf",
-      "pdf_data": "15/09/2026 14:34"
+      "pdf_data": "23/09/2026 14:15"
     },
     {
       "demo": "BO",
       "rotulo": "Despesa Empenhada",
-      "valor_banco": 32416610773.41,
-      "valor_pdf": 31925520738.14,
-      "diferenca": 491090035.27000046,
+      "valor_banco": 32835281779.37,
+      "valor_pdf": 32589401044.22,
+      "diferenca": 245880735.1499977,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\04 - Balanço Orçamentário 09.pdf",
-      "pdf_data": "15/09/2026 14:34"
+      "pdf_data": "23/09/2026 14:15"
     },
     {
       "demo": "BO",
       "rotulo": "Despesa Liquidada",
-      "valor_banco": 28872992472.17,
-      "valor_pdf": 28368093707.09,
-      "diferenca": 504898765.079998,
+      "valor_banco": 29194231218.08,
+      "valor_pdf": 29090847796.2,
+      "diferenca": 103383421.88000107,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\04 - Balanço Orçamentário 09.pdf",
-      "pdf_data": "15/09/2026 14:34"
+      "pdf_data": "23/09/2026 14:15"
     },
     {
       "demo": "BO",
       "rotulo": "Despesa Paga",
-      "valor_banco": 28664846655.46,
-      "valor_pdf": 28125349503.09,
-      "diferenca": 539497152.3699989,
+      "valor_banco": 28846426329.48,
+      "valor_pdf": 28811293255.6,
+      "diferenca": 35133073.88000107,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\04 - Balanço Orçamentário 09.pdf",
-      "pdf_data": "15/09/2026 14:34"
+      "pdf_data": "23/09/2026 14:15"
     },
     {
       "demo": "BF",
       "rotulo": "Receita Orçamentária",
-      "valor_banco": 33717612673.22,
-      "valor_pdf": 33173932054.21,
-      "diferenca": 543680619.0100021,
+      "valor_banco": 34406720565.31,
+      "valor_pdf": 34353558428.96,
+      "diferenca": 53162136.349998474,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\01 - Balanço Financeiro 09.pdf",
-      "pdf_data": "15/09/2026 14:23"
+      "pdf_data": "23/09/2026 13:51"
     },
     {
       "demo": "BF",
       "rotulo": "Despesa Orçamentária (Paga)",
-      "valor_banco": 28664846655.46,
-      "valor_pdf": 28125349503.09,
-      "diferenca": 539497152.3699989,
+      "valor_banco": 28846426329.48,
+      "valor_pdf": 28811293255.6,
+      "diferenca": 35133073.88000107,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\01 - Balanço Financeiro 09.pdf",
-      "pdf_data": "15/09/2026 14:23"
+      "pdf_data": "23/09/2026 13:51"
     },
     {
       "demo": "BF",
       "rotulo": "Caixa Final (Exceto RPPS + RPPS + Depósitos Restituíveis)",
-      "valor_banco": 5998986738.28,
-      "valor_pdf": 6035921625.12,
-      "diferenca": -36934886.84000015,
+      "valor_banco": 6579582708.71,
+      "valor_pdf": 6550734641.570001,
+      "diferenca": 28848067.13999939,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\01 - Balanço Financeiro 09.pdf",
-      "pdf_data": "15/09/2026 14:23"
+      "pdf_data": "23/09/2026 13:51"
     },
     {
       "demo": "BP",
       "rotulo": "Ativo Total",
-      "valor_banco": 68696314104.63,
-      "valor_pdf": 68581779025.25,
-      "diferenca": 114535079.37999725,
+      "valor_banco": 69224101738.0,
+      "valor_pdf": 69190971685.26,
+      "diferenca": 33130052.740005493,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\02 - Balanço Patrimonial 09.pdf",
-      "pdf_data": "15/09/2026 14:28"
+      "pdf_data": "23/09/2026 14:13"
     },
     {
       "demo": "BP",
       "rotulo": "Patrimônio Líquido",
-      "valor_banco": -145979247957.47,
-      "valor_pdf": -146212470691.12,
-      "diferenca": 233222733.6499939,
+      "valor_banco": -145624230377.67,
+      "valor_pdf": -145580143102.0,
+      "diferenca": -44087275.67001343,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\02 - Balanço Patrimonial 09.pdf",
-      "pdf_data": "15/09/2026 14:28"
+      "pdf_data": "23/09/2026 14:13"
     },
     {
       "demo": "DVP",
       "rotulo": "Resultado Patrimonial do Período",
-      "valor_banco": -14380273075.3,
-      "valor_pdf": -14574349667.94,
-      "diferenca": 194076592.6400013,
+      "valor_banco": -14023509140.92,
+      "valor_pdf": -13986627705.17,
+      "diferenca": -36881435.75,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\03 - Variações Patrimoniais 09.pdf",
-      "pdf_data": "15/09/2026 14:31"
+      "pdf_data": "23/09/2026 14:14"
     },
     {
       "demo": "DFC",
       "rotulo": "Caixa e Equivalente de Caixa Final",
-      "valor_banco": 5998986738.28,
-      "valor_pdf": 6035921625.12,
-      "diferenca": -36934886.84000015,
+      "valor_banco": 6579582708.71,
+      "valor_pdf": 6550734641.57,
+      "diferenca": 28848067.140000343,
       "pdf_arquivo": "C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\09 - Setembro\05 - Fluxos de Caixa 09.pdf",
-      "pdf_data": "15/09/2026 14:57"
+      "pdf_data": "23/09/2026 14:15"
     }
   ],
   "n_diverg": 11,
   "n_erros": 0
 };
 /* VS-PDF-END */
+
+/* INTEGR-PDF-START */
+var INTEGR_PDF_DATA = {
+  "gerado_em": "2026-09-24T08:24:09",
+  "mes": 9,
+  "ano": 2026,
+  "n_diverg": 6,
+  "n_alerta": 1,
+  "n_ok": 35,
+  "n_nao_verif": 0,
+  "achados": [
+    {
+      "regra": "1",
+      "titulo": "Resultado Patrimonial: DVP = BP",
+      "status": "DIVERGENTE",
+      "valor_a": -13986627705.17,
+      "rotulo_a": "DVP - Resultado Patrimonial (III)",
+      "valor_b": -13979410073.83,
+      "rotulo_b": "BP - Resultado do Exercício",
+      "observacao": ""
+    },
+    {
+      "regra": "1b",
+      "titulo": "Resultado do Exercício: DVP = DMPL (coluna TOTAL)",
+      "status": "DIVERGENTE",
+      "valor_a": -13986627705.17,
+      "rotulo_a": "DVP - Resultado Patrimonial (III)",
+      "valor_b": -15484195906.83,
+      "rotulo_b": "DMPL - Resultado do exercício (TOTAL)",
+      "observacao": ""
+    },
+    {
+      "regra": "2",
+      "titulo": "Saldo Final da DMPL = Patrimônio Líquido do BP",
+      "status": "DIVERGENTE",
+      "valor_a": -147071752266.32,
+      "rotulo_a": "DMPL - Saldos finais (TOTAL)",
+      "valor_b": -145580143102.0,
+      "rotulo_b": "BP - Patrimônio Líquido",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Patrimônio Social e Capital Social",
+      "status": "OK",
+      "valor_a": 42265528129.69,
+      "rotulo_a": "DMPL - Patrimônio Social e Capital Social",
+      "valor_b": 42265528129.69,
+      "rotulo_b": "BP - Patrimônio Social e Capital Social",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Adiantamento para Futuro Aumento de Capital",
+      "status": "DIVERGENTE",
+      "valor_a": 29855685.42,
+      "rotulo_a": "DMPL - Adiantamento para Futuro Aumento de Capital",
+      "valor_b": 53438133.1,
+      "rotulo_b": "BP - Adiantamento para Futuro Aumento de Capital",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Reservas de Capital",
+      "status": "OK",
+      "valor_a": 11961938.59,
+      "rotulo_a": "DMPL - Reservas de Capital",
+      "valor_b": 11961938.59,
+      "rotulo_b": "BP - Reservas de Capital",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Ajustes de Avaliação Patrimonial",
+      "status": "DIVERGENTE",
+      "valor_a": 584322674.88,
+      "rotulo_a": "DMPL - Ajustes de Avaliação Patrimonial",
+      "valor_b": 584213821.56,
+      "rotulo_b": "BP - Ajustes de Avaliação Patrimonial",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Reservas de Lucros",
+      "status": "OK",
+      "valor_a": 19180972.75,
+      "rotulo_a": "DMPL - Reservas de Lucros",
+      "valor_b": 19180972.75,
+      "rotulo_b": "BP - Reservas de Lucros",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Demais Reservas",
+      "status": "OK",
+      "valor_a": 1781387639.12,
+      "rotulo_a": "DMPL - Demais Reservas",
+      "valor_b": 1781387639.12,
+      "rotulo_b": "BP - Demais Reservas",
+      "observacao": ""
+    },
+    {
+      "regra": "3",
+      "titulo": "Coluna DMPL x linha BP — Resultado Acumulado",
+      "status": "DIVERGENTE",
+      "valor_a": -191763989306.77,
+      "rotulo_a": "DMPL - Resultado Acumulado",
+      "valor_b": -190295853736.81,
+      "rotulo_b": "BP - Resultado Acumulado",
+      "observacao": ""
+    },
+    {
+      "regra": "4a",
+      "titulo": "Caixa e Equiv. de Caixa: BP = DFC (Caixa Final)",
+      "status": "OK",
+      "valor_a": 6550734641.57,
+      "rotulo_a": "BP - Caixa e Equiv. de Caixa",
+      "valor_b": 6550734641.57,
+      "rotulo_b": "DFC - Caixa e Equivalente de Caixa Final",
+      "observacao": ""
+    },
+    {
+      "regra": "4b",
+      "titulo": "Caixa e Equiv. de Caixa: BP = BF (Caixa+RPPS+Dep.Restituíveis, saldo seguinte)",
+      "status": "OK",
+      "valor_a": 6550734641.57,
+      "rotulo_a": "BP - Caixa e Equiv. de Caixa",
+      "valor_b": 6550734641.570001,
+      "rotulo_b": "BF - Caixa (Exceto RPPS) + Caixa RPPS + Dep. Restituíveis",
+      "observacao": ""
+    },
+    {
+      "regra": "5a",
+      "titulo": "Ativo do Anexo (Financeiro+Permanente) = Ativo Total do BP",
+      "status": "OK",
+      "valor_a": 69190971685.26,
+      "rotulo_a": "Anexo BP - Ativo Financeiro + Permanente",
+      "valor_b": 69190971685.26,
+      "rotulo_b": "BP - ATIVO (corpo do balanço)",
+      "observacao": ""
+    },
+    {
+      "regra": "6",
+      "titulo": "Superávit Financeiro = Ativo Financeiro − Passivo Financeiro",
+      "status": "INFORMATIVO",
+      "valor_a": 2526913615.91,
+      "rotulo_a": "Anexo BP - Ativo Financeiro − Passivo Financeiro",
+      "valor_b": null,
+      "rotulo_b": "",
+      "observacao": "Só é o Superávit Financeiro oficial (para abertura de crédito adicional) no fechamento do exercício (dezembro), por fonte de recursos — aqui é o total consolidado, informativo. Saldo Patrimonial (III) do anexo, para referência: -149,138,198,456.78"
+    },
+    {
+      "regra": "7",
+      "titulo": "Receita Orçamentária: BF = Receitas Realizadas do BO",
+      "status": "OK",
+      "valor_a": 34353558428.96,
+      "rotulo_a": "BF - Receita Orçamentária",
+      "valor_b": 34353558428.96,
+      "rotulo_b": "BO - Receitas Realizadas",
+      "observacao": ""
+    },
+    {
+      "regra": "8",
+      "titulo": "Despesa Orçamentária: BF = Despesas Pagas do BO",
+      "status": "OK",
+      "valor_a": 28811293255.6,
+      "rotulo_a": "BF - Despesa Orçamentária",
+      "valor_b": 28811293255.6,
+      "rotulo_b": "BO - Despesas Pagas",
+      "observacao": ""
+    },
+    {
+      "regra": "10a",
+      "titulo": "Pagamento de RPÑP (não processados): BF = BO",
+      "status": "OK",
+      "valor_a": 1078459626.1,
+      "rotulo_a": "BF - Pagamentos de RPÑP",
+      "valor_b": 1078459626.1,
+      "rotulo_b": "BO - RP Não Proc. Pagos",
+      "observacao": ""
+    },
+    {
+      "regra": "10b",
+      "titulo": "Pagamento de RPP (processados): BF = BO",
+      "status": "OK",
+      "valor_a": 2286807080.76,
+      "rotulo_a": "BF - Pagamentos de RPP",
+      "valor_b": 2286807080.76,
+      "rotulo_b": "BO - RP Processados Pagos",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Impostos, Taxas e Contribuições de Melhoria",
+      "status": "OK",
+      "valor_a": 19623391697.46,
+      "rotulo_a": "BO - IMPOSTOS, TAXAS E CONTRIBUIÇÕES DE MELHORIA (Realizadas)",
+      "valor_b": 19623391697.46,
+      "rotulo_b": "DFC - Impostos, Taxas e Contribuições de Melhoria",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Receita de Contribuições",
+      "status": "OK",
+      "valor_a": 4399274502.0,
+      "rotulo_a": "BO - RECEITA CONTRIBUIÇÕES (Realizadas)",
+      "valor_b": 4399274502.0,
+      "rotulo_b": "DFC - Receita de Contribuições",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Receita Patrimonial",
+      "status": "OK",
+      "valor_a": 924987044.08,
+      "rotulo_a": "BO - RECEITA PATRIMONIAL (Realizadas)",
+      "valor_b": 924987044.08,
+      "rotulo_b": "DFC - Receita Patrimonial",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Receita Agropecuária",
+      "status": "OK",
+      "valor_a": 495.0,
+      "rotulo_a": "BO - RECEITA AGROPECUÁRIA (Realizadas)",
+      "valor_b": 495.0,
+      "rotulo_b": "DFC - Receita Agropecuária",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Receita Industrial",
+      "status": "OK",
+      "valor_a": 2421823.28,
+      "rotulo_a": "BO - RECEITA INDUSTRIAL (Realizadas)",
+      "valor_b": 2421823.28,
+      "rotulo_b": "DFC - Receita Industrial",
+      "observacao": ""
+    },
+    {
+      "regra": "11",
+      "titulo": "Receitas: BO x DFC — Receita de Serviços",
+      "status": "OK",
+      "valor_a": 1774671157.9,
+      "rotulo_a": "BO - RECEITA DE SERVIÇOS (Realizadas)",
+      "valor_b": 1774671157.9,
+      "rotulo_b": "DFC - Receita de Serviços",
+      "observacao": ""
+    },
+    {
+      "regra": "12a",
+      "titulo": "Superávit Orçamentário = ΔDotação(Despesa) − ΔPrevisão(Receita)",
+      "status": "INFORMATIVO",
+      "valor_a": 2081980076.3099976,
+      "rotulo_a": "Calculado (ΔDotação − ΔPrevisão)",
+      "valor_b": 0.0,
+      "rotulo_b": "BO - SUPERÁVIT (XIII) reportado",
+      "observacao": "Divergência grande é esperada quando o ajuste é alocado via Saldos de Exercícios Anteriores / Superávit Financeiro, não na linha SUPERÁVIT (XIII) — ver regra original nº12a."
+    },
+    {
+      "regra": "12b",
+      "titulo": "Variação da Dotação (Atualizada−Inicial) = Total de Créditos Adicionais",
+      "status": "OK",
+      "valor_a": 4250983981.0,
+      "rotulo_a": "BO - Dotação Atualizada − Inicial",
+      "valor_b": 4250983981.0,
+      "rotulo_b": "BO - Total de Alterações (Créditos Adicionais)",
+      "observacao": ""
+    },
+    {
+      "regra": "R.OURO",
+      "titulo": "Regra de Ouro: Operações de Crédito ≤ Despesas de Capital",
+      "status": "OK",
+      "valor_a": 64089064.25,
+      "rotulo_a": "BO - Operações de Crédito (Receita Realizada)",
+      "valor_b": 2431409050.46,
+      "rotulo_b": "BO - Despesas de Capital (Empenhadas)",
+      "observacao": "Operações de crédito não podem superar despesas de capital, salvo créditos suplementares/especiais com finalidade precisa aprovados por maioria absoluta do Legislativo (ressalva constitucional não verificável automaticamente aqui)."
+    },
+    {
+      "regra": "15",
+      "titulo": "Empenhado ≥ Liquidado ≥ Pago — Despesas Correntes",
+      "status": "OK",
+      "valor_a": 30157991993.76,
+      "rotulo_a": "Despesas Correntes - Empenhada",
+      "valor_b": 27620118041.48,
+      "rotulo_b": "Despesas Correntes - Liquidada",
+      "observacao": "Paga: 27,364,143,779.96. Sequência respeitada."
+    },
+    {
+      "regra": "15",
+      "titulo": "Empenhado ≥ Liquidado ≥ Pago — Despesas de Capital",
+      "status": "OK",
+      "valor_a": 2431409050.46,
+      "rotulo_a": "Despesas de Capital - Empenhada",
+      "valor_b": 1470729754.72,
+      "rotulo_b": "Despesas de Capital - Liquidada",
+      "observacao": "Paga: 1,447,149,475.64. Sequência respeitada."
+    },
+    {
+      "regra": "15",
+      "titulo": "Empenhado ≥ Liquidado ≥ Pago — Subtotal das Despesas",
+      "status": "OK",
+      "valor_a": 32589401044.22,
+      "rotulo_a": "Subtotal das Despesas - Empenhada",
+      "valor_b": 29090847796.2,
+      "rotulo_b": "Subtotal das Despesas - Liquidada",
+      "observacao": "Paga: 28,811,293,255.60. Sequência respeitada."
+    },
+    {
+      "regra": "16",
+      "titulo": "Resultado Orçamentário = Receitas Realizadas − Despesas Empenhadas",
+      "status": "INFORMATIVO",
+      "valor_a": 34353558428.96,
+      "rotulo_a": "BO - Receitas Realizadas",
+      "valor_b": 32589401044.22,
+      "rotulo_b": "BO - Despesas Empenhadas",
+      "observacao": "Resultado superavitário: 1,764,157,384.74"
+    },
+    {
+      "regra": "17a",
+      "titulo": "DFC: Geração Líquida = Operacional + Investimento + Financiamento",
+      "status": "OK",
+      "valor_a": 1090405099.83,
+      "rotulo_a": "DFC - Soma dos 3 fluxos",
+      "valor_b": 1090405099.83,
+      "rotulo_b": "DFC - Geração Líquida reportada",
+      "observacao": ""
+    },
+    {
+      "regra": "17b",
+      "titulo": "DFC: Geração Líquida = Caixa Final − Caixa Inicial",
+      "status": "OK",
+      "valor_a": 1090405099.83,
+      "rotulo_a": "DFC - Geração Líquida reportada",
+      "valor_b": 1090405099.83,
+      "rotulo_b": "DFC - Caixa Final − Caixa Inicial",
+      "observacao": ""
+    },
+    {
+      "regra": "18a",
+      "titulo": "BP: Ativo Circulante + Não Circulante = Ativo Total",
+      "status": "OK",
+      "valor_a": 69190971685.26001,
+      "rotulo_a": "Soma AC+ANC",
+      "valor_b": 69190971685.26,
+      "rotulo_b": "BP - ATIVO",
+      "observacao": ""
+    },
+    {
+      "regra": "18b",
+      "titulo": "BP: Ativo = Passivo + Patrimônio Líquido",
+      "status": "OK",
+      "valor_a": 69190971685.26,
+      "rotulo_a": "BP - ATIVO",
+      "valor_b": 69190971685.26,
+      "rotulo_b": "BP - PASSIVO E PATRIMÔNIO LÍQUIDO",
+      "observacao": ""
+    },
+    {
+      "regra": "18c",
+      "titulo": "BP: Passivo Circulante + Não Circulante + PL = Passivo e PL Total",
+      "status": "OK",
+      "valor_a": 69190971685.26001,
+      "rotulo_a": "Soma PC+PNC+PL",
+      "valor_b": 69190971685.26,
+      "rotulo_b": "BP - PASSIVO E PATRIMÔNIO LÍQUIDO",
+      "observacao": ""
+    },
+    {
+      "regra": "20-BF",
+      "titulo": "TI — Data do PDF — Balanço Financeiro",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "Balanço Financeiro: mês no PDF (22/09/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 22/09/2026"
+    },
+    {
+      "regra": "20-BP",
+      "titulo": "TI — Data do PDF — Balanço Patrimonial",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "Balanço Patrimonial: mês no PDF (22/09/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 22/09/2026"
+    },
+    {
+      "regra": "20-DVP",
+      "titulo": "TI — Data do PDF — Variações Patrimoniais",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "Variações Patrimoniais: mês no PDF (23/09/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 23/09/2026"
+    },
+    {
+      "regra": "20-BO",
+      "titulo": "TI — Data do PDF — Balanço Orçamentário",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "Balanço Orçamentário: mês no PDF (22/09/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 22/09/2026"
+    },
+    {
+      "regra": "20-DFC",
+      "titulo": "TI — Data do PDF — Fluxos de Caixa",
+      "status": "OK",
+      "valor_a": 9.0,
+      "rotulo_a": "Fluxos de Caixa: mês no PDF (22/09/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado",
+      "observacao": "Data coerente: 22/09/2026"
+    },
+    {
+      "regra": "20-DMPL",
+      "titulo": "TI — Data incompatível com mês de referência — DMPL",
+      "status": "ALERTA",
+      "valor_a": 8.0,
+      "rotulo_a": "DMPL: mês no PDF (26/08/2026)",
+      "valor_b": 9.0,
+      "rotulo_b": "Mês de referência esperado: 09/2026",
+      "observacao": "PDF 'DMPL' reporta posição em 26/08/2026 mas o mês de referência é 09/2026. Possível arquivo de mês anterior não substituído na pasta 13."
+    },
+    {
+      "regra": "21a",
+      "titulo": "TI — DVP: Soma categorias VPA = Total VPA declarado",
+      "status": "OK",
+      "valor_a": 107815406085.06,
+      "rotulo_a": "Soma de 7 categorias VPA",
+      "valor_b": 107815406085.06,
+      "rotulo_b": "Total VPA declarado no PDF",
+      "observacao": "Impostos/Taxas/Contrib. Melhoria: 23,733,923,206.48; Contribuições: 3,161,358,599.18; Exploração/Venda Bens e Serviços: 1,874,435,348.10; VPA Financeiras: 3,971,136,653.74; Transferências Recebidas: 40,737,651,551.00; Valorização/Ganhos c/ Ativos: 1,181,990,377.69; Outras VPA: 33,154,910,348.87"
+    },
+    {
+      "regra": "21b",
+      "titulo": "TI — DVP: Soma categorias VPD = Total VPD declarado",
+      "status": "OK",
+      "valor_a": 121802033790.23,
+      "rotulo_a": "Soma de 9 categorias VPD",
+      "valor_b": 121802033790.23,
+      "rotulo_b": "Total VPD declarado no PDF",
+      "observacao": "Pessoal e Encargos: 10,834,144,215.93; Benefícios Previdenciários: 5,440,981,670.68; Uso de Bens/Serviços/Capital: 7,483,381,666.13; VPD Financeiras: 727,787,422.04; Transferências Concedidas: 38,713,780,547.84; Desvalorização/Perda de Ativos: 3,113,960,753.52; Tributárias: 292,772,653.19; Custo Merc./Prod./Serv.: 50,340.00; Outras VPD: 55,195,174,520.90"
+    },
+    {
+      "regra": "21c",
+      "titulo": "TI — DVP Qualitativas: Soma itens = Total declarado",
+      "status": "OK",
+      "valor_a": 17409956141.71,
+      "rotulo_a": "Soma de 4 itens qualitativos",
+      "valor_b": 17409956141.71,
+      "rotulo_b": "Total Variações Qualitativas declarado",
+      "observacao": ""
+    }
+  ]
+};
+/* INTEGR-PDF-END */
 
 const MESES    = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_ABV= ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -2011,6 +2505,56 @@ function renderRun(data){
       }
     }
   }
+
+  /* ── Integridade técnica PDFs ── */
+  (function(){
+    const ipData = (typeof INTEGR_PDF_DATA !== 'undefined' && INTEGR_PDF_DATA) ? INTEGR_PDF_DATA : null;
+    const ipBadge = document.getElementById('integr-pdf-badge');
+    const ipOk    = document.getElementById('integr-pdf-ok');
+    const ipNone  = document.getElementById('integr-pdf-none');
+    const ipTbody = document.getElementById('tbody-integr-pdf');
+    if(!ipTbody) return;
+    if(!ipData){
+      ipTbody.innerHTML='';
+      if(ipOk)   ipOk.style.display='none';
+      if(ipNone) ipNone.style.display='';
+      if(ipBadge) ipBadge.innerHTML=`<span class="badge b-muted">sem dados</span>`;
+      return;
+    }
+    if(ipNone) ipNone.style.display='none';
+    const achados = ipData.achados || [];
+    const nDiv = ipData.n_diverg || 0;
+    const nAlr = ipData.n_alerta || 0;
+    if(nDiv===0 && nAlr===0){
+      ipTbody.innerHTML='';
+      if(ipOk) ipOk.style.display='';
+      if(ipBadge) ipBadge.innerHTML=`<span class="badge b-ok">OK — sem problemas</span>`;
+    } else {
+      if(ipOk) ipOk.style.display='none';
+      if(ipBadge){
+        const parts=[];
+        if(nDiv) parts.push(`<span class="badge b-err">${nDiv} divergência(s)</span>`);
+        if(nAlr) parts.push(`<span class="badge b-wrn">${nAlr} alerta(s)</span>`);
+        ipBadge.innerHTML=parts.join(' ');
+      }
+      const CHIP={'OK':'b-ok','DIVERGENTE':'b-err','ALERTA':'b-wrn','NAO_VERIF':'b-muted','INFORMATIVO':'b-inf'};
+      const LBL={'OK':'OK','DIVERGENTE':'DIVERGENTE','ALERTA':'ALERTA','NAO_VERIF':'N/V','INFORMATIVO':'INFO'};
+      const _fmtV = v => (v===null||v===undefined||v===0&&!v)?'—':_brl(v);
+      const _dif = (a,b) => {
+        if(a===null||a===undefined||b===null||b===undefined) return '—';
+        const d=a-b; return (d>0?'+':'')+_brl(d);
+      };
+      ipTbody.innerHTML=achados.filter(a=>a.status!=='OK'&&a.status!=='INFORMATIVO').map(a=>`<tr>
+        <td><code style="font-size:11px">${a.regra||'?'}</code></td>
+        <td style="font-size:12px">${(a.titulo||'').replace(/</g,'&lt;')}</td>
+        <td><span class="badge ${CHIP[a.status]||'b-muted'}">${LBL[a.status]||a.status}</span></td>
+        <td class="r" style="font-size:12px">${_fmtV(a.valor_a)}</td>
+        <td class="r" style="font-size:12px">${_fmtV(a.valor_b)}</td>
+        <td class="r" style="font-size:12px;color:${a.status==='DIVERGENTE'?'var(--err)':'var(--wrn)'};font-weight:600">${_dif(a.valor_a,a.valor_b)}</td>
+        <td style="font-size:11px;color:var(--t3)">${(a.observacao||'').replace(/</g,'&lt;')}</td>
+      </tr>`).join('');
+    }
+  })();
 
   /* Histórico de execuções */
   const histEl=document.getElementById('hist-timeline');
