@@ -72,3 +72,12 @@ mestre ultimo.py
 #    a fonte Python fica só local (mesmo padrão de auditoria_*.py acima).
 cruzamentos_completo.py
 saida/xlsx_html.py
+
+# ── NENHUM .py É PUBLICADO ────────────────────────────────────────────────
+# Decisão de 25/09/2026: o UBANCONT serve os painéis em HTML; o código-fonte
+# fica na máquina de trabalho. Os 10 .py que estavam aqui saíram do controle
+# do git com `git rm --cached`, que NÃO apaga nada do disco.
+#
+# Regra por último, depois das negações acima, para que nenhuma delas volte
+# a incluir um .py sem querer.
+*.py
