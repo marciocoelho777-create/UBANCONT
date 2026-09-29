@@ -2179,6 +2179,64 @@ function selecionarTipoSelect(val){
   }
 }
 
+/* ── Regras somáveis ──────────────────────────────────────────────────────
+   Em BF-01, DFC-01 e X2 o valor do consolidado é a SOMA dos tipos, não o
+   valor do pior tipo. Sem isto a linha consolidada herdava o detalhe do
+   primeiro tipo em ERRO — BF-01 exibia os 296.611,96 da Direta (que se
+   anulam contra as Autarquias) em vez dos 6.419,17 do GDF inteiro.
+   A soma dos 7 tipos bate ao centavo com o que o diag.py apura direto do
+   banco (Ingressos 75.477.908.453,06 / Dispêndios 75.477.902.033,89). */
+const REGRAS_SOMAVEIS = {
+  'BF-01':  {rotGap:'Diferença', rotA:'Ingressos', rotB:'Dispêndios',
+             reA:/Ingressos\s+(-?[\d,]+\.\d{2})/i,
+             reB:/Disp[êe]ndios\s+(-?[\d,]+\.\d{2})/i},
+  'DFC-01': {rotGap:'Gap', rotA:'Geração', rotB:'Var.Caixa',
+             reA:/Gera[cç][aã]o\s+(-?[\d,]+\.\d{2})/i,
+             reB:/(?:Var\.Caixa|Varia[cç][aã]o)\s+(-?[\d,]+\.\d{2})/i},
+  'X2':     {rotGap:'Gap', rotA:'Geração', rotB:'Var.Caixa',
+             reA:/Gera[cç][aã]o\s+(-?[\d,]+\.\d{2})/i,
+             reB:/Var\.Caixa\s+(-?[\d,]+\.\d{2})/i},
+};
+
+/* Soma cada regra somável ao longo dos tipos.
+   Devolve Map: codigo -> {fecha, vistos, detalhe}.
+   Usado nos DOIS lugares que consolidam (KPIs do topo e tabela), para que
+   não voltem a divergir. */
+function somarRegrasConsolidado(tipos){
+  const _n = s => parseFloat(String(s).replace(/,/g,''));
+  const _f = v => v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const out = new Map();
+  Object.keys(REGRAS_SOMAVEIS).forEach(cod=>{
+    const cfg = REGRAS_SOMAVEIS[cod];
+    let somaA=0, somaB=0, somaGap=0, completo=true, vistos=0;
+    tipos.forEach(t=>{
+      const ach = (TIPOS_DATA[t].achados||[]).find(a=>a.c===cod);
+      if(!ach) return;
+      vistos++;
+      const d = ach.d||'';
+      const mA = d.match(cfg.reA), mB = d.match(cfg.reB);
+      if(mA && mB){
+        somaA += _n(mA[1]); somaB += _n(mB[1]); somaGap += _n(mA[1]) - _n(mB[1]);
+        return;
+      }
+      // Tipo que só publica o gap (ex.: X2 quando OK escreve apenas "Gap: 0.00"):
+      // dá para somar a diferença, mas não os componentes.
+      const mG = d.match(/(?:Gap|Diferen[cç]a):\s*(-?[\d,]+\.\d{2})/i);
+      if(mG) somaGap += _n(mG[1]);
+      completo = false;
+    });
+    if(!vistos) return;
+    out.set(cod, {
+      fecha: Math.abs(somaGap) < 0.01,
+      vistos,
+      detalhe: (completo
+        ? `${cfg.rotGap}: ${_f(somaGap)}  |  ${cfg.rotA} ${_f(somaA)}  ${cfg.rotB} ${_f(somaB)}`
+        : `${cfg.rotGap}: ${_f(somaGap)}`) + `  (soma dos ${vistos} tipos)`,
+    });
+  });
+  return out;
+}
+
 function renderConsolidado(){
   // totais por regra única (pior status entre tipos) — não soma por tipo
   const tipos = Object.keys(TIPOS_DATA).map(Number).sort((a,b)=>a-b);
@@ -2204,6 +2262,10 @@ function renderConsolidado(){
     });
     _piorPorCod.set('BF-02', Math.abs(_soma02)<1.0 ? 'OK' : 'ALERTA');
   }
+  // Regras somáveis: o status do consolidado vem da soma dos tipos, não do pior tipo
+  somarRegrasConsolidado(tipos).forEach((r,cod)=>{
+    if(r.fecha && _piorPorCod.has(cod)) _piorPorCod.set(cod,'OK');
+  });
   let totalErro=0,totalAlr=0,totalOk=0,totalInf=0;
   _piorPorCod.forEach(s=>{ if(s==='ERRO')totalErro++; else if(s==='ALERTA')totalAlr++; else if(s==='OK')totalOk++; else totalInf++; });
   const totalTot = _piorPorCod.size;
@@ -2297,6 +2359,17 @@ function renderConsolidado(){
       e02.detalhePior = `Soma das diferenças entre tipos = ${somaGaps.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} — cobertura incompleta`;
     }
   }
+
+  // Regras somáveis: a linha consolidada exibe a soma dos tipos.
+  // Os badges de "Tipos c/ problema" ficam — o consolidado pode fechar
+  // enquanto tipos individuais não fecham entre si, e isso é achado.
+  somarRegrasConsolidado(tipos).forEach((r,cod)=>{
+    if(!porCodigo.has(cod)) return;
+    const e = porCodigo.get(cod);
+    e.detalhePior = r.detalhe + (r.fecha && e.tiposProblema.length
+      ? ' — os tipos se compensam no consolidado' : '');
+    if(r.fecha) e.piorStatus = 'OK';
+  });
 
   // Ordem canônica dos módulos
   const MOD_ORDER = ['BF','BO','DVP','DMPL','BP','BAL','X'];
