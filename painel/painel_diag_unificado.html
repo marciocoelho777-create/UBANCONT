@@ -190,7 +190,8 @@ const ESCOPO = {};
 P.controles.forEach(c => ESCOPO[c.codigo] = c);
 
 document.getElementById('sub').textContent =
-  'Balanço Financeiro · ' + String(P.mes).padStart(2,'0') + '/' + P.ano;
+  P.modulos.map(m=>m.sigla).join(' · ') + '  —  ' + P.controles.length +
+  ' controles · ' + String(P.mes).padStart(2,'0') + '/' + P.ano;
 document.getElementById('ger').textContent = 'Gerado em ' + P.gerado;
 
 const nSo = P.controles.filter(c => c.escopo === 'consolidado').length;
