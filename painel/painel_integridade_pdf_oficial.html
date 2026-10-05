@@ -6560,7 +6560,7 @@ function buildSelector(){
     let lbl='';
     try{
       const d=new Date(h.gerado_em.replace('T',' '));
-      lbl=`${MESES[h.mes]||h.mes}/${h.ano} — ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+      lbl=`${MESES[h.mes]||h.mes}/${h.ano} · extraído em ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
     }catch(e){lbl=h.gerado_em||String(i);}
     if(nDiv) lbl+=' ⚠ '+nDiv+' divergência(s)';
     return `<option value="${i}">${lbl}</option>`;

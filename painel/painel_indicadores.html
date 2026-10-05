@@ -162,7 +162,7 @@ function render(h){const inds=h.indicadores||[];const c={ERRO:0,ALERTA:0,OK:0,IN
  for(const [g] of GRUPOS){const el=document.getElementById('g-'+g);el.innerHTML=inds.filter(i=>i.grupo===g).map(card).join('')}}
 function init(){const sel=$('#run-select');sel.innerHTML=HIST.map((h,i)=>{const d=new Date(h.gerado_em);
  const e=(h.indicadores||[]).filter(x=>x.status==='ERRO').length,a=(h.indicadores||[]).filter(x=>x.status==='ALERTA').length;
- return `<option value="${i}">${MESES[h.mes]}/${h.ano} — ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${e} erro(s), ${a} alerta(s)</option>`}).join('');
+ return `<option value="${i}">${MESES[h.mes]}/${h.ano} · extraído em ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} · ${e} erro(s), ${a} alerta(s)</option>`}).join('');
  sel.onchange=()=>render(HIST[sel.value]);if(HIST.length)render(HIST[0])}
 init();
 </script><!-- kpi-filtro:inicio -->
