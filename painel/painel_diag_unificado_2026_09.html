@@ -207,7 +207,11 @@ P.controles.forEach(c => ESCOPO[c.codigo] = c);
 document.getElementById('sub').textContent =
   P.modulos.map(m=>m.sigla).join(' · ') + '  —  ' + P.controles.length +
   ' controles · ' + String(P.mes).padStart(2,'0') + '/' + P.ano;
-document.getElementById('ger').textContent = 'Gerado em ' + P.gerado;
+const MESN = ['','janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function refMes(h){ const m = h.mes || P.mes, a = h.ano || P.ano; return MESN[m] + '/' + a; }
+function refTxt(h){ return 'Mês de referência ' + refMes(h) + ' · dados extraídos em ' + h.gerado; }
+document.getElementById('ger').textContent = 'Mês de referência: ' + refMes(P) + ' — dados extraídos em ' + P.gerado +
+  '. O mês pode receber ajustes retroativos até o fechamento (cerca de 10 dias após o fim do mês).';
 
 const nSo = P.controles.filter(c => c.escopo === 'consolidado').length;
 document.getElementById('aviso-proto').innerHTML =
@@ -388,7 +392,7 @@ function pintaEvo(){
   svg += '<polyline class="ln" points="' + H.map((h,i)=>x(i)+','+y(h.n_erro)).join(' ') + '"/>';
   H.forEach((h,i) => {
     svg += '<circle class="pt'+(i===EVO_REF?' at':'')+'" r="4" cx="'+x(i)+'" cy="'+y(h.n_erro)+
-           '" onclick="setRef('+(i===atual?atual-1:i)+')"><title>'+esc(h.gerado)+' — '+
+           '" onclick="setRef('+(i===atual?atual-1:i)+')"><title>'+esc(refMes(h)+' · extraído em '+h.gerado)+' — '+
            h.n_erro+' unidade(s) com erro</title></circle>';
   });
   const passo = Math.max(1, Math.ceil(H.length/8));
@@ -417,14 +421,14 @@ function pintaEvo(){
     '<div class="sel-linha"><div><span class="lbl">Comparar a situação atual com</span>' +
     '<select onchange="setRef(+this.value)">' +
     H.slice(0,atual).map((q,i) => '<option value="'+i+'"'+(i===EVO_REF?' selected':'')+'>'+
-       esc(q.gerado)+' — '+q.n_erro+' un. com erro</option>').join('') +
+       esc(refMes(q)+' · extraído em '+q.gerado)+' — '+q.n_erro+' un. com erro</option>').join('') +
     '</select></div><div style="font-size:12.5px;color:var(--t2)">' +
     '<b style="color:var(--err)">'+cont.novo+'</b> novos · ' +
     '<b style="color:var(--inf)">'+cont.mud+'</b> mudaram de valor · ' +
     '<b style="color:var(--ok)">'+cont.res+'</b> resolvidos · ' +
     '<b style="color:var(--wrn)">'+cont.per+'</b> persistem</div></div>';
   h += '<table class="tbl" style="margin-top:10px"><thead><tr><th>Mudança</th><th>UG</th><th>Nome</th>' +
-       '<th>Controle</th><th>Em '+esc(H[EVO_REF].gerado)+'</th><th>Agora</th></tr></thead><tbody>';
+       '<th>Controle</th><th>Extraído em '+esc(H[EVO_REF].gerado)+'</th><th>Agora ('+esc(H[atual].gerado)+')</th></tr></thead><tbody>';
   linhas.forEach(l => {
     h += '<tr><td><span class="dif '+l.k+'">'+ROT[l.k]+'</span></td><td class="n">'+l.ug+'</td>' +
          '<td>'+esc(l.nome)+'</td><td class="cod">'+l.c+'</td><td>'+cel(l.a)+'</td><td>'+cel(l.b)+'</td></tr>';
