@@ -129,8 +129,8 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
 
 <header class="hd">
   <div><div class="hd-title">Auditoria Consolidada — GDF</div>
-  <div class="hd-sub">Outubro/2026 · Consolidado</div></div>
-  <div class="hd-sub">Gerado em 07/10/2026 05:10:11</div>
+  <div class="hd-sub" id="hd-comp">Outubro/2026 · Consolidado</div></div>
+  <div class="hd-sub" id="hd-gerado">Gerado em 07/10/2026 17:16:21</div>
 </header>
 <main class="wrap">
   <nav class="nav"><a href="#dem-bf">BF</a><a href="#dem-bo">BO</a><a href="#dem-bp">BP</a><a href="#dem-dfc">DFC</a><a href="#dem-dmpl">DMPL</a><a href="#dem-dvp">DVP</a><a href="#dem-bal">BAL</a><a href="#cruzamentos">CRUZAMENTOS</a></nav>
@@ -138,7 +138,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
   <div class="run-wrap">
     <span class="run-lbl">Execução</span>
     <select id="run-select" onchange="loadRun(this.selectedIndex)"></select>
-    <span class="run-note">seletor troca resumo/cruzamentos · tabelas por demonstrativo abaixo são sempre da execução mais recente</span>
+    <span class="run-note" id="run-note">o seletor troca tudo: resumo, cruzamentos e as tabelas por demonstrativo</span>
   </div>
 
   <div class="kpi-row">
@@ -170,6 +170,650 @@ const CHIP_CLASS = {"OK": "c-ok", "ERRO": "c-err", "ALERTA": "c-alr", "INFO": "c
 const ICONES = {"OK": "✔", "ERRO": "✘", "ALERTA": "⚠", "INFO": "ℹ"};
 const MESES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-10-07T17:16:21",
+    "mes": 10,
+    "ano": 2026,
+    "totais": {
+      "OK": 66,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 12
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 30,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 9
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração -222,685,282.05  Var.Caixa -222,685,282.05"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -15,089,796,705.85  DVP -15,089,796,705.85"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -15,089,796,705.85  DVP -15,089,796,705.85"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,816,287,884.24  BP -146,816,287,884.24"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -15,089,796,705.85  DMPL -15,089,796,705.85"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,532,025,938.45  DMPL -191,532,025,938.45"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 5,237,644,259.69  DFC 5,237,644,259.69"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 35,755,518,113.39  BO 35,755,518,113.39"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 31,470,703,938.03  BO 31,470,703,938.03"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,913,866.58  BO 1,078,913,866.58"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,287,058,106.44  BO 2,287,058,106.44"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "OK",
+        "titulo": "Inscrição RPNP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "OK",
+        "titulo": "Inscrição RPP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 35,755,518,113.39  DVP(VPA) 112,588,648,001.80  Diferença -76,833,129,888.41 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 31,871,938,472.12  DVP(VPD) 127,678,444,707.65  Diferença -95,806,506,235.53 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -15,089,796,705.85  Diferença 15,089,796,705.85 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 20,100,527,686.06  DFC 20,100,527,686.06"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,844,869,697.45  DFC 4,844,869,697.45"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 1,020,738,824.96  DFC 1,020,738,824.96"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,563,880.00  DFC 2,563,880.00"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,906,873,903.85  DFC 1,906,873,903.85"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,055,224,091.75  DFC 1,055,224,091.75"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 18,502,402.46  DFC 18,502,402.46"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,690,645,990.87  DFC 5,690,645,990.87"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 5,085,030,844.00  Créditos Adicionais 5,085,030,844.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 195,944,025,790.60  (Passivo+PL+VPA) 180,854,229,084.75  Diferença 15,089,796,705.85 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ],
+    "secoes_gz": "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"
+  },
+  {
+    "gerado_em": "2026-10-07T17:16:17",
+    "mes": 9,
+    "ano": 2026,
+    "totais": {
+      "OK": 66,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 12
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 30,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 9
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 1,000,040,670.81  Var.Caixa 1,000,040,670.81"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -15,094,963,014.59  DVP -15,094,963,014.59"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -15,094,963,014.59  DVP -15,094,963,014.59"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,816,273,921.94  BP -146,816,273,921.94"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -15,094,963,014.59  DMPL -15,094,963,014.59"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,532,011,976.15  DMPL -191,532,011,976.15"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 6,460,370,212.55  DFC 6,460,370,212.55"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 35,016,577,143.74  BO 35,016,577,143.74"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 29,519,674,309.16  BO 29,519,674,309.16"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "OK",
+        "titulo": "Inscrição RPNP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "OK",
+        "titulo": "Inscrição RPP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 35,016,577,143.74  DVP(VPA) 110,360,016,957.86  Diferença -75,343,439,814.12 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 31,452,816,675.11  DVP(VPD) 125,454,979,972.45  Diferença -94,002,163,297.34 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -15,094,963,014.59  Diferença 15,094,963,014.59 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 19,950,995,195.78  DFC 19,950,995,195.78"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 996,439,257.40  DFC 996,439,257.40"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,808,856,420.86  DFC 1,808,856,420.86"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,055,224,091.75  DFC 1,055,224,091.75"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 18,199,437.19  DFC 18,199,437.19"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,624,581,073.76  DFC 5,624,581,073.76"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 195,183,486,636.80  (Passivo+PL+VPA) 180,088,523,622.21  Diferença 15,094,963,014.59 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ],
+    "secoes_gz": "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"
+  },
   {
     "gerado_em": "2026-10-07T05:10:11",
     "mes": 10,
@@ -813,6 +1457,327 @@ var HISTORICO_FULL = [
     ]
   },
   {
+    "gerado_em": "2026-10-05T12:09:18",
+    "mes": 9,
+    "ano": 2026,
+    "totais": {
+      "OK": 66,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 12
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 30,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 9
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 1,000,040,670.81  Var.Caixa 1,000,040,670.81"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -15,094,963,014.59  DVP -15,094,963,014.59"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -15,094,963,014.59  DVP -15,094,963,014.59"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,816,273,921.94  BP -146,816,273,921.94"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -15,094,963,014.59  DMPL -15,094,963,014.59"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,532,011,976.15  DMPL -191,532,011,976.15"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 6,460,370,212.55  DFC 6,460,370,212.55"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 35,016,577,143.74  BO 35,016,577,143.74"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 29,519,674,309.16  BO 29,519,674,309.16"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "OK",
+        "titulo": "Inscrição RPNP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "OK",
+        "titulo": "Inscrição RPP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 35,016,577,143.74  DVP(VPA) 110,360,016,957.86  Diferença -75,343,439,814.12 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 31,452,816,675.11  DVP(VPD) 125,454,979,972.45  Diferença -94,002,163,297.34 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -15,094,963,014.59  Diferença 15,094,963,014.59 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 19,950,995,195.78  DFC 19,950,995,195.78"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 996,439,257.40  DFC 996,439,257.40"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,808,856,420.86  DFC 1,808,856,420.86"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,055,224,091.75  DFC 1,055,224,091.75"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 18,199,437.19  DFC 18,199,437.19"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,624,581,073.76  DFC 5,624,581,073.76"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 195,183,486,636.80  (Passivo+PL+VPA) 180,088,523,622.21  Diferença 15,094,963,014.59 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ]
+  },
+  {
     "gerado_em": "2026-10-05T11:07:46",
     "mes": 10,
     "ano": 2026,
@@ -1427,6 +2392,327 @@ var HISTORICO_FULL = [
         "status": "INFO",
         "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
         "detalhe": "(Ativo+VPD) 195,077,977,239.23  (Passivo+PL+VPA) 180,021,148,734.71  Diferença 15,056,828,504.52 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ]
+  },
+  {
+    "gerado_em": "2026-10-02T16:37:54",
+    "mes": 9,
+    "ano": 2026,
+    "totais": {
+      "OK": 66,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 12
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 30,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 9
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 1,174,871,959.04  Var.Caixa 1,174,871,959.04"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -14,958,910,235.16  DVP -14,958,910,235.16"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -14,958,910,235.16  DVP -14,958,910,235.16"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,681,178,101.09  BP -146,681,178,101.09"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -14,958,910,235.16  DMPL -14,958,910,235.16"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,396,916,155.30  DMPL -191,396,916,155.30"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 6,635,201,500.78  DFC 6,635,201,500.78"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 34,994,303,214.03  BO 34,994,303,214.03"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 29,516,952,073.59  BO 29,516,952,073.59"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "OK",
+        "titulo": "Inscrição RPNP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "OK",
+        "titulo": "Inscrição RPP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 34,994,303,214.03  DVP(VPA) 110,287,939,575.57  Diferença -75,293,636,361.54 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 31,449,602,448.56  DVP(VPD) 125,246,849,810.73  Diferença -93,797,247,362.17 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -14,958,910,235.16  Diferença 14,958,910,235.16 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 19,943,757,677.73  DFC 19,943,757,677.73"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 991,316,665.18  DFC 991,316,665.18"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,808,130,446.66  DFC 1,808,130,446.66"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,049,241,281.87  DFC 1,049,241,281.87"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 18,206,957.28  DFC 18,206,957.28"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,621,380,324.62  DFC 5,621,380,324.62"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 194,975,857,797.87  (Passivo+PL+VPA) 180,016,947,562.71  Diferença 14,958,910,235.16 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
       },
       {
         "codigo": "PEND-5B",
@@ -2390,648 +3676,6 @@ var HISTORICO_FULL = [
         "status": "INFO",
         "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
         "detalhe": "(Ativo+VPD) 194,841,424,343.98  (Passivo+PL+VPA) 179,812,733,465.11  Diferença 15,028,690,878.87 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-10-05T12:09:18",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,000,040,670.81  Var.Caixa 1,000,040,670.81"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -15,094,963,014.59  DVP -15,094,963,014.59"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -15,094,963,014.59  DVP -15,094,963,014.59"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -146,816,273,921.94  BP -146,816,273,921.94"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -15,094,963,014.59  DMPL -15,094,963,014.59"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -191,532,011,976.15  DMPL -191,532,011,976.15"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,460,370,212.55  DFC 6,460,370,212.55"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 35,016,577,143.74  BO 35,016,577,143.74"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 29,519,674,309.16  BO 29,519,674,309.16"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 35,016,577,143.74  DVP(VPA) 110,360,016,957.86  Diferença -75,343,439,814.12 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 31,452,816,675.11  DVP(VPD) 125,454,979,972.45  Diferença -94,002,163,297.34 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -15,094,963,014.59  Diferença 15,094,963,014.59 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,950,995,195.78  DFC 19,950,995,195.78"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 996,439,257.40  DFC 996,439,257.40"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,808,856,420.86  DFC 1,808,856,420.86"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,055,224,091.75  DFC 1,055,224,091.75"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 18,199,437.19  DFC 18,199,437.19"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,624,581,073.76  DFC 5,624,581,073.76"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 195,183,486,636.80  (Passivo+PL+VPA) 180,088,523,622.21  Diferença 15,094,963,014.59 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-10-02T16:37:54",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,174,871,959.04  Var.Caixa 1,174,871,959.04"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -14,958,910,235.16  DVP -14,958,910,235.16"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -14,958,910,235.16  DVP -14,958,910,235.16"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -146,681,178,101.09  BP -146,681,178,101.09"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -14,958,910,235.16  DMPL -14,958,910,235.16"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -191,396,916,155.30  DMPL -191,396,916,155.30"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,635,201,500.78  DFC 6,635,201,500.78"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 34,994,303,214.03  BO 34,994,303,214.03"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 29,516,952,073.59  BO 29,516,952,073.59"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 34,994,303,214.03  DVP(VPA) 110,287,939,575.57  Diferença -75,293,636,361.54 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 31,449,602,448.56  DVP(VPD) 125,246,849,810.73  Diferença -93,797,247,362.17 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -14,958,910,235.16  Diferença 14,958,910,235.16 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,943,757,677.73  DFC 19,943,757,677.73"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 991,316,665.18  DFC 991,316,665.18"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,808,130,446.66  DFC 1,808,130,446.66"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,049,241,281.87  DFC 1,049,241,281.87"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 18,206,957.28  DFC 18,206,957.28"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,621,380,324.62  DFC 5,621,380,324.62"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 194,975,857,797.87  (Passivo+PL+VPA) 180,016,947,562.71  Diferença 14,958,910,235.16 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
       },
       {
         "codigo": "PEND-5B",
@@ -5949,6 +6593,327 @@ var HISTORICO_FULL = [
     ]
   },
   {
+    "gerado_em": "2026-09-25T16:45:59",
+    "mes": 8,
+    "ano": 2026,
+    "totais": {
+      "OK": 64,
+      "ALERTA": 1,
+      "ERRO": 1,
+      "INFO": 14
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 1,
+        "ERRO": 1,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 28,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 11
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 1,816,169,658.09  Var.Caixa 1,816,169,658.09"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -14,982,840,375.66  DVP -14,982,840,375.66"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -14,982,840,375.66  DVP -14,982,840,375.66"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -146,618,297,634.17  BP -146,618,297,634.17"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -14,982,840,375.66  DMPL -14,982,840,375.66"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 53,409,791.44  DMPL 53,409,791.44"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,213,821.56  DMPL 584,213,821.56"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -191,333,979,927.32  DMPL -191,333,979,927.32"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 7,276,499,199.83  DFC 7,276,499,199.83"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 31,572,862,626.24  BO 31,572,862,626.24"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 25,464,325,398.18  BO 25,464,325,398.18"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,034,624.89  BO 1,078,034,624.89"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,285,754,193.40  BO 2,285,754,193.40"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "INFO",
+        "titulo": "Inscrição RPNP no exercício: BF vs BO",
+        "detalhe": "BF 0.00 — comparação com BO pendente (xlsx do BO gerado antes de 11/09/2026, sem a célula nova)."
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "INFO",
+        "titulo": "Inscrição RPP no exercício: BF vs BO",
+        "detalhe": "BF 0.00 — comparação com BO pendente (xlsx do BO gerado antes de 11/09/2026, sem a célula nova)."
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 31,572,862,626.24  DVP(VPA) 101,360,335,874.33  Diferença -69,787,473,248.09 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 27,595,004,485.26  DVP(VPD) 116,343,176,249.99  Diferença -88,748,171,764.73 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -14,982,840,375.66  Diferença 14,982,840,375.66 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 17,955,610,390.08  DFC 17,955,610,390.08"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 3,976,850,723.58  DFC 3,976,850,723.58"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 887,830,071.91  DFC 887,830,071.91"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,261,256.39  DFC 2,261,256.39"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,635,158,549.84  DFC 1,635,158,549.84"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,035,182,843.17  DFC 1,035,182,843.17"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 16,363,758.02  DFC 16,363,758.02"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 5,064,276,681.31  DFC 5,064,276,681.31"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 4,045,652,490.00  Créditos Adicionais 4,045,652,490.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 186,488,945,456.52  (Passivo+PL+VPA) 171,506,105,080.86  Diferença 14,982,840,375.66 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ]
+  },
+  {
     "gerado_em": "2026-09-25T16:45:56",
     "mes": 9,
     "ano": 2026,
@@ -6910,973 +7875,47 @@ var HISTORICO_FULL = [
         "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
       }
     ]
-  },
-  {
-    "gerado_em": "2026-09-24T08:17:36",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,119,253,166.97  Var.Caixa 1,119,253,166.97"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -14,023,509,140.92  DVP -14,023,509,140.92"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -14,023,509,140.92  DVP -14,023,509,140.92"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -145,624,230,377.67  BP -145,624,230,377.67"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -14,023,509,140.92  DMPL -14,023,509,140.92"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,438,133.10  DMPL 53,438,133.10"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,213,821.56  DMPL 584,213,821.56"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -190,339,941,012.48  DMPL -190,339,941,012.48"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,579,582,708.71  DFC 6,579,582,708.71"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 34,406,720,565.31  BO 34,406,720,565.31"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 28,846,426,329.48  BO 28,846,426,329.48"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,470,183.60  BO 1,078,470,183.60"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,807,080.76  BO 2,286,807,080.76"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 34,406,720,565.31  DVP(VPA) 107,908,497,756.17  Diferença -73,501,777,190.86 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 29,194,231,218.08  DVP(VPD) 121,932,006,897.09  Diferença -92,737,775,679.01 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -14,023,509,140.92  Diferença 14,023,509,140.92 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,661,954,853.02  DFC 19,661,954,853.02"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,399,445,454.27  DFC 4,399,445,454.27"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 926,084,828.83  DFC 926,084,828.83"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,429,597.68  DFC 2,429,597.68"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,780,766,546.23  DFC 1,780,766,546.23"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,037,107,113.88  DFC 1,037,107,113.88"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 17,745,903.08  DFC 17,745,903.08"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,499,667,309.24  DFC 5,499,667,309.24"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 4,298,875,646.00  Créditos Adicionais 4,298,875,646.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 191,156,108,635.09  (Passivo+PL+VPA) 177,132,599,494.17  Diferença 14,023,509,140.92 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-09-24T07:48:24",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,119,253,166.97  Var.Caixa 1,119,253,166.97"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -14,023,509,140.92  DVP -14,023,509,140.92"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -14,023,509,140.92  DVP -14,023,509,140.92"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -145,624,230,377.67  BP -145,624,230,377.67"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -14,023,509,140.92  DMPL -14,023,509,140.92"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,438,133.10  DMPL 53,438,133.10"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,213,821.56  DMPL 584,213,821.56"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -190,339,941,012.48  DMPL -190,339,941,012.48"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,579,582,708.71  DFC 6,579,582,708.71"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 34,406,720,565.31  BO 34,406,720,565.31"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 28,846,426,329.48  BO 28,846,426,329.48"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,470,183.60  BO 1,078,470,183.60"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,807,080.76  BO 2,286,807,080.76"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 34,406,720,565.31  DVP(VPA) 107,908,497,756.17  Diferença -73,501,777,190.86 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 29,194,231,218.08  DVP(VPD) 121,932,006,897.09  Diferença -92,737,775,679.01 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -14,023,509,140.92  Diferença 14,023,509,140.92 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,661,954,853.02  DFC 19,661,954,853.02"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,399,445,454.27  DFC 4,399,445,454.27"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 926,084,828.83  DFC 926,084,828.83"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,429,597.68  DFC 2,429,597.68"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,780,766,546.23  DFC 1,780,766,546.23"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,037,107,113.88  DFC 1,037,107,113.88"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 17,745,903.08  DFC 17,745,903.08"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,499,667,309.24  DFC 5,499,667,309.24"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 4,298,875,646.00  Créditos Adicionais 4,298,875,646.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 191,156,108,635.09  (Passivo+PL+VPA) 177,132,599,494.17  Diferença 14,023,509,140.92 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-09-23T07:47:17",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,090,405,099.83  Var.Caixa 1,090,405,099.83"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -13,979,410,073.83  DVP -13,979,410,073.83"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -13,979,410,073.83  DVP -13,979,410,073.83"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -145,580,143,102.00  BP -145,580,143,102.00"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -13,979,410,073.83  DMPL -13,979,410,073.83"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,438,133.10  DMPL 53,438,133.10"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,213,821.56  DMPL 584,213,821.56"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -190,295,853,736.81  DMPL -190,295,853,736.81"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,550,734,641.57  DFC 6,550,734,641.57"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 34,353,558,428.96  BO 34,353,558,428.96"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 28,811,293,255.60  BO 28,811,293,255.60"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,459,626.10  BO 1,078,459,626.10"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,807,080.76  BO 2,286,807,080.76"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 34,353,558,428.96  DVP(VPA) 107,807,290,130.34  Diferença -73,453,731,701.38 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 29,090,847,796.20  DVP(VPD) 121,786,700,204.17  Diferença -92,695,852,407.97 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -13,979,410,073.83  Diferença 13,979,410,073.83 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,623,391,697.46  DFC 19,623,391,697.46"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,399,274,502.00  DFC 4,399,274,502.00"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 924,987,044.08  DFC 924,987,044.08"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,421,823.28  DFC 2,421,823.28"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,774,671,157.90  DFC 1,774,671,157.90"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,037,107,113.88  DFC 1,037,107,113.88"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 16,696,267.62  DFC 16,696,267.62"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,499,062,641.06  DFC 5,499,062,641.06"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 4,250,983,981.00  Créditos Adicionais 4,250,983,981.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 190,977,671,889.43  (Passivo+PL+VPA) 176,998,261,815.60  Diferença 13,979,410,073.83 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
   }
 ];
 
+// Seções por demonstrativo: a original (execução mais recente) é guardada no
+// carregamento; as demais vêm do snapshot (gzip+base64) e são descompactadas aqui.
+const SEC_ORIG={};
+document.querySelectorAll('details.dem[id^="dem-"]').forEach(d=>{SEC_ORIG[d.id.slice(4)]=d.outerHTML;});
+const NOTA_PADRAO=document.getElementById('run-note')?.textContent||'';
+
+async function descompactar(b64){
+  const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const txt=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  return JSON.parse(txt);
+}
+
+function aplicarSecoes(mapa){
+  Object.keys(mapa).forEach(chave=>{
+    const el=document.getElementById('dem-'+chave); if(!el) return;
+    const aberto=el.open;
+    const tmp=document.createElement('div'); tmp.innerHTML=mapa[chave];
+    const novo=tmp.firstElementChild; if(!novo) return;
+    novo.open=aberto;
+    el.replaceWith(novo);
+  });
+}
+
+async function renderSecoes(h,idx){
+  const nota=document.getElementById('run-note');
+  try{
+    if(idx===0){ aplicarSecoes(SEC_ORIG); if(nota) nota.textContent=NOTA_PADRAO; return; }
+    if(h.secoes_gz){ aplicarSecoes(await descompactar(h.secoes_gz)); if(nota) nota.textContent=NOTA_PADRAO; return; }
+    aplicarSecoes(SEC_ORIG);
+    if(nota) nota.textContent='⚠ esta execução não guardou as tabelas por demonstrativo — as tabelas abaixo são as da execução mais recente (resumo e cruzamentos acima são desta execução)';
+  }catch(e){ if(nota) nota.textContent='Não foi possível carregar as tabelas desta execução: '+e; }
+}
+
 function renderRun(h){
+  const hc=document.getElementById('hd-comp'); if(hc) hc.textContent=`${MESES[h.mes]||h.mes}/${h.ano} · Consolidado`;
+  const hg=document.getElementById('hd-gerado');
+  if(hg){ try{ const d=new Date(h.gerado_em);
+    hg.textContent='Gerado em '+d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR'); }catch(e){} }
   const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v||0;};
   set('kpi-err',h.totais.ERRO); set('kpi-alr',h.totais.ALERTA);
   set('kpi-ok',h.totais.OK); set('kpi-inf',h.totais.INFO);
@@ -7926,6 +7965,7 @@ function loadRun(idx){
   const sel=document.getElementById('run-select');
   if(sel) sel.selectedIndex=idx;
   renderRun(h);
+  renderSecoes(h,idx);
 }
 
 buildSelector();
