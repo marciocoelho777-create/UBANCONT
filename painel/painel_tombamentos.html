@@ -60,6 +60,12 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 .popup-area .lbl{color:#7adba0}
 .popup-area .val{color:#b0f0c0;font-weight:600}
 .popup-val{font-size:15px;font-weight:700;color:#4caf50;margin-top:8px}
+.popup-links{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.popup-links a{font-size:11px;padding:3px 10px;border-radius:12px;text-decoration:none;border:1px solid;}
+.pl-gm{background:#1a2a3a;border-color:#2a6a9a;color:#7ab3e0}
+.pl-gm:hover{background:#2a3a5a;color:#9ad3ff}
+.pl-geo{background:#1a2a1a;border-color:#2a6a2a;color:#7ad07a}
+.pl-geo:hover{background:#2a3a2a;color:#9af09a}
 #sem-dados{padding:40px 20px;text-align:center;color:#9ab;font-size:12px}
 </style>
 </head>
@@ -110,7 +116,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 08/10/2026 16:43 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
+    <div class="sub">Gerado em 08/10/2026 16:50 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
   </div>
 </div>
 <div id="main">
@@ -381,7 +387,11 @@ function mkPopup(f){
     +row('Destinação',f.dest)
     +row('Objeto',f.obj)
     +row('Incorporação',f.dt)
-    +'<div class="popup-val">'+fmtVal(f.val)+'</div>';
+    +'<div class="popup-val">'+fmtVal(f.val)+'</div>'
+    +'<div class="popup-links">'
+    +'<a class="pl-gm" href="https://www.google.com/maps?q='+f.lat+','+f.lon+'&z=18" target="_blank" rel="noopener">📍 Google Maps</a>'
+    +'<a class="pl-geo" href="https://www.geoportal.df.gov.br/mapa/?lat='+f.lat+'&lng='+f.lon+'&zoom=18" target="_blank" rel="noopener">🗺 GeoPortal DF</a>'
+    +'</div>';
 }
 
 // ── estado ──────────────────────────────────────────────────────────────────
