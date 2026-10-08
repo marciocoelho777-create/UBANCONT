@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Legislação — Imóveis GDF</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#0f1923;color:#d0d8e4;min-height:100vh;display:flex;flex-direction:column}
+#header{background:#0a2540;padding:12px 20px;border-bottom:1px solid #1e3a5f}
+#header h1{font-size:16px;font-weight:700;color:#e2b96a}
+#header .sub{font-size:11px;color:#7a9bb5;margin-top:3px}
+#toolbar{background:#0d1f35;padding:10px 20px;border-bottom:1px solid #1e3a5f;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.tf{display:flex;flex-direction:column;gap:3px}
+.tf label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#7a9bb5}
+.tf input,.tf select{background:#0a2540;color:#d0d8e4;border:1px solid #2a4a6f;border-radius:4px;padding:5px 8px;font-size:12px}
+.tf input{width:220px}
+.tf select{min-width:160px}
+.tf input:focus,.tf select:focus{outline:none;border-color:#e2b96a}
+#btn-limpar{padding:5px 14px;background:#0a2540;border:1px solid #2a4a6f;color:#7a9bb5;border-radius:4px;cursor:pointer;font-size:12px;height:30px;align-self:flex-end}
+#btn-limpar:hover{color:#e2b96a;border-color:#e2b96a}
+#modo-consulta{background:#0d2a1e;border:1px solid #1e5a3a;border-radius:6px;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#modo-consulta .lbl{font-size:11px;color:#5c9;font-weight:600;white-space:nowrap}
+#modo-consulta select{background:#0a2540;color:#d0d8e4;border:1px solid #2a4a6f;border-radius:4px;padding:4px 8px;font-size:12px}
+#stats-bar{padding:6px 20px;background:#080f1a;font-size:11px;color:#7a9bb5;border-bottom:1px solid #1e3a5f}
+#stats-bar span{color:#e2b96a;font-weight:600}
+#content{flex:1;overflow-y:auto;padding:16px 20px}
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{background:#0d1f35;border:1px solid #1e3a5f;border-radius:6px;padding:14px 16px;transition:border-color .2s}
+.card:hover{border-color:#2a5a8f}
+.card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.card-titulo{flex:1;font-size:13px;font-weight:600;color:#e0e8f4;line-height:1.4}
+.card-titulo a{color:#e2b96a;text-decoration:none}
+.card-titulo a:hover{text-decoration:underline}
+.badge-tipo{font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;font-weight:600}
+.bt-Lei{background:#1a3a6e;color:#7ab3ff}
+.bt-Decreto{background:#2a1a5e;color:#b39eff}
+.bt-Portaria{background:#1a3a2e;color:#7adba0}
+.bt-Resolucao{background:#2a2a1e;color:#dbd67a}
+.bt-TCDF{background:#3a1a1a;color:#ff9e9e}
+.bt-Parecer{background:#1e2a3a;color:#9ec8ff}
+.bt-Manual{background:#2a1e1e;color:#e0a07a}
+.bt-Outro{background:#1e1e2a;color:#b0b0d0}
+.card-assunto{font-size:12px;color:#9ab;margin-bottom:8px;line-height:1.5}
+.card-meta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.badge-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.bs-vigente{background:#0d3a1a;color:#5c9;border:1px solid #2a6a3a}
+.bs-revogada{background:#3a0d0d;color:#e07a7a;border:1px solid #6a2a2a}
+.bs-desconhecida{background:#1e1e2e;color:#8888aa;border:1px solid #3a3a5a}
+.sits{display:flex;gap:4px;flex-wrap:wrap}
+.badge-sit{font-size:10px;padding:1px 7px;border-radius:10px;background:#0a2540;border:1px solid #2a4a6f;color:#9bc}
+.card-obs{font-size:11px;color:#6a8a9a;margin-top:6px;font-style:italic}
+.card-ano{font-size:11px;color:#5a7a8a}
+.no-results{padding:40px;text-align:center;color:#4a6a7a;font-size:13px}
+.file-icon{font-size:14px}
+</style>
+</head>
+<body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+
+<div id="header">
+  <h1>Legislação — Bens Imóveis GDF</h1>
+  <div class="sub">Catálogo de legislação, decisões e pareceres &nbsp;|&nbsp; Atualizado em 08/10/2026 14:53 &nbsp;|&nbsp; 42 documentos</div>
+</div>
+<div id="toolbar">
+  <div class="tf">
+    <label>Pesquisa</label>
+    <input type="text" id="busca" placeholder="título, assunto, observação..." oninput="filtrar()">
+  </div>
+  <div class="tf">
+    <label>Tipo</label>
+    <select id="sel-tipo" onchange="filtrar()">
+      <option value="">Todos os tipos</option><option value="Ato/Decreto">Ato/Decreto</option>
+<option value="Decisão Jurídica">Decisão Jurídica</option>
+<option value="Decisão TCDF">Decisão TCDF</option>
+<option value="Decisão/Nota">Decisão/Nota</option>
+<option value="Decreto">Decreto</option>
+<option value="Decreto/Portaria">Decreto/Portaria</option>
+<option value="Lei">Lei</option>
+<option value="Lei Complementar">Lei Complementar</option>
+<option value="Lei/Decreto">Lei/Decreto</option>
+<option value="Manual">Manual</option>
+<option value="Modelo/Minuta">Modelo/Minuta</option>
+<option value="Outro">Outro</option>
+<option value="Parecer PGDF">Parecer PGDF</option>
+<option value="Portaria">Portaria</option>
+<option value="Resolução">Resolução</option>
+    </select>
+  </div>
+  <div class="tf">
+    <label>Status</label>
+    <select id="sel-status" onchange="filtrar()">
+      <option value="">Todos</option>
+      <option value="vigente">Vigente</option>
+      <option value="revogada">Revogada</option>
+      <option value="desconhecida">Desconhecida</option>
+    </select>
+  </div>
+  <button id="btn-limpar" onclick="limpar()">Limpar</button>
+  <div id="modo-consulta">
+    <span class="lbl">🔍 Consultar situação:</span>
+    <select id="sel-consulta" onchange="consultarSituacao()">
+      <option value="">— selecione a situação do imóvel —</option><option value="LRF">LRF</option>
+<option value="acesso à informação">acesso à informação</option>
+<option value="aquisição">aquisição</option>
+<option value="baixa patrimonial">baixa patrimonial</option>
+<option value="cessão">cessão</option>
+<option value="competências">competências</option>
+<option value="concessão">concessão</option>
+<option value="construção">construção</option>
+<option value="controle">controle</option>
+<option value="desafetação">desafetação</option>
+<option value="doação">doação</option>
+<option value="imóveis rurais">imóveis rurais</option>
+<option value="manutenção">manutenção</option>
+<option value="mobiliário urbano">mobiliário urbano</option>
+<option value="movimentação">movimentação</option>
+<option value="obras em andamento">obras em andamento</option>
+<option value="ocupação irregular">ocupação irregular</option>
+<option value="permuta">permuta</option>
+<option value="procedimentos">procedimentos</option>
+<option value="registro contábil">registro contábil</option>
+<option value="regularização">regularização</option>
+<option value="reversão">reversão</option>
+<option value="transferência">transferência</option>
+<option value="transparência">transparência</option>
+<option value="uso de logradouros">uso de logradouros</option>
+<option value="uso do solo">uso do solo</option>
+<option value="uso educacional">uso educacional</option>
+<option value="uso especial">uso especial</option>
+<option value="uso público">uso público</option>
+<option value="zoneamento">zoneamento</option>
+    </select>
+  </div>
+</div>
+<div id="stats-bar">Exibindo <span id="st-qtd">42</span> de 42 documentos</div>
+<div id="content"><div class="cards" id="cards"></div></div>
+<script>
+var D=[{"arquivo":"APOSTILA.pdf","titulo":"Apostila de Procedimentos — Bens Imóveis / SISGEPAT","tipo":"Manual","ano":null,"status":"vigente","situacoes":["procedimentos"],"assunto":"Manual interno de procedimentos para controle patrimonial de imóveis no SISGEPAT","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/APOSTILA.pdf"},{"arquivo":"Altera a Lei das Igrejas.pdf","titulo":"Alteração da Lei das Igrejas","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["cessão","uso especial"],"assunto":"Altera lei que disciplina o uso de imóveis públicos por igrejas","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Altera a Lei das Igrejas.pdf"},{"arquivo":"Aquisição de lote no Gama para funcionamento da Agência de Atendimento da Receita.PDF","titulo":"Autorização para aquisição de lote no Gama — Receita","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["aquisição"],"assunto":"Autoriza a aquisição de lote no Gama para funcionamento de agência da Receita do DF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Aquisição de lote no Gama para funcionamento da Agência de Atendimento da Receita.PDF"},{"arquivo":"BAIXA DE ABRIGO DE PASSAGEIROS DA RA XXI.PDF","titulo":"Baixa de Abrigo de Passageiros — RA XXI","tipo":"Ato/Decreto","ano":null,"status":"desconhecida","situacoes":["baixa patrimonial"],"assunto":"Determina a baixa patrimonial de abrigos de passageiros na RA XXI (Riacho Fundo II)","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/BAIXA DE ABRIGO DE PASSAGEIROS DA RA XXI.PDF"},{"arquivo":"Competência delegada ao Secretário de Fazenda.pdf","titulo":"Competência delegada ao Secretário de Fazenda","tipo":"Decreto","ano":null,"status":"desconhecida","situacoes":["competências"],"assunto":"Delega competências ao Secretário de Fazenda em matéria de bens imóveis","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Competência delegada ao Secretário de Fazenda.pdf"},{"arquivo":"Criação do Parque Ecológico Sementes do Itapoã.pdf","titulo":"Criação do Parque Ecológico Sementes do Itapoã","tipo":"Lei","ano":null,"status":"vigente","situacoes":["desafetação","uso público"],"assunto":"Cria o Parque Ecológico Sementes do Itapoã — desafeta área pública para uso ambiental","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Criação do Parque Ecológico Sementes do Itapoã.pdf"},{"arquivo":"DECISÃO PROCAD -  TERMO DE CESSÃO DE USO.pdf","titulo":"Decisão PROCAD — Termo de Cessão de Uso","tipo":"Decisão Jurídica","ano":null,"status":"vigente","situacoes":["cessão"],"assunto":"Orienta sobre a formalização de Termo de Cessão de Uso de imóveis públicos","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/DECISÃO PROCAD -  TERMO DE CESSÃO DE USO.pdf"},{"arquivo":"DECRETO DE COMPETÊNCIA DO CONTROLE INTERNO.pdf","titulo":"Decreto de Competência do Controle Interno","tipo":"Decreto","ano":null,"status":"desconhecida","situacoes":["competências","controle"],"assunto":"Define competências do Controle Interno (CONTDF) em matéria de patrimônio","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/DECRETO DE COMPETÊNCIA DO CONTROLE INTERNO.pdf"},{"arquivo":"DECRETO Nº 16.109-94.doc","titulo":"Decreto nº 16.109/94","tipo":"Decreto","ano":1994,"status":"desconhecida","situacoes":[],"assunto":"Decreto de 1994 — verificar conteúdo no arquivo","obs":"Arquivo em formato .doc","existe":true,"eh_pdf":false,"eh_txt":false,"eh_doc":true,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/DECRETO Nº 16.109-94.doc"},{"arquivo":"DECRETO QUE DELEGA COMPETENCIA A CODHAB PARA REVERSÃO, PERMUTA, DOAÇÃO DE IMÓVEIS.pdf","titulo":"Decreto de Delegação de Competência à CODHAB — Reversão, Permuta e Doação","tipo":"Decreto","ano":null,"status":"desconhecida","situacoes":["reversão","permuta","doação"],"assunto":"Delega à CODHAB competência para processar reversão, permuta e doação de imóveis do GDF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/DECRETO QUE DELEGA COMPETENCIA A CODHAB PARA REVERSÃO, PERMUTA, DOAÇÃO DE IMÓVEIS.pdf"},{"arquivo":"Decisão 6300 - lei de responsabilidade fiscal.pdf","titulo":"Decisão TCDF nº 6.300 — Lei de Responsabilidade Fiscal","tipo":"Decisão TCDF","ano":null,"status":"vigente","situacoes":["manutenção","controle","LRF"],"assunto":"TCDF orienta sobre obrigações patrimoniais decorrentes da Lei de Responsabilidade Fiscal","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Decisão 6300 - lei de responsabilidade fiscal.pdf"},{"arquivo":"Decisão TCDF 2876 2003 Obrigatoriedade de Registro de Obras em Andamento e Imóveis a Regularizar.pdf","titulo":"Decisão TCDF nº 2.876/2003 — Registro de Obras em Andamento e Imóveis a Regularizar","tipo":"Decisão TCDF","ano":2003,"status":"vigente","situacoes":["obras em andamento","regularização","registro contábil"],"assunto":"TCDF torna obrigatório o registro no SISGEPAT de obras em andamento e imóveis a regularizar (cód. 90 e 91)","obs":"Fundamento legal para os códigos 90 e 91 no SISGEPAT","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Decisão TCDF 2876 2003 Obrigatoriedade de Registro de Obras em Andamento e Imóveis a Regularizar.pdf"},{"arquivo":"Decisão do Tribunal de Contas Sobre a Lei de Responsabilidade Fiscal acerca da nao manutenção dos imóveis.pdf","titulo":"Decisão TCDF — LRF e Não Manutenção dos Imóveis","tipo":"Decisão TCDF","ano":null,"status":"vigente","situacoes":["manutenção","LRF"],"assunto":"TCDF sobre a infração à LRF decorrente da não manutenção adequada dos imóveis públicos","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Decisão do Tribunal de Contas Sobre a Lei de Responsabilidade Fiscal acerca da nao manutenção dos imóveis.pdf"},{"arquivo":"Decreto de autorização do Secretário de Governo.pdf","titulo":"Decreto de Autorização ao Secretário de Governo","tipo":"Decreto","ano":null,"status":"desconhecida","situacoes":["competências"],"assunto":"Delega ou autoriza competências ao Secretário de Governo em matéria de imóveis","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Decreto de autorização do Secretário de Governo.pdf"},{"arquivo":"Decreto que permite a construção de subsolos para garagem no Setor de Clubes Sul.pdf","titulo":"Decreto — Construção de Subsolos para Garagem no Setor de Clubes Sul","tipo":"Decreto","ano":null,"status":"desconhecida","situacoes":["construção","uso especial"],"assunto":"Permite a construção de subsolos para garagem em imóveis do Setor de Clubes Sul","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Decreto que permite a construção de subsolos para garagem no Setor de Clubes Sul.pdf"},{"arquivo":"Desafetação de áreas e autoriza o governo a arcar com as despesas de alguns patrimonios.pdf","titulo":"Desafetação de Áreas — Autorização de Despesas Patrimoniais","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["desafetação"],"assunto":"Desafeta áreas públicas e autoriza o GDF a arcar com despesas de alguns patrimônios","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Desafetação de áreas e autoriza o governo a arcar com as despesas de alguns patrimonios.pdf"},{"arquivo":"LDO 2014.pdf","titulo":"LDO 2014 — Lei de Diretrizes Orçamentárias","tipo":"Lei","ano":2014,"status":"desconhecida","situacoes":[],"assunto":"Lei de Diretrizes Orçamentárias do GDF para o exercício de 2014","obs":"Verificar dispositivo específico sobre patrimônio imobiliário","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/LDO 2014.pdf"},{"arquivo":"LEI QUE DOA IMÓVEL EM BRAZLÂNDIA PARA A EMATER.pdf","titulo":"Lei de Doação de Imóvel em Brazlândia para a EMATER","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["doação"],"assunto":"Autoriza a doação de imóvel localizado em Brazlândia à EMATER-DF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/LEI QUE DOA IMÓVEL EM BRAZLÂNDIA PARA A EMATER.pdf"},{"arquivo":"LOTES DE ÁGUAS CLARAS.pdf","titulo":"Lotes de Águas Claras","tipo":"Outro","ano":null,"status":"desconhecida","situacoes":[],"assunto":"Documentação relativa a lotes em Águas Claras — verificar conteúdo","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/LOTES DE ÁGUAS CLARAS.pdf"},{"arquivo":"Lei 324 1992 Institui o serviço de Bancas de Jornais e Revistas.pdf","titulo":"Lei nº 324/1992 — Bancas de Jornais e Revistas","tipo":"Lei","ano":1992,"status":"desconhecida","situacoes":["concessão","uso de logradouros"],"assunto":"Institui o serviço de bancas de jornais e revistas no DF — disciplina o uso de espaço público","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Lei 324 1992 Institui o serviço de Bancas de Jornais e Revistas.pdf"},{"arquivo":"Lei de extinção do IDHAB.pdf","titulo":"Lei de Extinção do IDHAB","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["reversão","transferência"],"assunto":"Extingue o IDHAB e disciplina a transferência de seu acervo imobiliário","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Lei de extinção do IDHAB.pdf"},{"arquivo":"MINUTA DE ESCRITURA PÚBLICA DE DOAÇÃO.pdf","titulo":"Minuta de Escritura Pública de Doação","tipo":"Modelo/Minuta","ano":null,"status":"vigente","situacoes":["doação"],"assunto":"Modelo de escritura pública para formalização de doação de imóvel pelo GDF","obs":"Documento de referência — confirmar se ainda é o modelo vigente","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/MINUTA DE ESCRITURA PÚBLICA DE DOAÇÃO.pdf"},{"arquivo":"PDOT.pdf","titulo":"PDOT — Plano Diretor de Ordenamento Territorial do DF","tipo":"Lei Complementar","ano":null,"status":"vigente","situacoes":["uso do solo","zoneamento","desafetação"],"assunto":"Define o ordenamento territorial do DF, zoneamento e destinação de áreas públicas","obs":"Verificar se é a versão mais atualizada do PDOT","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/PDOT.pdf"},{"arquivo":"PORTARIA 202 DE 26 09 2013.pdf","titulo":"Portaria nº 202, de 26/09/2013","tipo":"Portaria","ano":2013,"status":"desconhecida","situacoes":[],"assunto":"Portaria de 2013 — verificar dispositivos relativos a imóveis","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/PORTARIA 202 DE 26 09 2013.pdf"},{"arquivo":"Parecer 0001 2013 PROMAI PGDF Transferência de Imóveis.pdf","titulo":"Parecer PROMAI/PGDF nº 0001/2013 — Transferência de Imóveis","tipo":"Parecer PGDF","ano":2013,"status":"vigente","situacoes":["transferência","movimentação"],"assunto":"Orienta sobre os procedimentos legais para transferência de imóveis entre órgãos do GDF","obs":"Fundamental para processos de movimentação patrimonial","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Parecer 0001 2013 PROMAI PGDF Transferência de Imóveis.pdf"},{"arquivo":"Pareceres Procuradoria-Geral do DF/PGCONS.0091.2025SEI.pdf","titulo":"Parecer PGCONS nº 0091/2025 — PGDF","tipo":"Parecer PGDF","ano":2025,"status":"vigente","situacoes":[],"assunto":"Parecer da Procuradoria-Geral de 2025 — verificar conteúdo para classificar situações","obs":"Documento recente (2025)","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Pareceres Procuradoria-Geral do DF/PGCONS.0091.2025SEI.pdf"},{"arquivo":"Pareceres Procuradoria-Geral do DF/Parecer 001_2013 PROMAI PGDF ( Movimentação de Imóveis).pdf","titulo":"Parecer PROMAI/PGDF nº 001/2013 — Movimentação de Imóveis","tipo":"Parecer PGDF","ano":2013,"status":"vigente","situacoes":["movimentação","transferência"],"assunto":"Orienta sobre formalidades e requisitos legais para movimentação de imóveis públicos","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Pareceres Procuradoria-Geral do DF/Parecer 001_2013 PROMAI PGDF ( Movimentação de Imóveis).pdf"},{"arquivo":"Pareceres Procuradoria-Geral do DF/Parecer 468_2013 PROCAD PGDF Compl Parecer PROMAI PGDF 0001 2013 Permitida cessão quando inviável movimentação.pdf","titulo":"Parecer PROCAD/PGDF nº 468/2013 — Cessão Permitida quando Inviável Movimentação","tipo":"Parecer PGDF","ano":2013,"status":"vigente","situacoes":["cessão","movimentação"],"assunto":"Complementa o Parecer PROMAI 001/2013: permite a cessão de uso quando a movimentação patrimonial for inviável","obs":"Citar junto ao Parecer 001/2013","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Pareceres Procuradoria-Geral do DF/Parecer 468_2013 PROCAD PGDF Compl Parecer PROMAI PGDF 0001 2013 Permitida cessão quando inviável movimentação.pdf"},{"arquivo":"REGULAMENTA O ACESSO A INFORMAÇÕES DO DISTRITO FEDERAL.pdf","titulo":"Decreto — Regulamenta o Acesso à Informação no DF (LAI-DF)","tipo":"Decreto","ano":null,"status":"vigente","situacoes":["transparência","acesso à informação"],"assunto":"Regulamenta a Lei de Acesso à Informação no âmbito do Distrito Federal","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/REGULAMENTA O ACESSO A INFORMAÇÕES DO DISTRITO FEDERAL.pdf"},{"arquivo":"REGULARIZAÇÃO DOS IMÓVEIS RURAIS.pdf","titulo":"Regularização dos Imóveis Rurais","tipo":"Lei/Decreto","ano":null,"status":"desconhecida","situacoes":["regularização","imóveis rurais"],"assunto":"Disciplina os procedimentos para regularização de imóveis rurais no DF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/REGULARIZAÇÃO DOS IMÓVEIS RURAIS.pdf"},{"arquivo":"RESOLUÇÃO 217 DA TERRACAP.pdf","titulo":"Resolução nº 217 da TERRACAP","tipo":"Resolução","ano":null,"status":"desconhecida","situacoes":[],"assunto":"Resolução da TERRACAP — verificar conteúdo para classificar situações","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/RESOLUÇÃO 217 DA TERRACAP.pdf"},{"arquivo":"Resolução 217_2006 CONAD.pdf","titulo":"Resolução nº 217/2006 — CONAD","tipo":"Resolução","ano":2006,"status":"desconhecida","situacoes":[],"assunto":"Resolução do CONAD de 2006 — verificar conteúdo e vigência","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/Resolução 217_2006 CONAD.pdf"},{"arquivo":"autorização para compra de imóvel pela Secretaria de Saúde.pdf","titulo":"Autorização para Compra de Imóvel pela Secretaria de Saúde","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["aquisição"],"assunto":"Autoriza a Secretaria de Saúde do DF a adquirir imóvel para suas atividades","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/autorização para compra de imóvel pela Secretaria de Saúde.pdf"},{"arquivo":"decisão sobre cessao de uso dos lotes invadidos.txt","titulo":"Decisão sobre Cessão de Uso de Lotes Invadidos","tipo":"Decisão/Nota","ano":null,"status":"desconhecida","situacoes":["cessão","ocupação irregular"],"assunto":"Orientação sobre cessão de uso em lotes com ocupação irregular","obs":"Arquivo em formato .txt","existe":true,"eh_pdf":false,"eh_txt":true,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/decisão sobre cessao de uso dos lotes invadidos.txt"},{"arquivo":"desafeta áreas públicas.pdf","titulo":"Desafetação de Áreas Públicas","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["desafetação"],"assunto":"Desafeta áreas públicas do DF para fins específicos","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/desafeta áreas públicas.pdf"},{"arquivo":"dispensa Alvará de Construção e Habite-se para Mobiliário Urbano com mais de 5 anos.pdf","titulo":"Dispensa de Alvará de Construção e Habite-se — Mobiliário Urbano com mais de 5 anos","tipo":"Lei/Decreto","ano":null,"status":"desconhecida","situacoes":["construção","regularização","mobiliário urbano"],"assunto":"Dispensa alvará de construção e habite-se para mobiliário urbano com mais de 5 anos de existência","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/dispensa Alvará de Construção e Habite-se para Mobiliário Urbano com mais de 5 anos.pdf"},{"arquivo":"lei que autoriza a utilização dos espaços em bens imóveis as associações de servidores.pdf","titulo":"Lei — Uso de Espaços em Imóveis Públicos por Associações de Servidores","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["cessão","uso especial"],"assunto":"Autoriza a utilização de espaços em bens imóveis do GDF por associações de servidores","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/lei que autoriza a utilização dos espaços em bens imóveis as associações de servidores.pdf"},{"arquivo":"lei_4056 abrigo de táxi.pdf","titulo":"Lei nº 4.056 — Abrigo de Táxi","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["concessão","uso de logradouros"],"assunto":"Disciplina o serviço de abrigos de táxi no DF — uso de espaço público","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/lei_4056 abrigo de táxi.pdf"},{"arquivo":"muda a regional das escolas.pdf","titulo":"Mudança de Regional das Escolas","tipo":"Lei/Decreto","ano":null,"status":"desconhecida","situacoes":["transferência","uso educacional"],"assunto":"Altera a vinculação regional de escolas públicas do DF — pode implicar movimentação de imóveis","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/muda a regional das escolas.pdf"},{"arquivo":"ocupação de logradouros públicos.pdf","titulo":"Ocupação de Logradouros Públicos","tipo":"Lei/Decreto","ano":null,"status":"desconhecida","situacoes":["uso de logradouros","concessão"],"assunto":"Disciplina as condições para ocupação de logradouros públicos no DF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/ocupação de logradouros públicos.pdf"},{"arquivo":"permuta de imóvel.pdf","titulo":"Permuta de Imóvel","tipo":"Lei","ano":null,"status":"desconhecida","situacoes":["permuta"],"assunto":"Autoriza ou disciplina permuta de imóvel público do GDF","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/permuta de imóvel.pdf"},{"arquivo":"regimento interno da SEDHAB.pdf","titulo":"Regimento Interno da SEDHAB","tipo":"Decreto/Portaria","ano":null,"status":"desconhecida","situacoes":["competências"],"assunto":"Define a estrutura e competências da Secretaria de Habitação do DF (SEDHAB) em matéria imobiliária","obs":"","existe":true,"eh_pdf":true,"eh_txt":false,"eh_doc":false,"url":"../lançamento controle obras SISGEPAT/LEGISLAÇÃO/regimento interno da SEDHAB.pdf"}];
+var SITS=["LRF", "acesso à informação", "aquisição", "baixa patrimonial", "cessão", "competências", "concessão", "construção", "controle", "desafetação", "doação", "imóveis rurais", "manutenção", "mobiliário urbano", "movimentação", "obras em andamento", "ocupação irregular", "permuta", "procedimentos", "registro contábil", "regularização", "reversão", "transferência", "transparência", "uso de logradouros", "uso do solo", "uso educacional", "uso especial", "uso público", "zoneamento"];
+
+function tipoBadgeClass(t){
+  if(!t) return 'bt-Outro';
+  t=t.toLowerCase();
+  if(t.includes('lei')) return 'bt-Lei';
+  if(t.includes('decreto')) return 'bt-Decreto';
+  if(t.includes('portaria')) return 'bt-Portaria';
+  if(t.includes('resolu')) return 'bt-Resolucao';
+  if(t.includes('tcdf')) return 'bt-TCDF';
+  if(t.includes('parecer')) return 'bt-Parecer';
+  if(t.includes('manual')||t.includes('minuta')||t.includes('apostila')) return 'bt-Manual';
+  if(t.includes('decis')) return 'bt-TCDF';
+  return 'bt-Outro';
+}
+
+function renderCard(it){
+  var ext = it.arquivo.split('.').pop().toLowerCase();
+  var icon = ext==='pdf'?'📄':ext==='txt'?'📝':ext==='doc'||ext==='docx'?'📋':'📎';
+  var link = it.existe
+    ? '<a href="'+it.url+'" target="_blank">'+icon+' '+_e(it.titulo)+'</a>'
+    : '<span title="Arquivo não encontrado" style="color:#6a8a9a">⚠ '+_e(it.titulo)+'</span>';
+  var bc = tipoBadgeClass(it.tipo);
+  var sc = 'bs-'+(it.status||'desconhecida').replace(/\s/g,'');
+  var sits = (it.situacoes||[]).map(function(s){
+    return '<span class="badge-sit">'+_e(s)+'</span>';
+  }).join('');
+  var ano = it.ano ? '<span class="card-ano">Ano: '+it.ano+'</span>' : '';
+  var obs = it.obs ? '<div class="card-obs">'+_e(it.obs)+'</div>' : '';
+  return '<div class="card">'
+    +'<div class="card-header">'
+    +'<div class="card-titulo">'+link+'</div>'
+    +'<span class="badge-tipo '+bc+'">'+_e(it.tipo)+'</span>'
+    +'</div>'
+    +'<div class="card-assunto">'+_e(it.assunto)+'</div>'
+    +'<div class="card-meta">'
+    +'<span class="badge-status '+sc+'">'+_e(it.status||'desconhecida')+'</span>'
+    +ano
+    +'<div class="sits">'+sits+'</div>'
+    +'</div>'
+    +obs
+    +'</div>';
+}
+
+function _e(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+
+function filtrar(){
+  var q=(document.getElementById('busca').value||'').toLowerCase();
+  var tipo=document.getElementById('sel-tipo').value;
+  var status=document.getElementById('sel-status').value;
+  var sit=document.getElementById('sel-consulta').value;
+
+  var res=D.filter(function(it){
+    if(q){
+      var txt=(it.titulo+' '+it.assunto+' '+(it.obs||'')).toLowerCase();
+      if(txt.indexOf(q)<0) return false;
+    }
+    if(tipo && it.tipo!==tipo) return false;
+    if(status && it.status!==status) return false;
+    if(sit && (it.situacoes||[]).indexOf(sit)<0) return false;
+    return true;
+  });
+
+  var el=document.getElementById('cards');
+  if(!res.length){
+    el.innerHTML='<div class="no-results">Nenhum documento encontrado para os filtros aplicados.</div>';
+  } else {
+    el.innerHTML=res.map(renderCard).join('');
+  }
+  document.getElementById('st-qtd').textContent=res.length.toLocaleString('pt-BR');
+}
+
+function consultarSituacao(){
+  // Limpa os outros filtros ao selecionar uma situação
+  document.getElementById('busca').value='';
+  document.getElementById('sel-tipo').value='';
+  document.getElementById('sel-status').value='';
+  filtrar();
+}
+
+function limpar(){
+  document.getElementById('busca').value='';
+  document.getElementById('sel-tipo').value='';
+  document.getElementById('sel-status').value='';
+  document.getElementById('sel-consulta').value='';
+  filtrar();
+}
+
+filtrar();
+</script>
+</body>
+</html>
