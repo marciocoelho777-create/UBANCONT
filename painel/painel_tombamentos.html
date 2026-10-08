@@ -116,7 +116,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 08/10/2026 17:05 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
+    <div class="sub">Gerado em 08/10/2026 17:14 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
   </div>
 </div>
 <div id="main">
@@ -261,6 +261,18 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <option value="Incorporado">Incorporado</option>
 <option value="Não Incorporado">Não Incorporado</option></select>
       </div>
+      <div class="frow">
+        <label>Área do terreno</label>
+        <select id="sel-mt">
+          <option value="">Todas as áreas</option>
+          <option value="0">Não informada (0 m²)</option>
+          <option value="1-500">Até 500 m²</option>
+          <option value="500-2000">500 a 2.000 m²</option>
+          <option value="2000-10000">2.000 a 10.000 m²</option>
+          <option value="10000-100000">10.000 a 100.000 m²</option>
+          <option value="100000-">Acima de 100.000 m²</option>
+        </select>
+      </div>
       <button id="btn-limpar" onclick="limpar()">Limpar filtros</button>
     </div>
     <div id="stats">
@@ -378,9 +390,9 @@ function mkPopup(f){
     +row('UG',f.ug)
     +row('Situação',f.sit)
     +(eTerreno&&f.matr?'<div class="popup-row popup-destaque"><span class="lbl">Matrícula</span><span class="val">'+f.matr+'</span></div>':'')
-    +(f.mt>0||f.me>0?'<div style="margin-top:6px;margin-bottom:2px;font-size:10px;color:#5a8a6a;text-transform:uppercase;letter-spacing:.6px">Áreas</div>':'')
-    +(f.mt>0?'<div class="popup-row popup-area"><span class="lbl">▪ Terreno</span><span class="val">'+fmtM2(f.mt)+'</span></div>':'')
-    +(f.me>0?'<div class="popup-row popup-area"><span class="lbl">▪ Edificação</span><span class="val">'+fmtM2(f.me)+'</span></div>':'')
+    +(eTerreno||eEdif?'<div style="margin-top:6px;margin-bottom:2px;font-size:10px;color:#5a8a6a;text-transform:uppercase;letter-spacing:.6px">Áreas</div>':'')
+    +(eTerreno?'<div class="popup-row popup-area"><span class="lbl">▪ Terreno</span><span class="val">'+(f.mt>0?fmtM2(f.mt):'<span style="color:#5a7a6a;font-style:italic">Não informada</span>')+'</span></div>':'')
+    +(eEdif?'<div class="popup-row popup-area"><span class="lbl">▪ Edificação</span><span class="val">'+(f.me>0?fmtM2(f.me):'<span style="color:#5a7a6a;font-style:italic">Não informada</span>')+'</span></div>':'')
     +(f.vt>0?row('Valor T',fmtVal(f.vt)):'')
     +(f.ve>0?row('Valor E',fmtVal(f.ve)):'')
     +(f.vo>0?row('Valor Obra',fmtVal(f.vo)):'')
@@ -414,12 +426,13 @@ function filtrados(){
   var cid=document.getElementById('sel-cid').value;
   var ug=document.getElementById('sel-ug').value;
   var sit=document.getElementById('sel-sit').value;
+  var mt=document.getElementById('sel-mt').value;
   var cbT=document.getElementById('cb-T').checked;
   var cbE=document.getElementById('cb-E').checked;
   var cbO=document.getElementById('cb-O').checked;
   var termos=semAcento(document.getElementById('busca').value).split(/\s+/)
              .filter(function(p){return p.length;});
-  return _DATA.filter(function(f,i){
+  return _DATA.filter(function(f){
     for(var k=0;k<termos.length;k++) if(f._b.indexOf(termos[k])<0) return false;
     if(cid && f.cid!==cid) return false;
     if(ug  && f.ug!==ug)   return false;
@@ -430,6 +443,17 @@ function filtrados(){
     if(cbE && t.indexOf('E')>=0) ok=true;
     if(cbO && t.indexOf('O')>=0) ok=true;
     if(!ok) return false;
+    // filtro de metragem (só para terrenos; imóveis sem terreno passam sempre)
+    if(mt && t.indexOf('T')>=0){
+      var v=f.mt;
+      if(mt==='0') { if(v!==0) return false; }
+      else {
+        var parts=mt.split('-');
+        var lo=parseFloat(parts[0])||0;
+        var hi=parts[1]===''?Infinity:(parseFloat(parts[1])||Infinity);
+        if(v<=0||v<lo||v>=hi) return false;
+      }
+    }
     return true;
   });
 }
@@ -509,6 +533,7 @@ function limpar(){
   document.getElementById('sel-cid').value='';
   document.getElementById('sel-ug').value='';
   document.getElementById('sel-sit').value='';
+  document.getElementById('sel-mt').value='';
   document.getElementById('cb-T').checked=true;
   document.getElementById('cb-E').checked=true;
   document.getElementById('cb-O').checked=true;
@@ -531,6 +556,7 @@ _campoBusca.addEventListener('keydown',function(e){
 document.getElementById('sel-cid').addEventListener('change',aplicarFiltros);
 document.getElementById('sel-ug').addEventListener('change',aplicarFiltros);
 document.getElementById('sel-sit').addEventListener('change',aplicarFiltros);
+document.getElementById('sel-mt').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-T').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-E').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
