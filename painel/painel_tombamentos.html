@@ -110,7 +110,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 08/10/2026 16:37 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
+    <div class="sub">Gerado em 08/10/2026 16:43 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
   </div>
 </div>
 <div id="main">
@@ -282,25 +282,31 @@ _DATA.forEach(function(f){
   f._b=semAcento([f.tomb,f.end,f.cid,f.ug,f.sit,f.ocup,f.dest,f.obj,f.matr].join(' '));
 });
 
-// ── mapa ────────────────────────────────────────────────────────────────────
-var osm    = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png',{
-  maxZoom:19, attribution:'© CartoDB © OpenStreetMap'});
-var esri   = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {maxZoom:19, attribution:'© Esri'});
-var labels = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',
-  {maxZoom:19, opacity:0.8, attribution:'© CartoDB'});
+// ── mapa — todos os tiles via Esri ArcGIS (gratuito, sem API key, file://) ──
+var ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+var esriDark = L.tileLayer(ESRI+'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:16, attribution:'© Esri © OpenStreetMap contributors'});
+var esriLight = L.tileLayer(ESRI+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:16, attribution:'© Esri © OpenStreetMap contributors'});
+var esriStreet = L.tileLayer(ESRI+'World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19, attribution:'© Esri © OpenStreetMap contributors'});
+var esriSat = L.tileLayer(ESRI+'World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19, attribution:'© Esri © Maxar'});
+var esriLabels = L.tileLayer(ESRI+'Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:16, opacity:0.9, attribution:'© Esri'});
 
 var map = L.map('map',{
   center:[-15.78, -47.93], zoom:10,
-  layers:[osm]
+  layers:[esriDark]
 });
 
-var carto_light= L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-  maxZoom:19, attribution:'© CartoDB © OpenStreetMap'});
-var baseLayers = {'🗺 Mapa (escuro)': osm, '🗺 Mapa (claro)': carto_light, '🛰 Satélite': esri};
-L.control.layers(baseLayers, {'🏷 Rótulos (sat)': labels}, {position:'topright'}).addTo(map);
+var baseLayers = {
+  '🗺 Mapa (escuro)': esriDark,
+  '🗺 Mapa (claro)': esriLight,
+  '🗺 Mapa (ruas)': esriStreet,
+  '🛰 Satélite': esriSat
+};
+L.control.layers(baseLayers, {'🏷 Rótulos': esriLabels}, {position:'topright'}).addTo(map);
 
 // ── cores por tipo ───────────────────────────────────────────────────────────
 function corTipo(tipos){
