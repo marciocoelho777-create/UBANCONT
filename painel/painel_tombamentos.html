@@ -116,7 +116,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 08/10/2026 16:50 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
+    <div class="sub">Gerado em 08/10/2026 17:05 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 7,61 bi</div>
   </div>
 </div>
 <div id="main">
@@ -378,8 +378,9 @@ function mkPopup(f){
     +row('UG',f.ug)
     +row('Situação',f.sit)
     +(eTerreno&&f.matr?'<div class="popup-row popup-destaque"><span class="lbl">Matrícula</span><span class="val">'+f.matr+'</span></div>':'')
-    +(f.mt>0?'<div class="popup-row popup-area"><span class="lbl">Área terreno</span><span class="val">'+fmtM2(f.mt)+'</span></div>':'')
-    +(f.me>0?'<div class="popup-row popup-area"><span class="lbl">Área edificação</span><span class="val">'+fmtM2(f.me)+'</span></div>':'')
+    +(f.mt>0||f.me>0?'<div style="margin-top:6px;margin-bottom:2px;font-size:10px;color:#5a8a6a;text-transform:uppercase;letter-spacing:.6px">Áreas</div>':'')
+    +(f.mt>0?'<div class="popup-row popup-area"><span class="lbl">▪ Terreno</span><span class="val">'+fmtM2(f.mt)+'</span></div>':'')
+    +(f.me>0?'<div class="popup-row popup-area"><span class="lbl">▪ Edificação</span><span class="val">'+fmtM2(f.me)+'</span></div>':'')
     +(f.vt>0?row('Valor T',fmtVal(f.vt)):'')
     +(f.ve>0?row('Valor E',fmtVal(f.ve)):'')
     +(f.vo>0?row('Valor Obra',fmtVal(f.vo)):'')
@@ -469,8 +470,8 @@ function aplicarFiltros(){
     li.dataset.tomb=f.tomb;
     var badges=f.tipo.map(tipoBadge).join('');
     var areas='';
-    if(f.mt>0) areas+='<span class="li-area">'+fmtM2(f.mt)+'</span>';
-    if(f.me>0) areas+='<span class="li-area">(ed: '+fmtM2(f.me)+')</span>';
+    if(f.mt>0) areas+='<span class="li-area" title="Área do terreno">T: '+fmtM2(f.mt)+'</span>';
+    if(f.me>0) areas+='<span class="li-area" title="Área da edificação">E: '+fmtM2(f.me)+'</span>';
     li.innerHTML=
       '<div class="li-tomb">'+f.tomb+'</div>'
       +'<div class="li-end">'+(f.end||f.cid||'')+'</div>'
