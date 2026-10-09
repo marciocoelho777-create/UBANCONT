@@ -120,7 +120,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 09/10/2026 17:01 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 09/10/2026 17:06 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -358,46 +358,72 @@ var RA_NOMES = {1:'Brasília',2:'Gama',3:'Taguatinga',4:'Brazlândia',5:'Sobradi
   26:'Sobradinho II',27:'Jardim Botânico',28:'Itapoã',29:'SIA',30:'Vicente Pires',
   31:'Fercal',32:'Sol Nascente/Pôr do Sol',33:'Arniqueiras'};
 var SITUACAO = {1:'Ocupado',2:'Vago',3:'Público',4:'Arrendado',5:'Cedido',6:'Permutado',7:'Aforado'};
+function row(k,v){return v!=null&&v!==''?'<tr><td style="color:#9ab;padding:2px 6px 2px 0;white-space:nowrap">'+k+'</td><td style="padding:2px 0">'+v+'</td></tr>':''}
+
 map.on('click', function(e){
-  if(!map.hasLayer(lotesWMS)) return;
+  var temLote=map.hasLayer(lotesWMS), temTerracap=map.hasLayer(terracapWMS);
+  if(!temLote && !temTerracap) return;
   var lat=e.latlng.lat, lon=e.latlng.lng;
   _lotePopup.setLatLng(e.latlng)
-    .setContent('<div style="font-size:12px;color:#aaa">Consultando lote…</div>')
+    .setContent('<div style="font-size:12px;color:#aaa">Consultando…</div>')
     .openOn(map);
-  var url='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/10/query'
-    +'?geometry='+lon+','+lat
-    +'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects'
-    +'&outFields=pu_ciu,pu_end_cart,pu_end_usual,pu_ra,pu_situacao,pu_tipo,pu_cipu'
-    +',qd_setor,qd_quadra,qd_lote,pn_uso,pn_alt_max,qd_dim_frente,qd_dim_fundo,pn_norma_vg'
-    +'&returnGeometry=false&f=json';
-  fetch(url).then(function(r){return r.json();}).then(function(d){
-    var feats=d.features||[];
-    if(!feats.length){
-      _lotePopup.setContent('<div style="font-size:12px;color:#aaa">Nenhum lote neste ponto.</div>');
-      return;
+
+  var ptParam='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=false&f=json';
+  var urlLote='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/10/query'
+    +ptParam+'&outFields=pu_ciu,pu_end_cart,pu_end_usual,pu_ra,pu_situacao,pu_tipo,pu_cipu,qd_setor,qd_quadra,qd_lote,pn_uso,pn_alt_max,qd_dim_frente,qd_dim_fundo,pn_norma_vg';
+  var urlTerracap='https://terrageo2.terracap.df.gov.br/arcgis/rest/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/0/query'
+    +ptParam+'&outFields=CD_IMOVEL,ENDERECO,DS_REGIAO_ADM,NR_AREA,NR_AREA_MAX,IN_TIPO_USO';
+
+  var pLote    = temLote    ? fetch(urlLote).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
+  var pTerracap= temTerracap? fetch(urlTerracap).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
+
+  Promise.all([pLote, pTerracap]).then(function(res){
+    var html='<div style="font-family:monospace;font-size:12px">';
+    var vazio=true;
+
+    // ── IDE-DF ─────────────────────────────────────────────────────────────
+    var featsL=(res[0].features||[]);
+    if(featsL.length){
+      vazio=false;
+      var a=featsL[0].attributes;
+      html+='<b style="font-size:13px;color:#7cf">Lote IDE-DF</b>'
+        +'<table style="border-collapse:collapse;margin-top:4px">'
+        +row('CIU',a.pu_ciu)
+        +row('End. Cartorial',a.pu_end_cart)
+        +row('End. Usual',a.pu_end_usual)
+        +row('RA',RA_NOMES[a.pu_ra]||a.pu_ra)
+        +row('Setor/Quadra/Lote',[a.qd_setor,a.qd_quadra,a.qd_lote].filter(Boolean).join(' / '))
+        +row('Situação',SITUACAO[a.pu_situacao]||a.pu_situacao)
+        +row('Uso',a.pn_uso)
+        +row('Tipo',a.pu_tipo)
+        +row('CIPU',a.pu_cipu)
+        +row('Alt. Máx.',a.pn_alt_max!=null?a.pn_alt_max+' m':null)
+        +row('Frente',a.qd_dim_frente!=null?a.qd_dim_frente+' m':null)
+        +row('Fundo',a.qd_dim_fundo!=null?a.qd_dim_fundo+' m':null)
+        +row('Norma Vigente',a.pn_norma_vg)
+        +'</table>';
     }
-    var a=feats[0].attributes;
-    function row(k,v){return v!=null&&v!==''?'<tr><td style="color:#9ab;padding:2px 6px 2px 0;white-space:nowrap">'+k+'</td><td style="padding:2px 0">'+v+'</td></tr>':''}
-    var html='<div style="font-family:monospace;font-size:12px">'
-      +'<b style="font-size:13px;color:#7cf">Lote IDE-DF</b><br>'
-      +'<table style="border-collapse:collapse;margin-top:4px">'
-      +row('CIU',a.pu_ciu)
-      +row('End. Cartorial',a.pu_end_cart)
-      +row('End. Usual',a.pu_end_usual)
-      +row('RA',RA_NOMES[a.pu_ra]||a.pu_ra)
-      +row('Setor/Quadra/Lote',[a.qd_setor,a.qd_quadra,a.qd_lote].filter(Boolean).join(' / '))
-      +row('Situação',SITUACAO[a.pu_situacao]||a.pu_situacao)
-      +row('Uso',a.pn_uso)
-      +row('Tipo',a.pu_tipo)
-      +row('CIPU',a.pu_cipu)
-      +row('Alt. Máx.',a.pn_alt_max!=null?a.pn_alt_max+' m':null)
-      +row('Frente',a.qd_dim_frente!=null?a.qd_dim_frente+' m':null)
-      +row('Fundo',a.qd_dim_fundo!=null?a.qd_dim_fundo+' m':null)
-      +row('Norma Vigente',a.pn_norma_vg)
-      +'</table></div>';
+
+    // ── Terracap GSO ───────────────────────────────────────────────────────
+    var featsT=(res[1].features||[]);
+    if(featsT.length){
+      if(!vazio) html+='<hr style="border-color:#444;margin:6px 0">';
+      vazio=false;
+      var b=featsT[0].attributes;
+      var area=b.NR_AREA?b.NR_AREA.toLocaleString('pt-BR',{maximumFractionDigits:2})+' m²':null;
+      html+='<b style="font-size:13px;color:#fc9">Imóvel GSO — Terracap</b>'
+        +'<table style="border-collapse:collapse;margin-top:4px">'
+        +row('Código',b.CD_IMOVEL)
+        +row('Endereço',b.ENDERECO)
+        +row('RA',b.DS_REGIAO_ADM)
+        +row('Área',area)
+        +row('Tipo de Uso',b.IN_TIPO_USO)
+        +'</table>';
+    }
+
+    if(vazio) html+='<span style="color:#aaa">Nenhum dado neste ponto.</span>';
+    html+='</div>';
     _lotePopup.setContent(html);
-  }).catch(function(){
-    _lotePopup.setContent('<div style="font-size:12px;color:#f88">Erro ao consultar IDE-DF.</div>');
   });
 });
 
