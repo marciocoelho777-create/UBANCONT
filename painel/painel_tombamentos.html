@@ -68,6 +68,8 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 .pl-geo:hover{background:#2a3a2a;color:#9af09a}
 .pl-edge{background:#0a1a2a;border-color:#1a4a8a;color:#5ab0f0}
 .pl-edge:hover{background:#1a2a3a;color:#8ad0ff}
+.pl-tgeo{background:#1a2a1a;border-color:#2a7a2a;color:#6ada6a}
+.pl-tgeo:hover{background:#1a3a1a;color:#9afa9a}
 #sem-dados{padding:40px 20px;text-align:center;color:#9ab;font-size:12px}
 </style>
 </head>
@@ -118,7 +120,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 09/10/2026 15:44 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 09/10/2026 16:48 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -473,6 +475,7 @@ function mkPopup(f){
     +'<div class="popup-val">'+fmtVal(f.val)+'</div>'
     +'<div class="popup-links">'
     +'<a class="pl-gm" href="https://www.google.com/maps?q='+f.lat+','+f.lon+'&z=18" target="_blank" rel="noopener">📍 Google Maps</a>'
+    +'<a class="pl-tgeo" href="https://terrageo2.terracap.df.gov.br/portal/apps/webappviewer/index.html?id=583f654105564859a85c749e86106692&center='+f.lon+','+f.lat+'&level=19" target="_blank" rel="noopener">🌿 TerraGeo</a>'
     +'<a class="pl-geo" href="https://www.geoportal.df.gov.br/mapa/?lat='+f.lat+'&lng='+f.lon+'&zoom=18" target="_blank" rel="noopener">🗺 GeoPortal DF</a>'
     +'<a class="pl-edge" href="microsoft-edge:https://www.geoportal.df.gov.br/mapa/?lat='+f.lat+'&lng='+f.lon+'&zoom=18" title="Abrir no Edge (contorna bloqueio SSL do Chrome)">🔷 Edge</a>'
     +'</div>';
