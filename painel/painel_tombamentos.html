@@ -120,7 +120,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 09/10/2026 16:53 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 09/10/2026 17:01 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -335,9 +335,16 @@ var lotesWMS = L.tileLayer.wms(
     version:'1.1.1', crs:L.CRS.EPSG4326,
     attribution:'Lotes: IDE-DF/SEDUH'}
 );
+var terracapWMS = L.tileLayer.wms(
+  'https://terrageo2.terracap.df.gov.br/arcgis/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/WMSServer',
+  {layers:'0', format:'image/png', transparent:true, opacity:0.7,
+    version:'1.1.1', crs:L.CRS.EPSG4326,
+    attribution:'Imóveis GSO: Terracap'}
+);
 var overlays = {
   '🏷 Rótulos': esriLabels,
-  '🟡 Lotes Registrados (IDE-DF)': lotesWMS
+  '🟡 Lotes Registrados (IDE-DF)': lotesWMS,
+  '🟠 Imóveis Urbanos GSO (Terracap)': terracapWMS
 };
 L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
 
