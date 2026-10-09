@@ -118,7 +118,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 09/10/2026 13:26 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 09/10/2026 14:53 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -419,12 +419,45 @@ function mkPopup(f){
 var _markers=[];
 var _ativo=null;
 
+// ── polígono do lote (IDE-DF) ─────────────────────────────────────────────────
+var _loteLayer=null;
+var _LOTES_URL='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/10/query';
+
+function buscarPoligono(lat,lon){
+  if(_loteLayer){ _loteLayer.remove(); _loteLayer=null; }
+  var params=new URLSearchParams({
+    geometry: lon+','+lat,
+    geometryType:'esriGeometryPoint',
+    spatialRel:'esriSpatialRelIntersects',
+    outFields:'pu_ciu,pu_end_cart,pu_end_usual',
+    returnGeometry:'true',
+    outSR:'4326',
+    f:'geojson'
+  });
+  fetch(_LOTES_URL+'?'+params)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.features||!data.features.length) return;
+      _loteLayer=L.geoJSON(data,{
+        style:{color:'#ffcc00',weight:2.5,fillColor:'#ffcc00',fillOpacity:0.15}
+      }).addTo(map);
+    })
+    .catch(function(){});
+}
+
+map.on('popupclose',function(){
+  if(_loteLayer){ _loteLayer.remove(); _loteLayer=null; }
+});
+
 function buildMarkers(){
   _markers=_DATA.map(function(f){
     var m=L.marker([f.lat,f.lon],{icon:mkIcon(f.tipo)});
     m._f=f;
     m.bindPopup(function(){return mkPopup(f);},{maxWidth:280,minWidth:240});
-    m.on('click',function(){selecionarLista(f.tomb);});
+    m.on('click',function(){
+      selecionarLista(f.tomb);
+      buscarPoligono(f.lat,f.lon);
+    });
     return m;
   });
 }
