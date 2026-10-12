@@ -141,7 +141,7 @@ table.bal tr.dif.c-err td{color:var(--err)}
 <header class="hd">
   <div><div class="hd-title">Balancete Contábil — GDF</div>
   <div class="hd-sub">Outubro/2026 · Consolidado</div></div>
-  <div class="hd-sub">Gerado em 11/10/2026 04:40:34</div>
+  <div class="hd-sub">Gerado em 12/10/2026 04:39:40</div>
 </header>
 <main class="wrap">
   <div class="run-wrap">
@@ -178,6 +178,32 @@ const ICONES = {"OK": "✔", "ERRO": "✘", "ALERTA": "⚠", "INFO": "ℹ"};
 const MESES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const CLASSES = [["CL1_ATIVO", "Cl. 1 — Ativo", "DEV"], ["CL2_PASSIVO_PL", "Cl. 2 — Passivo e Patrimônio Líquido", "CRED"], ["CL3_VPD", "Cl. 3 — Variações Patrimoniais Diminutivas (VPD)", "DEV"], ["CL4_VPA", "Cl. 4 — Variações Patrimoniais Aumentativas (VPA)", "CRED"], ["CL5_CONTROR_APROV", "Cl. 5 — Controles Orçamentários — Aprovação", "DEV"], ["CL6_CONTROR_EXEC", "Cl. 6 — Controles Orçamentários — Execução", "CRED"], ["CL7_CONTRDEV", "Cl. 7 — Controles Devedores", "DEV"], ["CL8_CONTRCRED", "Cl. 8 — Controles Credores", "CRED"], ["CL9_RESULTADO", "Cl. 9 — Resultado do Exercício (Encerramento)", "CRED"]];
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-10-12T04:39:40",
+    "mes": 10,
+    "ano": 2026,
+    "t": {
+      "CL1_ATIVO": 68566723518.4,
+      "CL3_VPD": 128185474513.57,
+      "CL5_CONTROR_APROV": 287261104952.91,
+      "CL7_CONTRDEV": 692943245088.23,
+      "CL2_PASSIVO_PL": 83267787346.15,
+      "CL4_VPA": 113484410685.82,
+      "CL6_CONTROR_EXEC": 287261104952.91,
+      "CL8_CONTRCRED": 692943245088.23,
+      "CL9_RESULTADO": 0.0,
+      "DEVEDORES_TOTAL": 1176956548073.11,
+      "CREDORES_TOTAL": 1176956548073.11
+    },
+    "achados": [
+      {
+        "codigo": "BAL-01",
+        "status": "OK",
+        "titulo": "Balancete (consolidado): Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
+        "detalhe": "Devedores 1,176,956,548,073.11  =  Cl.1 68,566,723,518.40  +  Cl.3 128,185,474,513.57  +  Cl.5 287,261,104,952.91  +  Cl.7 692,943,245,088.23  |  Credores 1,176,956,548,073.11  =  Cl.2 83,267,787,346.15  +  Cl.4 113,484,410,685.82  +  Cl.6 287,261,104,952.91  +  Cl.8 692,943,245,088.23  +  Cl.9 0.00"
+      }
+    ]
+  },
   {
     "gerado_em": "2026-10-11T04:40:34",
     "mes": 10,
@@ -773,32 +799,6 @@ var HISTORICO_FULL = [
         "status": "OK",
         "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
         "detalhe": "Devedores 1,127,813,543,453.35  =  Cl.1 69,190,971,685.26  +  Cl.3 121,786,700,204.17  +  Cl.5 273,958,239,366.57  +  Cl.7 662,877,632,197.35  |  Credores 1,127,813,543,453.35  =  Cl.2 83,170,381,759.09  +  Cl.4 107,807,290,130.34  +  Cl.6 273,958,239,366.57  +  Cl.8 662,877,632,197.35  +  Cl.9 0.00"
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-09-22T04:32:55",
-    "mes": 9,
-    "ano": 2026,
-    "t": {
-      "CL1_ATIVO": 68857791764.62,
-      "CL3_VPD": 121600986133.57,
-      "CL5_CONTROR_APROV": 273292973386.62,
-      "CL7_CONTRDEV": 660373681622.17,
-      "CL2_PASSIVO_PL": 83135479758.67,
-      "CL4_VPA": 107323298139.52,
-      "CL6_CONTROR_EXEC": 273292973386.62,
-      "CL8_CONTRCRED": 660373681622.17,
-      "CL9_RESULTADO": 0.0,
-      "DEVEDORES_TOTAL": 1124125432906.98,
-      "CREDORES_TOTAL": 1124125432906.98
-    },
-    "achados": [
-      {
-        "codigo": "BAL-01",
-        "status": "OK",
-        "titulo": "Balancete: Devedores (1+3+5+7) = Credores (2+4+6+8+9)",
-        "detalhe": "Devedores 1,124,125,432,906.98  =  Cl.1 68,857,791,764.62  +  Cl.3 121,600,986,133.57  +  Cl.5 273,292,973,386.62  +  Cl.7 660,373,681,622.17  |  Credores 1,124,125,432,906.98  =  Cl.2 83,135,479,758.67  +  Cl.4 107,323,298,139.52  +  Cl.6 273,292,973,386.62  +  Cl.8 660,373,681,622.17  +  Cl.9 0.00"
       }
     ]
   }
