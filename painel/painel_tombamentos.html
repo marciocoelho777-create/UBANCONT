@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 13/10/2026 14:09 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 13/10/2026 14:35 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -382,6 +382,19 @@ var RA_NOMES = {1:'Brasília',2:'Gama',3:'Taguatinga',4:'Brazlândia',5:'Sobradi
 var SITUACAO = {1:'Ocupado',2:'Vago',3:'Público',4:'Arrendado',5:'Cedido',6:'Permutado',7:'Aforado'};
 function row(k,v){return v!=null&&v!==''?'<tr><td style="color:#9ab;padding:2px 6px 2px 0;white-space:nowrap">'+k+'</td><td style="padding:2px 0">'+v+'</td></tr>':''}
 
+// Área de polígono UTM (coords em metros) via fórmula de Shoelace
+function ringArea(ring){
+  var s=0, n=ring.length;
+  for(var i=0;i<n-1;i++) s+=ring[i][0]*ring[i+1][1]-ring[i+1][0]*ring[i][1];
+  return Math.abs(s)/2;
+}
+function polyArea(rings){
+  if(!rings||!rings.length) return null;
+  var a=ringArea(rings[0]);
+  for(var i=1;i<rings.length;i++) a-=ringArea(rings[i]); // subtrai buracos
+  return a;
+}
+
 // Encontra o tombamento mais próximo do ponto clicado (em metros)
 function tombProximo(lat, lon, maxM){
   var best=null, bestD=maxM, toRad=Math.PI/180;
@@ -405,8 +418,9 @@ map.on('click', function(e){
     .openOn(map);
 
   var ptParam='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=false&f=json';
+  var ptParamGeo='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=31983&f=json';
   var urlLote='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/10/query'
-    +ptParam+'&outFields=pu_ciu,pu_end_cart,pu_end_usual,pu_ra,pu_situacao,pu_tipo,pu_cipu,qd_setor,qd_quadra,qd_lote,pn_uso,pn_alt_max,qd_dim_frente,qd_dim_fundo,pn_norma_vg';
+    +ptParamGeo+'&outFields=pu_ciu,pu_end_cart,pu_end_usual,pu_ra,pu_situacao,pu_tipo,pu_cipu,qd_setor,qd_quadra,qd_lote,pn_uso,pn_alt_max,qd_dim_frente,qd_dim_fundo,pn_norma_vg';
   var urlTerracap='https://terrageo2.terracap.df.gov.br/arcgis/rest/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/0/query'
     +ptParam+'&outFields=CD_IMOVEL,ENDERECO,DS_REGIAO_ADM,NR_AREA,NR_AREA_MAX,IN_TIPO_USO';
   var urlLUOS='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/LUOS/MapServer/11/query'
@@ -422,13 +436,16 @@ map.on('click', function(e){
   Promise.all([pLote, pTerracap, pLUOS, pTombada]).then(function(res){
     var html='<div style="font-family:monospace;font-size:12px">';
     var vazio=true;
-    var areaTerracap=null, areaLUOS=null;
+    var areaTerracap=null, areaLUOS=null, areaLote=null;
 
     // ── IDE-DF ─────────────────────────────────────────────────────────────
     var featsL=(res[0].features||[]);
     if(featsL.length){
       vazio=false;
       var a=featsL[0].attributes;
+      var geomLote=featsL[0].geometry;
+      var areaLote=geomLote?polyArea(geomLote.rings):null;
+      var areaLoteStr=areaLote?areaLote.toLocaleString('pt-BR',{maximumFractionDigits:2})+' m²':null;
       html+='<b style="font-size:13px;color:#7cf">Lote IDE-DF</b>'
         +'<table style="border-collapse:collapse;margin-top:4px">'
         +row('CIU',a.pu_ciu)
@@ -440,6 +457,7 @@ map.on('click', function(e){
         +row('Uso',a.pn_uso)
         +row('Tipo',a.pu_tipo)
         +row('CIPU',a.pu_cipu)
+        +(areaLoteStr?'<tr><td style="color:#7adba0;padding:2px 6px 2px 0;white-space:nowrap">Área</td><td style="color:#b0f0c0;font-weight:600;padding:2px 0">'+areaLoteStr+'</td></tr>':'')
         +row('Alt. Máx.',a.pn_alt_max!=null?a.pn_alt_max+' m':null)
         +row('Frente',a.qd_dim_frente!=null?a.qd_dim_frente+' m':null)
         +row('Fundo',a.qd_dim_fundo!=null?a.qd_dim_fundo+' m':null)
@@ -512,12 +530,12 @@ map.on('click', function(e){
 
     // ── Comparação de Áreas (SISGEPAT × LUOS × Terracap) ──────────────────
     var prox=tombProximo(lat,lon,150);
-    if(prox && (areaTerracap||areaLUOS)){
+    if(prox && (areaTerracap||areaLUOS||areaLote)){
       var fp=prox.f;
       var spatm2=(fp.mt>0&&!fp.mtfi&&!fp.mtha)?fp.mt:null;
-      if(spatm2||areaTerracap||areaLUOS){
+      if(spatm2||areaTerracap||areaLUOS||areaLote){
         if(!vazio) html+='<hr style="border-color:#444;margin:6px 0">';
-        var refArea=spatm2||areaTerracap||areaLUOS;
+        var refArea=spatm2||areaLote||areaTerracap||areaLUOS;
         function cRow(lbl, val){
           if(val==null) return '';
           var sty='color:#e0e0e0';
@@ -533,6 +551,7 @@ map.on('click', function(e){
           +fp.tomb+(prox.d>0?' <span style="font-size:9px;color:#5a7a5a">'+prox.d+'m</span>':'')+'</div>'
           +'<table style="border-collapse:collapse">'
           +cRow('SISGEPAT terreno',spatm2)
+          +cRow('IDE-DF geometria',areaLote)
           +cRow('LUOS proj.',areaLUOS)
           +cRow('Terracap',areaTerracap)
           +'</table>'
