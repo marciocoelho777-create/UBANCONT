@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 13/10/2026 14:35 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 13/10/2026 15:10 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -360,13 +360,20 @@ var raWMS = L.tileLayer.wms(
     version:'1.1.1', crs:L.CRS.EPSG4326,
     attribution:'Regiões Adm.: IDE-DF/SEDUH'}
 );
+var concessaoWMS = L.tileLayer.wms(
+  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/CADASTRO_TERRITORIAL/MapServer/WMSServer',
+  {layers:'9', format:'image/png', transparent:true, opacity:0.75,
+    version:'1.1.1', crs:L.CRS.EPSG4326,
+    attribution:'Concessão de Lotes: IDE-DF/SEDUH'}
+);
 var overlays = {
   '🏷 Rótulos': esriLabels,
   '🟡 Lotes Registrados (IDE-DF)': lotesWMS,
   '🟠 Imóveis Urbanos GSO (Terracap)': terracapWMS,
   '🟣 Zoneamento LUOS': luosWMS,
   '🏛 Área Tombada UNESCO': tombadaWMS,
-  '🏘 Regiões Administrativas': raWMS
+  '🏘 Regiões Administrativas': raWMS,
+  '🔵 Concessão de Lotes (IDE-DF)': concessaoWMS
 };
 L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
 
@@ -411,7 +418,8 @@ function tombProximo(lat, lon, maxM){
 map.on('click', function(e){
   var temLote=map.hasLayer(lotesWMS), temTerracap=map.hasLayer(terracapWMS);
   var temLUOS=map.hasLayer(luosWMS),  temTombada=map.hasLayer(tombadaWMS);
-  if(!temLote && !temTerracap && !temLUOS && !temTombada) return;
+  var temConcessao=map.hasLayer(concessaoWMS);
+  if(!temLote && !temTerracap && !temLUOS && !temTombada && !temConcessao) return;
   var lat=e.latlng.lat, lon=e.latlng.lng;
   _lotePopup.setLatLng(e.latlng)
     .setContent('<div style="font-size:12px;color:#aaa">Consultando…</div>')
@@ -427,13 +435,16 @@ map.on('click', function(e){
     +ptParam+'&outFields=lu_cipu,lu_end_cart,lu_area_proj,lu_padrao_cores,lu_uos_setor,lu_cfa_b,lu_cfa_m,lu_tx_ocu,lu_tx_perm,lu_alt_max,lu_afr,lu_afu,lu_notas';
   var urlTombada='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/LIMITES/MapServer/0/query'
     +ptParam+'&outFields=tomb_descricao,tomb_decreto_cr';
+  var urlConcessao='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/9/query'
+    +ptParam+'&outFields=ciu,end_rest,destinacao,tipo_destinacao,dimen_cessao,processo,processo_2';
 
   var pLote    = temLote    ? fetch(urlLote).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pTerracap= temTerracap? fetch(urlTerracap).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pLUOS    = temLUOS    ? fetch(urlLUOS).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pTombada = temTombada ? fetch(urlTombada).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
+  var pConcessao= temConcessao? fetch(urlConcessao).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
 
-  Promise.all([pLote, pTerracap, pLUOS, pTombada]).then(function(res){
+  Promise.all([pLote, pTerracap, pLUOS, pTombada, pConcessao]).then(function(res){
     var html='<div style="font-family:monospace;font-size:12px">';
     var vazio=true;
     var areaTerracap=null, areaLUOS=null, areaLote=null;
@@ -525,6 +536,24 @@ map.on('click', function(e){
         +'<table style="border-collapse:collapse;margin-top:4px">'
         +row('Descrição',descr||null)
         +row('Decreto/CR',decr||null)
+        +'</table>';
+    }
+
+    // ── Concessão de Lotes (IDE-DF/9) ─────────────────────────────────────
+    var featsC=(res[4].features||[]);
+    if(featsC.length){
+      if(!vazio) html+='<hr style="border-color:#444;margin:6px 0">';
+      vazio=false;
+      var c0=featsC[0].attributes;
+      var proc=[c0.processo,c0.processo_2].filter(Boolean).join(' / ');
+      html+='<b style="font-size:13px;color:#60c0ff">🔵 Concessão de Lotes</b>'
+        +'<table style="border-collapse:collapse;margin-top:4px">'
+        +row('CIU',c0.ciu)
+        +row('Endereço',c0.end_rest)
+        +row('Destinação',c0.destinacao)
+        +row('Tipo',c0.tipo_destinacao)
+        +row('Dimensão',c0.dimen_cessao)
+        +row('Processo',proc||null)
         +'</table>';
     }
 
