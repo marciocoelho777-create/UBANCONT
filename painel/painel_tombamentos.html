@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 13/10/2026 18:52 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 13/10/2026 19:23 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -437,14 +437,17 @@ map.on('click', function(e){
     +ptParam+'&outFields=tomb_descricao,tomb_decreto_cr';
   var urlConcessao='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/9/query'
     +ptParam+'&outFields=ciu,end_rest,destinacao,tipo_destinacao,dimen_cessao,processo,processo_2';
+  var urlIPTU='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Aplicacoes/CERTIDAO_IMOVEL/MapServer/0/query'
+    +ptParam+'&outFields=iptu_imovel,iptu_ciu,iptu_area_terr,iptu_icto_nat';
 
   var pLote    = temLote    ? fetch(urlLote).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pTerracap= fetch(urlTerracap).then(function(r){return r.json();}).catch(function(){return {features:[]}});
   var pLUOS    = temLUOS    ? fetch(urlLUOS).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pTombada = temTombada ? fetch(urlTombada).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
   var pConcessao= temConcessao? fetch(urlConcessao).then(function(r){return r.json();}).catch(function(){return {features:[]}}) : Promise.resolve({features:[]});
+  var pIPTU    = fetch(urlIPTU).then(function(r){return r.json();}).catch(function(){return {features:[]}});
 
-  Promise.all([pLote, pTerracap, pLUOS, pTombada, pConcessao]).then(function(res){
+  Promise.all([pLote, pTerracap, pLUOS, pTombada, pConcessao, pIPTU]).then(function(res){
     var html='<div style="font-family:monospace;font-size:12px">';
     var vazio=true;
     var areaTerracap=null, areaLUOS=null, areaLote=null;
@@ -559,10 +562,21 @@ map.on('click', function(e){
         +'</table>';
     }
 
-    // ── Comparação de Áreas (SISGEPAT × IDE-DF × LUOS × Terracap) ─────────
+    // ── IPTU — área do terreno ─────────────────────────────────────────────
+    var areaIPTU=null;
+    var featsIPTU=(res[5].features||[]);
+    if(featsIPTU.length){
+      // prefere o registro cujo iptu_ciu bate com o lote IDE-DF
+      var ciu=featsL.length?featsL[0].attributes.pu_ciu:null;
+      var iptuMatch=ciu?featsIPTU.filter(function(f){return f.attributes.iptu_ciu===ciu;}):[];
+      var iptuRec=(iptuMatch.length?iptuMatch[0]:featsIPTU[0]).attributes;
+      areaIPTU=iptuRec.iptu_area_terr||null;
+    }
+
+    // ── Comparação de Áreas (SISGEPAT × IDE-DF × LUOS × Terracap × IPTU) ─
     var prox=tombProximo(lat,lon,150);
     var spatm2=prox&&prox.f.mt>0&&!prox.f.mtfi&&!prox.f.mtha?prox.f.mt:null;
-    var nAreas=[spatm2,areaLote,areaLUOS,areaTerracap].filter(Boolean).length;
+    var nAreas=[spatm2,areaLote,areaLUOS,areaTerracap,areaIPTU].filter(Boolean).length;
     if(nAreas>=2){
       if(!vazio) html+='<hr style="border-color:#444;margin:6px 0">';
       var refArea=spatm2||areaLote||areaTerracap||areaLUOS;
@@ -584,6 +598,7 @@ map.on('click', function(e){
         +cRow('IDE-DF geometria',areaLote)
         +cRow('LUOS proj.',areaLUOS)
         +cRow('Terracap NR_AREA',areaTerracap)
+        +cRow('IPTU área terr.',areaIPTU)
         +'</table>'
         +'<div style="font-size:9px;color:#4a6a4a;margin-top:2px">'
         +'<span style="color:#4caf50">■</span> ≤5%&nbsp;'
