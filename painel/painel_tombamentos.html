@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 13/10/2026 20:17 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 13/10/2026 20:28 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -392,7 +392,7 @@ _tgModal.innerHTML = '<div style="background:#16213e;border:1px solid #2a4a7f;bo
   +'<div id="tg-err" style="font-size:11px;color:#ef5350;min-height:14px;margin-bottom:8px"></div>'
   +'<div style="display:flex;gap:8px">'
   +'<button onclick="tgLogin()" style="flex:1;background:#0f3460;color:#e2b96a;border:1px solid #e2b96a;border-radius:4px;padding:6px;font-size:12px;cursor:pointer">Entrar</button>'
-  +'<button onclick="document.getElementById('tg-modal').style.display='none'" style="flex:1;background:#0f3460;color:#9ab;border:1px solid #2a4a7f;border-radius:4px;padding:6px;font-size:12px;cursor:pointer">Cancelar</button>'
+  +'<button onclick="_closeTgModal()" style="flex:1;background:#0f3460;color:#9ab;border:1px solid #2a4a7f;border-radius:4px;padding:6px;font-size:12px;cursor:pointer">Cancelar</button>'
   +'</div>'
   +'</div>';
 document.body.appendChild(_tgModal);
@@ -419,12 +419,14 @@ function tgLogin(){
 }
 
 document.getElementById('tg-pass').addEventListener('keydown',function(e){if(e.key==='Enter')tgLogin();});
+function _openTgModal(){document.getElementById('tg-modal').style.display='flex';}
+function _closeTgModal(){document.getElementById('tg-modal').style.display='none';}
 
 var TgControl = L.Control.extend({
   options:{position:'bottomright'},
   onAdd:function(){
     var div=L.DomUtil.create('div');
-    div.innerHTML='<button id="tg-btn" onclick="document.getElementById('tg-modal').style.display='flex'" '
+    div.innerHTML='<button id="tg-btn" onclick="_openTgModal()" '
       +'style="background:#16213e;color:#9ab;border:1px solid #2a4a7f;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:monospace">🔐 TerraGeo</button>';
     L.DomEvent.disableClickPropagation(div);
     return div;
