@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 14/10/2026 09:54 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 14/10/2026 14:27 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -380,16 +380,7 @@ L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
 // ── TerraGeo login ────────────────────────────────────────────────────────────
 var _tgToken = null;
 (function(){
-  try{
-    var _saved=localStorage.getItem('tg_token');
-    if(_saved){
-      _tgToken=_saved;
-      window.addEventListener('load',function(){
-        var btn=document.getElementById('tg-btn');
-        if(btn){btn.textContent='✅ TerraGeo';btn.style.color='#4caf50';btn.style.borderColor='#4caf50';}
-      });
-    }
-  }catch(e){}
+  try{var s=localStorage.getItem('tg_token');if(s)_tgToken=s;}catch(e){}
 })();
 
 var _tgModal = document.createElement('div');
@@ -434,9 +425,6 @@ function _tgActivate(tok){
   _tgToken=tok;
   try{localStorage.setItem('tg_token',tok);}catch(e){}
   _closeTgModal();
-  document.getElementById('tg-btn').textContent='✅ TerraGeo';
-  document.getElementById('tg-btn').style.color='#4caf50';
-  document.getElementById('tg-btn').style.borderColor='#4caf50';
 }
 function tgLogin(){
   var u=document.getElementById('tg-user').value.trim();
@@ -461,17 +449,6 @@ document.getElementById('tg-pass').addEventListener('keydown',function(e){if(e.k
 function _openTgModal(){document.getElementById('tg-modal').style.display='flex';}
 function _closeTgModal(){document.getElementById('tg-modal').style.display='none';}
 
-var TgControl = L.Control.extend({
-  options:{position:'bottomright'},
-  onAdd:function(){
-    var div=L.DomUtil.create('div');
-    div.innerHTML='<button id="tg-btn" onclick="_openTgModal()" '
-      +'style="background:#16213e;color:#9ab;border:1px solid #2a4a7f;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:monospace">🔐 TerraGeo</button>';
-    L.DomEvent.disableClickPropagation(div);
-    return div;
-  }
-});
-new TgControl().addTo(map);
 
 // ── clique no WMS de lotes ────────────────────────────────────────────────────
 var _lotePopup = L.popup({maxWidth:320});
@@ -864,8 +841,12 @@ function buildMarkers(){
     m.bindPopup(function(){return mkPopup(f);},{maxWidth:300,minWidth:240});
     m.on('click',function(){selecionarLista(f.tomb);});
     m.on('popupopen',function(ev){
-      if(!_tgToken) return;
       var pop=ev.popup;
+      if(!_tgToken){
+        pop.setContent(mkPopup(f)+'<div style="margin-top:6px;font-size:10px;color:#678;text-align:center">'
+          +'<a href="#" onclick="event.preventDefault();_openTgModal()" style="color:#9ab;text-decoration:none">🔐 Configurar TerraGeo</a></div>');
+        pop.update(); return;
+      }
       var lat=f.lat, lon=f.lon;
       var _tb='https://terrageo2.terracap.df.gov.br/arcgis/rest/services/';
       var ptP='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=false&f=json&token='+_tgToken;
@@ -892,6 +873,9 @@ function buildMarkers(){
             +rv('Fazenda',tf.fazenda)+rv('Situação',tf.sit_fundiaria)
             +(tf.area_ha!=null?rv('Área',tf.area_ha.toLocaleString('pt-BR',{maximumFractionDigits:4})+' ha'):'');
         }
+        var err=(rs[0].error||rs[1].error);
+        if(!gh&&err){ gh='<div style="margin-top:6px;font-size:10px;color:#678;text-align:center">'
+          +'<a href="#" onclick="event.preventDefault();_tgToken=null;try{localStorage.removeItem('tg_token')}catch(e){};_openTgModal()" style="color:#ef5350;text-decoration:none">🔐 Token TerraGeo expirado</a></div>'; }
         if(gh){ pop.setContent(mkPopup(f)+gh); pop.update(); }
       });
     });
