@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 14/10/2026 09:30 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 14/10/2026 09:54 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -379,6 +379,18 @@ L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
 
 // ── TerraGeo login ────────────────────────────────────────────────────────────
 var _tgToken = null;
+(function(){
+  try{
+    var _saved=localStorage.getItem('tg_token');
+    if(_saved){
+      _tgToken=_saved;
+      window.addEventListener('load',function(){
+        var btn=document.getElementById('tg-btn');
+        if(btn){btn.textContent='✅ TerraGeo';btn.style.color='#4caf50';btn.style.borderColor='#4caf50';}
+      });
+    }
+  }catch(e){}
+})();
 
 var _tgModal = document.createElement('div');
 _tgModal.id = 'tg-modal';
@@ -420,6 +432,7 @@ function _tgTab(i){
 }
 function _tgActivate(tok){
   _tgToken=tok;
+  try{localStorage.setItem('tg_token',tok);}catch(e){}
   _closeTgModal();
   document.getElementById('tg-btn').textContent='✅ TerraGeo';
   document.getElementById('tg-btn').style.color='#4caf50';
