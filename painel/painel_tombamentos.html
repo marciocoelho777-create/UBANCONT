@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 14/10/2026 14:27 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
+    <div class="sub">Gerado em 14/10/2026 17:04 &nbsp;|&nbsp; 6,301 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,11 bi</div>
   </div>
 </div>
 <div id="main">
@@ -448,6 +448,7 @@ function tgUseToken(){
 document.getElementById('tg-pass').addEventListener('keydown',function(e){if(e.key==='Enter')tgLogin();});
 function _openTgModal(){document.getElementById('tg-modal').style.display='flex';}
 function _closeTgModal(){document.getElementById('tg-modal').style.display='none';}
+function _tgExpired(){_tgToken=null;try{localStorage.removeItem('tg_token');}catch(e){}_openTgModal();}
 
 
 // ── clique no WMS de lotes ────────────────────────────────────────────────────
@@ -875,7 +876,7 @@ function buildMarkers(){
         }
         var err=(rs[0].error||rs[1].error);
         if(!gh&&err){ gh='<div style="margin-top:6px;font-size:10px;color:#678;text-align:center">'
-          +'<a href="#" onclick="event.preventDefault();_tgToken=null;try{localStorage.removeItem('tg_token')}catch(e){};_openTgModal()" style="color:#ef5350;text-decoration:none">🔐 Token TerraGeo expirado</a></div>'; }
+          +'<a href="#" onclick="event.preventDefault();_tgExpired()" style="color:#ef5350;text-decoration:none">🔐 Token TerraGeo expirado</a></div>'; }
         if(gh){ pop.setContent(mkPopup(f)+gh); pop.update(); }
       });
     });
@@ -1027,4 +1028,3 @@ document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
 </script>
 </body>
 </html>
-<!-- redeploy: 2026-10-14 16:50 -->
