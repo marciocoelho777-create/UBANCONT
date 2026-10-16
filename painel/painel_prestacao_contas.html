@@ -43,6 +43,12 @@ input[type=search]{flex:1 1 220px;min-width:0}
 .botao{font:inherit;font-size:13px;padding:7px 12px;cursor:pointer;color:var(--ink);
 background:var(--surface);border:1px solid var(--line-forte);border-radius:7px;flex:none}
 .botao:hover{background:var(--surface-2)}
+/* o botão aceso usa a mesma cor do "ainda de 2025", para o olho ligar as
+   duas coisas sem precisar ler */
+.botao[aria-pressed="true"]{background:var(--trabalhando);border-color:var(--trabalhando);
+color:#1a1205;font-weight:600}
+.botao[aria-pressed="true"]:hover{filter:brightness(1.06)}
+li.tab-ok[hidden]{display:none}
 .recado{max-width:1180px;margin:12px auto 0;padding:0 16px;font-size:12px;color:var(--muted)}
 main{max-width:1180px;margin-inline:auto;padding:14px 16px 48px}
 .anexo,details.no{background:var(--surface);border:1px solid var(--line);border-radius:10px;
@@ -168,6 +174,7 @@ footer{max-width:1180px;margin-inline:auto;padding:0 16px 40px;color:var(--muted
 
 <div class="ferr" id="ferr-mapa" hidden>
   <input type="search" id="busca-mapa" placeholder="Filtrar por arquivo, pasta ou anexo…" aria-label="Filtrar o mapa">
+  <button type="button" class="botao" id="so-pendentes" aria-pressed="false">Só tabelas pendentes</button>
   <button type="button" class="botao" id="abrir-tudo">Expandir tudo</button>
   <button type="button" class="botao" id="fechar-tudo">Retrair tudo</button>
 </div>
@@ -342,7 +349,8 @@ function linhaTabelas(f){
   d.appendChild(s);
   var ul = el("ul", "tabs");
   f.tabelas.forEach(function(t){
-    var li = el("li");
+    var pend = t.fonte === "docx2025";
+    var li = el("li", pend ? "tab-pend" : "tab-ok");
     li.appendChild(el("b", "", "{{TABELA:"+t.m+"}}"));
     if (t.fonte === "xlsx")
       li.appendChild(document.createTextNode(" aba "+t.aba+" de "+t.de.split("/").pop()));
@@ -382,6 +390,8 @@ function desenharMapa(){
       p.arquivos.forEach(function(f){
         var li = el("li");
         li.dataset.busca = (f.n+" "+p.t+" "+a.t+" "+a.id).toLowerCase();
+        li.dataset.pend = f.tabelas.some(function(t){
+          return t.fonte === "docx2025"; }) ? "1" : "0";
         var linha = el("div", "linha-arq");
         linha.appendChild(el("span", "nome-arq", f.n));
         linha.appendChild(el("span", "chip", f.fm));
@@ -403,29 +413,46 @@ function desenharMapa(){
   alvo.appendChild(nada);
 }
 
+function soPendentes(){
+  return document.getElementById("so-pendentes")
+    .getAttribute("aria-pressed") === "true";
+}
+
 function filtrarMapa(){
   var q = document.getElementById("busca-mapa").value.trim().toLowerCase();
-  var achou = false;
+  var pend = soPendentes(), achou = false;
   Array.prototype.forEach.call(document.querySelectorAll("details.anexo-mapa"), function(d){
     var naoAnexo = q && d.dataset.busca.indexOf(q) < 0;
-    var algum = !q;
+    /* com o botão aceso, casar o nome do anexo não basta: o que interessa
+       é o arquivo que ainda tem tabela de 2025 */
+    var algum = !q && !pend;
     Array.prototype.forEach.call(d.querySelectorAll("li[data-busca]"), function(li){
       var ok = !q || !naoAnexo || li.dataset.busca.indexOf(q) >= 0;
+      if (pend && li.dataset.pend !== "1") ok = false;
       li.hidden = !ok;
       if (ok) algum = true;
+      /* dentro do arquivo, esconder as tabelas que já vieram de 2026 */
+      Array.prototype.forEach.call(li.querySelectorAll("li.tab-ok"),
+        function(t){ t.hidden = pend; });
+      var det = li.querySelector("details.tab");
+      if (det && ok && pend) det.open = true;
     });
-    if (q && !naoAnexo) algum = true;
+    if (q && !naoAnexo && !pend) algum = true;
     d.hidden = !algum;
     Array.prototype.forEach.call(d.querySelectorAll("details.pasta"), function(dp){
       var vis = Array.prototype.some.call(dp.querySelectorAll("li[data-busca]"),
         function(li){ return !li.hidden; });
-      dp.hidden = q ? !vis : false;
-      if (q) dp.open = vis;
+      dp.hidden = (q || pend) ? !vis : false;
+      if (q || pend) dp.open = vis;
     });
-    if (q && algum) d.open = true;
+    if ((q || pend) && algum) d.open = true;
     if (algum) achou = true;
   });
-  document.getElementById("mapa-vazio").hidden = achou;
+  var vazio = document.getElementById("mapa-vazio");
+  vazio.textContent = pend
+    ? "Nenhuma tabela pendente — todas já vêm de 2026."
+    : "Nenhum arquivo corresponde ao filtro.";
+  vazio.hidden = achou;
 }
 
 function abrirTudo(abrir){
@@ -458,10 +485,32 @@ verAba("situacao");
 Array.prototype.forEach.call(document.querySelectorAll(".aba[data-v]"), function(b){
   b.addEventListener("click", function(){ verAba(b.dataset.v); }); });
 document.getElementById("busca-mapa").addEventListener("input", filtrarMapa);
+(function(){
+  /* o número no botão sai do próprio mapa, não de um total fixo: no dia em
+     que a última tabela virar de 2026 o botão zera sozinho */
+  var tab = 0, arq = 0;
+  MAPA.anexos.forEach(function(a){ a.pastas.forEach(function(p){
+    p.arquivos.forEach(function(f){
+      var n = f.tabelas.filter(function(t){ return t.fonte === "docx2025"; }).length;
+      if (n){ tab += n; arq += 1; }
+    });
+  }); });
+  var b = document.getElementById("so-pendentes");
+  b.textContent = tab ? "Só tabelas pendentes (" + tab + ")"
+                      : "Nenhuma tabela pendente";
+  b.disabled = !tab;
+  b.title = tab ? tab + " tabela(s) ainda do documento de 2025, em "
+                  + arq + " arquivo(s)" : "";
+  b.addEventListener("click", function(){
+    var on = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", on ? "false" : "true");
+    filtrarMapa();
+  });
+})();
 document.getElementById("abrir-tudo").addEventListener("click", function(){ abrirTudo(true); });
 document.getElementById("fechar-tudo").addEventListener("click", function(){ abrirTudo(false); });
 document.getElementById("rodape").textContent =
   "Catálogo montado a partir da IN TCDF nº 1/2016 · situação lida em "+SNAP.lido_em
-  +" · arquivos levantados em "+MAPA.gerado+" · página gerada em 16/10/2026 05:02";
+  +" · arquivos levantados em "+MAPA.gerado+" · página gerada em 16/10/2026 14:25";
 </script>
 </body></html>
