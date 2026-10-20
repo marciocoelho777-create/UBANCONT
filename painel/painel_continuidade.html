@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Continuidade entre Exercícios</title>
+<style>
+:root{--bg:#0a1020;--s1:#111a2e;--s2:#16213a;--bd:#223css;--bd:#22304d;
+  --t1:#dce6f7;--t2:#8aa0c4;--t3:#5b6f94;--ok:#4ade80;--err:#f87171;--inf:#93c5fd;--wrn:#fbba47;
+  --fn:'Segoe UI',system-ui,sans-serif;--fm:Consolas,'Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5}
+.hd{background:#0d1b3e;padding:16px 24px;border-bottom:1px solid var(--bd)}
+.hd h1{font-size:18px;font-weight:600}
+.hd p{font-size:12.5px;color:var(--t2);margin-top:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 56px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;border-top:3px solid var(--bd)}
+.kpi.ok{border-top-color:var(--ok)} .kpi.err{border-top-color:var(--err)}
+.kpi.inf{border-top-color:var(--inf)} .kpi.wrn{border-top-color:var(--wrn)}
+.kpi.wrn .kpi-n{color:var(--wrn)} section.wrn{border-left:3px solid var(--wrn)}
+.kpi-n{font-size:22px;font-weight:700;font-family:var(--fm)}
+.kpi.ok .kpi-n{color:var(--ok)} .kpi.err .kpi-n{color:var(--err)} .kpi.inf .kpi-n{color:var(--inf)}
+.kpi-l{font-size:12px;color:var(--t1);margin-top:2px}
+.kpi-s{font-size:11px;color:var(--t3);margin-top:2px}
+section{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+h2{font-size:15px;margin-bottom:10px}
+.meca{font-size:11px;color:var(--t3);font-weight:400;text-transform:uppercase;letter-spacing:.05em;margin-left:6px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th{text-align:left;padding:7px 9px;background:var(--s2);color:var(--t2);font-size:11px;
+   text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--bd)}
+td{padding:6px 9px;border-bottom:1px solid var(--bd);vertical-align:top}
+.n{text-align:right;font-family:var(--fm);white-space:nowrap}
+.dif{color:var(--err);font-weight:700}
+.oc{color:var(--t3);font-size:11px}
+.obs{font-size:12.5px;color:var(--t2);margin:6px 0;line-height:1.55}
+.ok-msg{color:var(--ok);font-size:12.5px}
+footer{color:var(--t3);font-size:11.5px;margin-top:24px;line-height:1.7;
+  border-top:1px solid var(--bd);padding-top:14px}
+footer ul{margin:6px 0 0 18px}
+@media(max-width:640px){.wrap{padding:14px 12px 40px}td,th{padding:5px 6px}}
+</style></head><body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+
+<div class="hd">
+  <h1>Continuidade entre Exercícios — 2026 × 2025</h1>
+  <p>Coluna "Exercício Anterior" dos demonstrativos de 2026
+     (mês de referência 10) confrontada com a coluna "Exercício Atual"
+     dos demonstrativos de 2025 (encerramento).
+     Fonte: PDFs oficiais da pasta 13 (PSIAG550) — sem Oracle.
+     Gerado em 19/10/2026 18:53.</p>
+</div>
+<div class="wrap">
+  <div class="kpis"><div class="kpi ok"><div class="kpi-n">BP</div><div class="kpi-l">sem quebra</div><div class="kpi-s">149 linha(s) conferida(s)</div></div><div class="kpi err"><div class="kpi-n">DMPL</div><div class="kpi-l">2 divergência(s)</div><div class="kpi-s">9 linha(s) conferida(s)</div></div><div class="kpi wrn"><div class="kpi-n">BF · DVP · DFC</div><div class="kpi-l">a verificar</div><div class="kpi-s">0 linha(s) conferida(s)</div></div><div class="kpi inf"><div class="kpi-n">BO</div><div class="kpi-l">não aplicável</div><div class="kpi-s">0 linha(s) conferida(s)</div></div></div>
+  <section><h2>BP — Balanço Patrimonial <span class="meca">duas colunas</span></h2><p class="ok-msg">✔ Todas as linhas conferidas batem ao centavo entre os dois exercícios.</p><p class="obs"><strong>Linhas não pareadas</strong> — o rótulo não encontrou par pela chave usada (lado do bloco + seção + ocorrência). Quase sempre ele EXISTE nos dois exercícios e só não pareou porque o PDF quebrou a linha em outro ponto: é limite do pareamento, não afirmação de que a linha sumiu. Não foram conferidas:<br><em>só em 2026:</em> Caixa e Equivalentes de Caixa; Obrig. Trab.,Prev. e Assist. a Pagar a Curto; Créditos a Curto Prazo; Empréstimos e Financiamentos a Curto Prazo; Demais Créditos e Valores a Curto Prazo; Fornecedores e Contas a Pagar a Curto Prazo; Investimentos e Aplic. Temporárias a Curto; Estoques; VPD Pagas Antecipadamente; Provisões a Curto Prazo; Demais Obrigações a Curto Prazo; REALIZÁVEL A LONGO PRAZO; INVESTIMENTOS; Obrig. Trab., Previd. e Assist. a Pagar a LP; IMOBILIZADO; Empréstimos e Financiamentos a Longo Prazo; INTANGÍVEL; Provisões a Longo Prazo; Resultado Diferido; Reservas de Capital; Ajustes de Avaliação Patrimonial; Reservas de Lucros; Demais Reservas; Resultado Acumulado; ATIVO ( I ); PASSIVO ( II ); Ativo Financeiro; Passivo Financeiro; Ativo Permanente; Passivo Permanente; ATOS POTENCIAIS ATIVOS; ATOS POTENCIAIS PASSIVOS; Garantias e Contra Garantias Recebidas; Garantias e Contra Garantias Concedidas; Direitos Conveniados e Outros Instr; Obrigações Contratuais; Outros Atos Potenciais Ativos; Outros Atos Potenciais Passivos; 1002 Transferências do FUNDEB - Impostos e Transferências de Impostos - Recursos do Exercício Corrente; 1003 Recursos Vinculados ao Fundo de Combate e Erradicação da Pobreza - Recursos do Exercício Corrente<br><em>só em 2025:</em> Caixa e Equivalentes de Caixa 000001; Obrig. Trab.,Prev. e Assist. a Pagar a Curto Prazo 000010; Créditos a Curto Prazo 000002; Empréstimos e Financiamentos a Curto Prazo 000011; Demais Créditos e Valores a Curto Prazo 000003; Fornecedores e Contas a Pagar a Curto Prazo 000013; Investimentos e Aplic. Temporárias a Curto Prazo 000004; Estoques 000005; VPD Pagas Antecipadamente 000006; Provisões a Curto Prazo 000014; Demais Obrigações a Curto Prazo 000015; REALIZÁVEL A LONGO PRAZO 000007; INVESTIMENTOS 000008; Obrig. Trab., Previd. e Assist. a Pagar a LP 000026; IMOBILIZADO 000023; Empréstimos e Financiamentos a Longo Prazo 000012; INTANGÍVEL 000009; Provisões a Longo Prazo 000016; Reservas de Capital 000017; Ajustes de Avaliação Patrimonial 000018; Reservas de Lucros 000019; Demais Reservas 000020; Resultado Acumulado 000021; ATIVO ( I ) 000025; PASSIVO ( II ) 000025; Ativo Financeiro 000022; Passivo Financeiro 000022; Ativo Permanente 000024; Passivo Permanente 000024; ATOS POTENCIAIS ATIVOS; ATOS POTENCIAIS PASSIVOS; Garantias e Contra Garantias Recebidas; Garantias e Contra Garantias Concedidas; Direitos Conveniados e Outros Instr. Congêneres; Obrigações Contratuais; Outros Atos Potenciais Ativos; Outros Atos Potenciais Passivos; 1380 Transferências Fundo a Fundo de Recursos do SUS provenientes do Governo Federal - Bloco de Manutenção das; 1381 Transferências Fundo a Fundo de Recursos do SUS provenientes do Governo Federal - Bloco de Estruturação da; 1382 Transferências Fundo a Fundo de Recursos do SUS provenientes do Governo Federal - Bloco de Manutenção das</p></section><section><h2>DMPL — Demonstração das Mutações do Patrimônio Líquido <span class="meca">saldos iniciais × saldos finais</span></h2><p class="obs">O TOTAL do Patrimônio Líquido bate, mas a composição mudou: houve reclassificação ENTRE colunas do PL depois que o exercício anterior foi publicado. Some as diferenças: elas se anulam.</p><table><thead><tr><th>Linha do demonstrativo</th><th class="n">Saldos iniciais de 2026</th><th class="n">Saldos finais de 2025</th><th class="n">Diferença</th></tr></thead><tbody><tr><td>Patrimônio Social / Capital Social</td><td class="n">42.167.276.938,93</td><td class="n">42.168.600.879,18</td><td class="n dif">-1.323.940,25</td></tr><tr><td>Resultados Acumulados</td><td class="n">-167.835.984.634,59</td><td class="n">-167.837.308.574,84</td><td class="n dif">1.323.940,25</td></tr></tbody></table></section><section class="wrn"><h2>BF · DVP · DFC — Leituras a verificar (não são achados) <span class="meca">pendente de curadoria</span></h2><p class="obs">5 destas 7 leituras aparentam diferença, mas NENHUMA está confirmada. O texto extraído do PDF de 2025 e o de 2026 não têm o mesmo leiaute nestes três demonstrativos: o de 2025 cola o código do item no rótulo e quebra as linhas em outro ponto. Numa das tentativas, o rótulo &quot;VARIAÇÕES PATRIMONIAIS DIMINUTIVAS&quot; no PDF de 2026 casou com uma linha de cabeçalho quebrada e devolveu os números das AUMENTATIVAS — diferença de R$ 128 bilhões que não existe. Antes de tratar qualquer linha abaixo como divergência, abra os dois PDFs e confira se o rótulo é mesmo a linha certa nos dois.</p><table><thead><tr><th>Leitura</th><th class="n">No 2026</th><th class="n">No 2025</th><th class="n">Diferença aparente</th></tr></thead><tbody><tr><td>BF — total de ingressos do Balanço Financeiro</td><td class="n">116.661.812.747,13</td><td class="n">116.660.439.634,95</td><td class="n dif">1.373.112,18</td></tr><tr><td>BF — receita orçamentária do BF</td><td class="n">42.804.143.507,97</td><td class="n">42.804.143.507,97</td><td class="n ">0,00</td></tr><tr><td>DFC — ingressos do fluxo operacional <span class="oc">⟨ATIVIDADES OPERACIONAIS⟩</span></td><td class="n">107.421.666.473,03</td><td class="n">107.420.773.643,99</td><td class="n dif">892.829,04</td></tr><tr><td>DFC — desembolsos do fluxo operacional <span class="oc">⟨ATIVIDADES OPERACIONAIS⟩</span></td><td class="n">107.674.586.317,24</td><td class="n">107.679.052.147,01</td><td class="n dif">-4.465.829,77</td></tr><tr><td>DFC — ingressos do fluxo de investimento <span class="oc">⟨ATIVIDADES DE INVESTIMENTO⟩</span></td><td class="n">25.224.807.014,54</td><td class="n">16.464.505.006,95</td><td class="n dif">8.760.302.007,59</td></tr><tr><td>DFC — desembolsos do fluxo de investimento <span class="oc">⟨ATIVIDADES DE INVESTIMENTO⟩</span></td><td class="n">27.706.268.315,84</td><td class="n">18.940.582.008,68</td><td class="n dif">8.765.686.307,16</td></tr><tr><td>DVP — resultado patrimonial do exercício</td><td class="n">-53.672.984.228,98</td><td class="n">-53.672.984.228,98</td><td class="n ">0,00</td></tr></tbody></table></section><section><h2>BO — Balanço Orçamentário <span class="meca">não aplicável</span></h2><p class="obs">O Balanço Orçamentário não tem coluna de exercício anterior: o leiaute é Previsão Inicial / Previsão Atualizada / Receitas Realizadas / Saldo. Não há a mesma grandeza publicada nos dois exercícios para cruzar — a continuidade do BO teria de ser verificada contra os restos a pagar inscritos, que é outro controle.</p></section>
+  <footer>
+    <strong>Como ler.</strong> Os dois números de cada linha são a mesma
+    grandeza publicada duas vezes: o fechamento de 2025.
+    Divergência significa que o exercício anterior mudou depois de publicado
+    (lançamento retroativo, reclassificação) ou que um dos dois PDFs está
+    desatualizado. Tolerância: R$ 1,00.
+    <br><strong>PDFs lidos:</strong>
+    <ul><li><strong>BF</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\19-10\01 - BF   19-10.pdf</li><li><strong>BP</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\16-10\02 - BP   16-10.pdf</li><li><strong>DVP</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\19-10\03 - DVP   19-10.pdf</li><li><strong>BO</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\19-10\04 - BO   19-10.pdf</li><li><strong>DFC</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\19-10\05 - DFC   19-10.pdf</li><li><strong>DMPL</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2026\10 - Outubro\19-10\06 - DMPL   19-10.pdf</li><li><strong>BF (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaBalancoFinanceiro 13.pdf</li><li><strong>BP (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaBalancoPatrimonial 13.pdf</li><li><strong>DVP (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaVariacaoPatrimonial 13.pdf</li><li><strong>BO (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaBalancoOrcamentario 13.pdf</li><li><strong>DFC (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaFluxoCaixa 13.pdf</li><li><strong>DMPL (2025)</strong>: C:\Users\marcio.coelho\Desktop\balanço 2026 gemini arquivos\13 - DEMONSTRATIVOS CONTÁBEIS\2025\ListaDMPL 13.pdf</li></ul>
+    Gerado por <code>continuidade_exercicios.py</code>.
+  </footer>
+</div></body></html>
