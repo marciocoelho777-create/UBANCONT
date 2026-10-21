@@ -619,6 +619,10 @@ footer {
     <div class="card-hd">
       Mudanças no ITEMBALANCO — últimos 15 dias
       <span id="mud-badge"></span>
+      <select id="mud-demo" aria-label="Filtrar por demonstrativo"
+              style="margin-left:auto;font:inherit;font-size:12px;padding:4px 8px;
+                     border-radius:6px;border:1px solid var(--bd);
+                     background:var(--s2);color:var(--t1)"></select>
     </div>
     <div class="tbl-wrap" id="mud-wrap">
       <table id="tbl-mudancas">
@@ -2014,24 +2018,35 @@ function renderRun(data){
     conta_removida:   {txt: 'Conta removida',     cls: 'b-wrn'},
     nome_alterado:    {txt: 'Nome alterado',       cls: 'b-wrn'},
   };
+  const mudSel = document.getElementById('mud-demo');
+  const mudDemo = m => m.demo || '?';
+
+  function mudFiltradas(){
+    const d = mudSel ? mudSel.value : '';
+    return d ? mudData.filter(m => mudDemo(m) === d) : mudData;
+  }
+
+  function pintaMudancas(){
+    const dados = mudFiltradas();
+    const filtrando = !!(mudSel && mudSel.value);
   if(mudBadge){
-    if(mudData.length){
-      const nNov = mudData.filter(m=>m.tipo_mud==='item_novo').length;
-      const nRem = mudData.filter(m=>m.tipo_mud==='item_removido').length;
-      const nOut = mudData.length - nNov - nRem;
+    if(dados.length){
+      const nNov = dados.filter(m=>m.tipo_mud==='item_novo').length;
+      const nRem = dados.filter(m=>m.tipo_mud==='item_removido').length;
+      const nOut = dados.length - nNov - nRem;
       let partes = [];
       if(nNov) partes.push(`${nNov} novo${nNov>1?'s':''}`);
       if(nRem) partes.push(`${nRem} removido${nRem>1?'s':''}`);
-      if(nOut) partes.push(`${nOut} alteração${nOut>1?'ões':''}`);
-      mudBadge.innerHTML=`<span class="badge b-wrn">${mudData.length} mudança${mudData.length>1?'s':''}: ${partes.join(', ')}</span>`;
+      if(nOut) partes.push(`${nOut} ${nOut>1?'alterações':'alteração'}`);
+      mudBadge.innerHTML=`<span class="badge b-wrn">${dados.length} mudança${dados.length>1?'s':''}: ${partes.join(', ')}${filtrando?` em ${mudSel.value}`:''}</span>`;
     } else {
-      mudBadge.innerHTML=`<span class="badge b-ok">sem mudanças</span>`;
+      mudBadge.innerHTML=`<span class="badge b-ok">sem mudanças${filtrando?` em ${mudSel.value}`:''}</span>`;
     }
   }
   if(mudTbody){
-    if(mudData.length){
+    if(dados.length){
       if(mudOk) mudOk.style.display='none';
-      mudTbody.innerHTML=mudData.map(m=>{
+      mudTbody.innerHTML=dados.map(m=>{
         const lbl = MUD_LABEL[m.tipo_mud]||{txt:m.tipo_mud,cls:'b-muted'};
         const nomeCell = m.tipo_mud==='nome_alterado'
           ? `<span style="color:var(--err);text-decoration:line-through;font-size:11px">${(m.nome_anterior||'').replace(/</g,'&lt;')}</span><br>${(m.noitembalanco||'').replace(/</g,'&lt;')}`
@@ -2047,9 +2062,25 @@ function renderRun(data){
       }).join('');
     } else {
       mudTbody.innerHTML='';
-      if(mudOk) mudOk.style.display='';
+      if(mudOk){
+        mudOk.style.display='';
+        mudOk.textContent = filtrando
+          ? `✅ Nenhuma mudança em ${mudSel.value} nos últimos 15 dias`
+          : '✅ Nenhuma mudança detectada nos últimos 15 dias';
+      }
     }
   }
+  }
+
+  if(mudSel){
+    const demos = Array.from(new Set(mudData.map(mudDemo))).sort();
+    const n = d => mudData.filter(m => mudDemo(m) === d).length;
+    mudSel.innerHTML = `<option value="">Todos os demonstrativos (${mudData.length})</option>`
+      + demos.map(d => `<option value="${d}">${d} (${n(d)})</option>`).join('');
+    mudSel.disabled = !mudData.length;
+    mudSel.addEventListener('change', pintaMudancas);
+  }
+  pintaMudancas();
 
   /* Ortografia do ITEMBALANCO */
   const ortData = (typeof ORTOGRAFIA !== 'undefined') ? ORTOGRAFIA : [];
