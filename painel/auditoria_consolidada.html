@@ -130,7 +130,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
 <header class="hd">
   <div><div class="hd-title">Auditoria Consolidada — GDF</div>
   <div class="hd-sub" id="hd-comp">Outubro/2026 · Consolidado</div></div>
-  <div class="hd-sub" id="hd-gerado">Gerado em 23/10/2026 14:01:18</div>
+  <div class="hd-sub" id="hd-gerado">Gerado em 24/10/2026 04:45:50</div>
 </header>
 <main class="wrap">
   <nav class="nav"><a href="#dem-bf">BF</a><a href="#dem-bo">BO</a><a href="#dem-bp">BP</a><a href="#dem-dfc">DFC</a><a href="#dem-dmpl">DMPL</a><a href="#dem-dvp">DVP</a><a href="#dem-bal">BAL</a><a href="#cruzamentos">CRUZAMENTOS</a></nav>
@@ -170,6 +170,328 @@ const CHIP_CLASS = {"OK": "c-ok", "ERRO": "c-err", "ALERTA": "c-alr", "INFO": "c
 const ICONES = {"OK": "✔", "ERRO": "✘", "ALERTA": "⚠", "INFO": "ℹ"};
 const MESES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 var HISTORICO_FULL = [
+  {
+    "gerado_em": "2026-10-24T04:45:50",
+    "mes": 10,
+    "ano": 2026,
+    "totais": {
+      "OK": 66,
+      "ALERTA": 2,
+      "ERRO": 0,
+      "INFO": 12
+    },
+    "resumo": [
+      {
+        "chave": "bf",
+        "rotulo": "Balanço Financeiro",
+        "ausente": false,
+        "OK": 3,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bo",
+        "rotulo": "Balanço Orçamentário",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 2,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "bp",
+        "rotulo": "Balanço Patrimonial",
+        "ausente": false,
+        "OK": 14,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dfc",
+        "rotulo": "Fluxo de Caixa (DFC)",
+        "ausente": false,
+        "OK": 0,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "dmpl",
+        "rotulo": "Mutações do PL (DMPL)",
+        "ausente": false,
+        "OK": 10,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "dvp",
+        "rotulo": "Variações Patrimoniais (DVP)",
+        "ausente": false,
+        "OK": 4,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 1
+      },
+      {
+        "chave": "bal",
+        "rotulo": "Balancete Contábil",
+        "ausente": false,
+        "OK": 1,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 0
+      },
+      {
+        "chave": "cruzamentos",
+        "rotulo": "Cruzamentos",
+        "ausente": false,
+        "OK": 30,
+        "ALERTA": 0,
+        "ERRO": 0,
+        "INFO": 9
+      }
+    ],
+    "achados_x": [
+      {
+        "codigo": "X1a/X1b",
+        "status": "INFO",
+        "titulo": "Caixa Inicial/Final: BF vs DFC",
+        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
+      },
+      {
+        "codigo": "X2",
+        "status": "OK",
+        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
+        "detalhe": "Geração 1,118,915,526.96  Var.Caixa 1,118,915,526.96"
+      },
+      {
+        "codigo": "X6",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: DMPL = DVP",
+        "detalhe": "DMPL -13,831,393,372.35  DVP -13,831,393,372.35"
+      },
+      {
+        "codigo": "R1a",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DVP(III)",
+        "detalhe": "BP -13,831,393,372.35  DVP -13,831,393,372.35"
+      },
+      {
+        "codigo": "R2",
+        "status": "OK",
+        "titulo": "Saldo Final DMPL = PL do BP",
+        "detalhe": "DMPL -145,340,781,736.56  BP -145,340,781,736.56"
+      },
+      {
+        "codigo": "R1b",
+        "status": "OK",
+        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
+        "detalhe": "BP -13,831,393,372.35  DMPL -13,831,393,372.35"
+      },
+      {
+        "codigo": "PL1",
+        "status": "OK",
+        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
+        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
+      },
+      {
+        "codigo": "PL2",
+        "status": "OK",
+        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
+        "detalhe": "BP 58,476,060.09  DMPL 58,476,060.09"
+      },
+      {
+        "codigo": "PL3",
+        "status": "OK",
+        "titulo": "Reservas de Capital: BP = DMPL",
+        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
+      },
+      {
+        "codigo": "PL4",
+        "status": "OK",
+        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
+        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
+      },
+      {
+        "codigo": "PL5",
+        "status": "OK",
+        "titulo": "Reservas de Lucros: BP = DMPL",
+        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
+      },
+      {
+        "codigo": "PL6",
+        "status": "OK",
+        "titulo": "Demais Reservas: BP = DMPL",
+        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
+      },
+      {
+        "codigo": "PL7",
+        "status": "OK",
+        "titulo": "Resultados Acumulados: BP = DMPL",
+        "detalhe": "BP -190,061,475,871.70  DMPL -190,061,475,871.70"
+      },
+      {
+        "codigo": "R4a",
+        "status": "OK",
+        "titulo": "Caixa: BP = DFC (Caixa Final)",
+        "detalhe": "BP 6,579,245,068.70  DFC 6,579,245,068.70"
+      },
+      {
+        "codigo": "R7",
+        "status": "OK",
+        "titulo": "Receita Realizada: BF = BO",
+        "detalhe": "BF 38,299,704,298.56  BO 38,299,704,298.56"
+      },
+      {
+        "codigo": "R8",
+        "status": "OK",
+        "titulo": "Despesa Paga: BF = BO",
+        "detalhe": "BF 32,607,244,299.43  BO 32,607,244,299.43"
+      },
+      {
+        "codigo": "R10a",
+        "status": "OK",
+        "titulo": "Pagamentos RPNP: BF = BO",
+        "detalhe": "BF 1,078,969,105.25  BO 1,078,969,105.25"
+      },
+      {
+        "codigo": "R10b",
+        "status": "OK",
+        "titulo": "Pagamentos RPP: BF = BO",
+        "detalhe": "BF 2,287,065,619.61  BO 2,287,065,619.61"
+      },
+      {
+        "codigo": "PEND-9a",
+        "status": "OK",
+        "titulo": "Inscrição RPNP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "PEND-9b",
+        "status": "OK",
+        "titulo": "Inscrição RPP no exercício: BF = BO",
+        "detalhe": "BF 0.00  BO 0.00"
+      },
+      {
+        "codigo": "X3",
+        "status": "INFO",
+        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
+        "detalhe": "BO 38,299,704,298.56  DVP(VPA) 116,068,045,329.34  Diferença -77,768,341,030.78 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "X4",
+        "status": "INFO",
+        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
+        "detalhe": "BO 33,122,753,713.80  DVP(VPD) 129,899,438,701.69  Diferença -96,776,684,987.89 — esperada (VPD inclui itens sem empenho)."
+      },
+      {
+        "codigo": "X5",
+        "status": "INFO",
+        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
+        "detalhe": "BO 0.00  DVP -13,831,393,372.35  Diferença 13,831,393,372.35 — esperada (regimes contábeis distintos)."
+      },
+      {
+        "codigo": "11a",
+        "status": "OK",
+        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
+        "detalhe": "BO 21,670,733,950.67  DFC 21,670,733,950.67"
+      },
+      {
+        "codigo": "11b",
+        "status": "OK",
+        "titulo": "Receita de Contribuições: BO = DFC",
+        "detalhe": "BO 4,904,030,604.96  DFC 4,904,030,604.96"
+      },
+      {
+        "codigo": "11c",
+        "status": "OK",
+        "titulo": "Receita Patrimonial: BO = DFC",
+        "detalhe": "BO 1,036,012,562.87  DFC 1,036,012,562.87"
+      },
+      {
+        "codigo": "11d",
+        "status": "OK",
+        "titulo": "Receita Agropecuária: BO = DFC",
+        "detalhe": "BO 495.00  DFC 495.00"
+      },
+      {
+        "codigo": "11e",
+        "status": "OK",
+        "titulo": "Receita Industrial: BO = DFC",
+        "detalhe": "BO 2,665,818.44  DFC 2,665,818.44"
+      },
+      {
+        "codigo": "11f",
+        "status": "OK",
+        "titulo": "Receita de Serviços: BO = DFC",
+        "detalhe": "BO 1,943,307,829.31  DFC 1,943,307,829.31"
+      },
+      {
+        "codigo": "11h",
+        "status": "OK",
+        "titulo": "Alienação de Bens: BO = DFC",
+        "detalhe": "BO 1,496,564,913.23  DFC 1,496,564,913.23"
+      },
+      {
+        "codigo": "11i",
+        "status": "OK",
+        "titulo": "Amortização de Empréstimos: BO = DFC",
+        "detalhe": "BO 19,049,970.44  DFC 19,049,970.44"
+      },
+      {
+        "codigo": "11j",
+        "status": "OK",
+        "titulo": "Operações de Crédito: BO = DFC",
+        "detalhe": "BO 113,339,064.25  DFC 113,339,064.25"
+      },
+      {
+        "codigo": "11g",
+        "status": "OK",
+        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
+        "detalhe": "BO 6,000,332,959.47  DFC 6,000,332,959.47"
+      },
+      {
+        "codigo": "12B",
+        "status": "OK",
+        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
+        "detalhe": "Variação 5,853,360,768.00  Créditos Adicionais 5,853,360,768.00"
+      },
+      {
+        "codigo": "13a",
+        "status": "INFO",
+        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
+        "detalhe": "(Ativo+VPD) 199,758,553,557.07  (Passivo+PL+VPA) 185,927,160,184.72  Diferença 13,831,393,372.35 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
+      },
+      {
+        "codigo": "PEND-5B",
+        "status": "INFO",
+        "titulo": "Passivo Anexo ajustado por RPNP",
+        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
+      },
+      {
+        "codigo": "PEND-6",
+        "status": "INFO",
+        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
+        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
+      },
+      {
+        "codigo": "PEND-12A",
+        "status": "INFO",
+        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
+        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
+      },
+      {
+        "codigo": "PEND-13b",
+        "status": "INFO",
+        "titulo": "Controles Aprovação = Controles Execução",
+        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
+      }
+    ],
+    "secoes_gz": "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"
+  },
   {
     "gerado_em": "2026-10-23T14:01:18",
     "mes": 10,
@@ -2743,8 +3065,7 @@ var HISTORICO_FULL = [
         "titulo": "Controles Aprovação = Controles Execução",
         "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
       }
-    ],
-    "secoes_gz": "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"
+    ]
   },
   {
     "gerado_em": "2026-10-14T05:09:14",
@@ -7534,327 +7855,6 @@ var HISTORICO_FULL = [
         "status": "INFO",
         "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
         "detalhe": "(Ativo+VPD) 195,077,977,239.23  (Passivo+PL+VPA) 180,021,148,734.71  Diferença 15,056,828,504.52 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
-      },
-      {
-        "codigo": "PEND-5B",
-        "status": "INFO",
-        "titulo": "Passivo Anexo ajustado por RPNP",
-        "detalhe": "Não implementado nesta versão — requer sub-contas do Passivo Circulante (RPNP a Liquidar x Crédito Empenhado a Liquidar) não confirmadas no plano de contas — ver nota acima."
-      },
-      {
-        "codigo": "PEND-6",
-        "status": "INFO",
-        "titulo": "AF-PF (Anexo p.2) = Superávit por Fonte (p.4)",
-        "detalhe": "Não implementado nesta versão — quadro de Superávit por Fonte exige cadastro de fontes de recursos não usado em nenhum módulo do projeto (bp.py já documenta isso) — é um anexo novo, não uma célula."
-      },
-      {
-        "codigo": "PEND-12A",
-        "status": "INFO",
-        "titulo": "Equação do Balanço Orçamentário (fórmula literal)",
-        "detalhe": "Não implementado nesta versão — a célula já existe no BO mas usa fórmula diferente do achado interno 'Equilíbrio Orçamentário (MCASP 2.1)' — expor as duas aqui contradiria a aba de Auditoria do BO."
-      },
-      {
-        "codigo": "PEND-13b",
-        "status": "INFO",
-        "titulo": "Controles Aprovação = Controles Execução",
-        "detalhe": "Não implementado nesta versão — exigiria uma identidade contas 7XX = 8XX que o próprio bp.py descarta (só 811/812 são confiáveis, 711/712 foi uma aproximação abandonada) — sem base para reproduzir."
-      }
-    ]
-  },
-  {
-    "gerado_em": "2026-10-02T16:37:54",
-    "mes": 9,
-    "ano": 2026,
-    "totais": {
-      "OK": 66,
-      "ALERTA": 2,
-      "ERRO": 0,
-      "INFO": 12
-    },
-    "resumo": [
-      {
-        "chave": "bf",
-        "rotulo": "Balanço Financeiro",
-        "ausente": false,
-        "OK": 3,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bo",
-        "rotulo": "Balanço Orçamentário",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 2,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "bp",
-        "rotulo": "Balanço Patrimonial",
-        "ausente": false,
-        "OK": 14,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dfc",
-        "rotulo": "Fluxo de Caixa (DFC)",
-        "ausente": false,
-        "OK": 0,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "dmpl",
-        "rotulo": "Mutações do PL (DMPL)",
-        "ausente": false,
-        "OK": 10,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "dvp",
-        "rotulo": "Variações Patrimoniais (DVP)",
-        "ausente": false,
-        "OK": 4,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 1
-      },
-      {
-        "chave": "bal",
-        "rotulo": "Balancete Contábil",
-        "ausente": false,
-        "OK": 1,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 0
-      },
-      {
-        "chave": "cruzamentos",
-        "rotulo": "Cruzamentos",
-        "ausente": false,
-        "OK": 30,
-        "ALERTA": 0,
-        "ERRO": 0,
-        "INFO": 9
-      }
-    ],
-    "achados_x": [
-      {
-        "codigo": "X1a/X1b",
-        "status": "INFO",
-        "titulo": "Caixa Inicial/Final: BF vs DFC",
-        "detalhe": "Não verificável com exatidão a partir do xlsx do BF — o relatório oficial não expõe uma linha única de Caixa 111XXXXXX (só o Saldo Anterior/Seguinte, que mistura outras contas). O BF já registra essa divergência internamente como achado BF-04."
-      },
-      {
-        "codigo": "X2",
-        "status": "OK",
-        "titulo": "DFC: Geração Líquida (I+II+III) = Var. Caixa",
-        "detalhe": "Geração 1,174,871,959.04  Var.Caixa 1,174,871,959.04"
-      },
-      {
-        "codigo": "X6",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: DMPL = DVP",
-        "detalhe": "DMPL -14,958,910,235.16  DVP -14,958,910,235.16"
-      },
-      {
-        "codigo": "R1a",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DVP(III)",
-        "detalhe": "BP -14,958,910,235.16  DVP -14,958,910,235.16"
-      },
-      {
-        "codigo": "R2",
-        "status": "OK",
-        "titulo": "Saldo Final DMPL = PL do BP",
-        "detalhe": "DMPL -146,681,178,101.09  BP -146,681,178,101.09"
-      },
-      {
-        "codigo": "R1b",
-        "status": "OK",
-        "titulo": "Resultado do Exercício: BP = DMPL(TOTAL)",
-        "detalhe": "BP -14,958,910,235.16  DMPL -14,958,910,235.16"
-      },
-      {
-        "codigo": "PL1",
-        "status": "OK",
-        "titulo": "Patrimônio Social e Capital Social: BP = DMPL",
-        "detalhe": "BP 42,265,528,129.69  DMPL 42,265,528,129.69"
-      },
-      {
-        "codigo": "PL2",
-        "status": "OK",
-        "titulo": "Adiantamento p/ Futuro Aumento de Capital (AFAC): BP = DMPL",
-        "detalhe": "BP 53,519,979.16  DMPL 53,519,979.16"
-      },
-      {
-        "codigo": "PL3",
-        "status": "OK",
-        "titulo": "Reservas de Capital: BP = DMPL",
-        "detalhe": "BP 11,961,938.59  DMPL 11,961,938.59"
-      },
-      {
-        "codigo": "PL4",
-        "status": "OK",
-        "titulo": "Ajustes de Avaliação Patrimonial: BP = DMPL",
-        "detalhe": "BP 584,159,394.90  DMPL 584,159,394.90"
-      },
-      {
-        "codigo": "PL5",
-        "status": "OK",
-        "titulo": "Reservas de Lucros: BP = DMPL",
-        "detalhe": "BP 19,180,972.75  DMPL 19,180,972.75"
-      },
-      {
-        "codigo": "PL6",
-        "status": "OK",
-        "titulo": "Demais Reservas: BP = DMPL",
-        "detalhe": "BP 1,781,387,639.12  DMPL 1,781,387,639.12"
-      },
-      {
-        "codigo": "PL7",
-        "status": "OK",
-        "titulo": "Resultados Acumulados: BP = DMPL",
-        "detalhe": "BP -191,396,916,155.30  DMPL -191,396,916,155.30"
-      },
-      {
-        "codigo": "R4a",
-        "status": "OK",
-        "titulo": "Caixa: BP = DFC (Caixa Final)",
-        "detalhe": "BP 6,635,201,500.78  DFC 6,635,201,500.78"
-      },
-      {
-        "codigo": "R7",
-        "status": "OK",
-        "titulo": "Receita Realizada: BF = BO",
-        "detalhe": "BF 34,994,303,214.03  BO 34,994,303,214.03"
-      },
-      {
-        "codigo": "R8",
-        "status": "OK",
-        "titulo": "Despesa Paga: BF = BO",
-        "detalhe": "BF 29,516,952,073.59  BO 29,516,952,073.59"
-      },
-      {
-        "codigo": "R10a",
-        "status": "OK",
-        "titulo": "Pagamentos RPNP: BF = BO",
-        "detalhe": "BF 1,078,761,104.92  BO 1,078,761,104.92"
-      },
-      {
-        "codigo": "R10b",
-        "status": "OK",
-        "titulo": "Pagamentos RPP: BF = BO",
-        "detalhe": "BF 2,286,952,675.56  BO 2,286,952,675.56"
-      },
-      {
-        "codigo": "PEND-9a",
-        "status": "OK",
-        "titulo": "Inscrição RPNP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "PEND-9b",
-        "status": "OK",
-        "titulo": "Inscrição RPP no exercício: BF = BO",
-        "detalhe": "BF 0.00  BO 0.00"
-      },
-      {
-        "codigo": "X3",
-        "status": "INFO",
-        "titulo": "Receita Realizada (BO) vs VPA Total (DVP)",
-        "detalhe": "BO 34,994,303,214.03  DVP(VPA) 110,287,939,575.57  Diferença -75,293,636,361.54 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "X4",
-        "status": "INFO",
-        "titulo": "Despesa Liquidada (BO) vs VPD Total (DVP)",
-        "detalhe": "BO 31,449,602,448.56  DVP(VPD) 125,246,849,810.73  Diferença -93,797,247,362.17 — esperada (VPD inclui itens sem empenho)."
-      },
-      {
-        "codigo": "X5",
-        "status": "INFO",
-        "titulo": "Resultado Orçamentário (BO) vs Resultado Patrimonial (DVP)",
-        "detalhe": "BO 0.00  DVP -14,958,910,235.16  Diferença 14,958,910,235.16 — esperada (regimes contábeis distintos)."
-      },
-      {
-        "codigo": "11a",
-        "status": "OK",
-        "titulo": "Impostos/Taxas/Contrib.Melhoria: BO = DFC",
-        "detalhe": "BO 19,943,757,677.73  DFC 19,943,757,677.73"
-      },
-      {
-        "codigo": "11b",
-        "status": "OK",
-        "titulo": "Receita de Contribuições: BO = DFC",
-        "detalhe": "BO 4,458,529,662.74  DFC 4,458,529,662.74"
-      },
-      {
-        "codigo": "11c",
-        "status": "OK",
-        "titulo": "Receita Patrimonial: BO = DFC",
-        "detalhe": "BO 991,316,665.18  DFC 991,316,665.18"
-      },
-      {
-        "codigo": "11d",
-        "status": "OK",
-        "titulo": "Receita Agropecuária: BO = DFC",
-        "detalhe": "BO 495.00  DFC 495.00"
-      },
-      {
-        "codigo": "11e",
-        "status": "OK",
-        "titulo": "Receita Industrial: BO = DFC",
-        "detalhe": "BO 2,504,201.60  DFC 2,504,201.60"
-      },
-      {
-        "codigo": "11f",
-        "status": "OK",
-        "titulo": "Receita de Serviços: BO = DFC",
-        "detalhe": "BO 1,808,130,446.66  DFC 1,808,130,446.66"
-      },
-      {
-        "codigo": "11h",
-        "status": "OK",
-        "titulo": "Alienação de Bens: BO = DFC",
-        "detalhe": "BO 1,049,241,281.87  DFC 1,049,241,281.87"
-      },
-      {
-        "codigo": "11i",
-        "status": "OK",
-        "titulo": "Amortização de Empréstimos: BO = DFC",
-        "detalhe": "BO 18,206,957.28  DFC 18,206,957.28"
-      },
-      {
-        "codigo": "11j",
-        "status": "OK",
-        "titulo": "Operações de Crédito: BO = DFC",
-        "detalhe": "BO 64,089,064.25  DFC 64,089,064.25"
-      },
-      {
-        "codigo": "11g",
-        "status": "OK",
-        "titulo": "Transf.Recebidas: BO(Correntes+Capital) = DFC",
-        "detalhe": "BO 5,621,380,324.62  DFC 5,621,380,324.62"
-      },
-      {
-        "codigo": "12B",
-        "status": "OK",
-        "titulo": "Variação da Dotação = Total Alterações (Créditos Adicionais)",
-        "detalhe": "Variação 5,007,057,352.00  Créditos Adicionais 5,007,057,352.00"
-      },
-      {
-        "codigo": "13a",
-        "status": "INFO",
-        "titulo": "Balancete: Ativo+VPD = Passivo+PL+VPA",
-        "detalhe": "(Ativo+VPD) 194,975,857,797.87  (Passivo+PL+VPA) 180,016,947,562.71  Diferença 14,958,910,235.16 — não avaliado como erro: o PL deste BP já inclui o Resultado do Exercício corrente, então esta identidade dupla-conta o período por construção (ver nota no código)."
       },
       {
         "codigo": "PEND-5B",
