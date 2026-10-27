@@ -144,7 +144,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 27/10/2026 17:02 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
+    <div class="sub">Gerado em 27/10/2026 17:10 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
   </div>
 </div>
 <div id="main">
@@ -1158,32 +1158,29 @@ function parseCoordenadas(txt){
 
 function irParaCoordenadas(lat,lon){
   if(_pinCoordenada){map.removeLayer(_pinCoordenada);_pinCoordenada=null;}
-  // procura tombamento mais próximo (haversine simplificado)
+  // Sempre coloca o pino exato
+  map.setView([lat,lon],18);
+  var svgPin='<svg width="24" height="32" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">'
+    +'<path d="M12 1C7.03 1 3 5.03 3 10c0 7 9 21 9 21s9-14 9-21c0-4.97-4.03-9-9-9z" fill="#ef5350" stroke="#fff" stroke-width="1.5"/>'
+    +'<circle cx="12" cy="10" r="3.5" fill="#fff"/>'
+    +'</svg>';
+  var ic=L.divIcon({className:'',iconSize:[24,32],iconAnchor:[12,32],html:svgPin});
+  _pinCoordenada=L.marker([lat,lon],{icon:ic})
+    .bindPopup('<b>Coordenada</b><br>'+lat.toFixed(6)+', '+lon.toFixed(6))
+    .addTo(map)
+    .openPopup();
+  // Se coincidir com algum tombamento (~30 m), abre o popup dele também
+  // 30 m ≈ 0.00027° → 0.00027²≈7.3e-8
   var melhor=null,dMin=Infinity;
   _DATA.forEach(function(f){
     if(!f.lat||!f.lon) return;
     var dx=f.lat-lat,dy=f.lon-lon,d=dx*dx+dy*dy;
     if(d<dMin){dMin=d;melhor=f;}
   });
-  // ~500 m ≈ 0.0045 grau → 0.0045²=2.025e-5
-  if(melhor&&dMin<2.025e-5){
-    map.setView([lat,lon],18);
+  if(melhor&&dMin<7.3e-8){
     var mk=null;
     for(var i=0;i<_markers.length;i++){if(_markers[i]._f.tomb===melhor.tomb){mk=_markers[i];break;}}
     if(mk) cluster.zoomToShowLayer(mk,function(){mk.openPopup();});
-  } else {
-    map.setView([lat,lon],17);
-    var svgPin='<svg width="24" height="32" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">'
-      +'<path d="M12 1C7.03 1 3 5.03 3 10c0 7 9 21 9 21s9-14 9-21c0-4.97-4.03-9-9-9z" fill="#ef5350" stroke="#fff" stroke-width="1.5"/>'
-      +'<circle cx="12" cy="10" r="3.5" fill="#fff"/>'
-      +'</svg>';
-    var ic=L.divIcon({className:'',iconSize:[24,32],iconAnchor:[12,32],html:svgPin});
-    _pinCoordenada=L.marker([lat,lon],{icon:ic})
-      .bindPopup('<b>Coordenada pesquisada</b><br>'
-        +lat.toFixed(6)+', '+lon.toFixed(6)
-        +'<br><span style="color:#789;font-size:11px">Nenhum imóvel nesse ponto</span>')
-      .addTo(map)
-      .openPopup();
   }
 }
 
