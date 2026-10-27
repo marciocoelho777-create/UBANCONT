@@ -72,6 +72,29 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 .pl-tgeo:hover{background:#1a3a1a;color:#9afa9a}
 #sem-dados{padding:40px 20px;text-align:center;color:#9ab;font-size:12px}
 .cmp-area{margin-top:6px;padding:5px 7px;background:#0a1828;border-radius:4px}
+/* ── painel de camadas customizado ─────────────────────────────────────────── */
+#cam-panel{position:absolute;top:10px;right:44px;z-index:1000;width:240px;
+  background:rgba(10,20,50,0.97);border:1px solid #2a4a7f;border-radius:6px;
+  font-size:12px;color:#ccd;box-shadow:0 2px 8px rgba(0,0,0,.5);user-select:none}
+#cam-hdr{padding:7px 10px;background:#0f3460;border-radius:5px 5px 0 0;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;font-weight:600;color:#e2b96a;letter-spacing:.4px}
+#cam-hdr:hover{background:#1a4a80}
+#cam-body{max-height:75vh;overflow-y:auto;padding:4px 0}
+#cam-body::-webkit-scrollbar{width:4px}
+#cam-body::-webkit-scrollbar-thumb{background:#2a4a7f;border-radius:2px}
+.cam-grp-hdr{padding:5px 10px;cursor:pointer;color:#9ab;font-size:10px;
+  text-transform:uppercase;letter-spacing:.7px;display:flex;justify-content:space-between;
+  align-items:center;border-top:1px solid #1a2a50}
+.cam-grp-hdr:hover{color:#e2b96a}
+.cam-grp-hdr:first-child{border-top:none}
+.cam-grp-items{padding:2px 0 4px 0}
+.cam-item{display:flex;align-items:center;padding:3px 12px;gap:6px;cursor:pointer}
+.cam-item:hover{background:#0f2040}
+.cam-item input{accent-color:#e2b96a;cursor:pointer;flex-shrink:0}
+.cam-item span{font-size:11px;color:#ccd;line-height:1.3}
+.cam-sep{padding:4px 10px;font-size:10px;color:#9ab;border-top:1px solid #1a2a50;
+  background:#07111e;letter-spacing:.3px}
 </style>
 </head>
 <body>
@@ -121,7 +144,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 27/10/2026 16:55 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
+    <div class="sub">Gerado em 27/10/2026 17:02 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
   </div>
 </div>
 <div id="main">
@@ -331,64 +354,144 @@ var baseLayers = {
   '🗺 Mapa (ruas)': esriStreet,
   '🛰 Satélite': esriSat
 };
-// URL base dos serviços IDE-DF
-var _IDE='https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer';
-var _wms=function(lyr,op,att){return L.tileLayer.wms(_IDE,
-  {layers:lyr,format:'image/png',transparent:true,opacity:op,version:'1.1.1',
-    crs:L.CRS.EPSG4326,attribution:att});}
-// ── Cadastro territorial ──────────────────────────────────────────────────────
-var lotesWMS       = _wms('230',0.70,'Lotes Registrados: IDE-DF/SEDUH');
-var concessaoWMS   = _wms('231',0.75,'Concessão de Lotes: IDE-DF/SEDUH');
-var ocupacoesWMS   = _wms('229',0.60,'Ocupações Identificadas: IDE-DF');
-var quadrasWMS     = _wms('227',0.40,'Quadras: IDE-DF/SEDUH');
-var setorWMS       = _wms('226',0.35,'Setor: IDE-DF/SEDUH');
-var unidAut        = _wms('232',0.65,'Unidades Autônomas: IDE-DF');
-var edificWMS      = _wms('235',0.70,'Edificações: IDE-DF/SEDUH');
-// ── Limitações e uso do solo ──────────────────────────────────────────────────
-var luosWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/LUOS/MapServer/WMSServer',
-  {layers:'11',format:'image/png',transparent:true,opacity:0.65,
-    version:'1.1.1',crs:L.CRS.EPSG4326,attribution:'Zoneamento LUOS: IDE-DF/SEDUH'}
-);
-var pdotWMS        = _wms('94', 0.45,'Zoneamento PDOT: IDE-DF/SEDUH');
-var tombadaWMS     = _wms('119',0.45,'Área Tombada: IDE-DF/TJDFT');
-var zonaProteAerea = _wms('176',0.40,'Zona de Proteção Aérea: ANAC');
-// ── Limites administrativos ───────────────────────────────────────────────────
-var raWMS          = _wms('118',0.40,'Regiões Adm.: IDE-DF/SEDUH');
-// ── Meio físico e ambiente ────────────────────────────────────────────────────
-var riosWMS        = _wms('127',0.75,'Rios e Córregos: IDE-DF');
-var lagosWMS       = _wms('128',0.75,'Lagos e Barragens: IDE-DF');
-var parquesWMS     = _wms('137',0.55,'Parques Urbanos: IDE-DF');
-// ── Terracap ──────────────────────────────────────────────────────────────────
-var terracapWMS = L.tileLayer.wms(
-  'https://terrageo2.terracap.df.gov.br/arcgis/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/WMSServer',
-  {layers:'0',format:'image/png',transparent:true,opacity:0.70,
-    version:'1.1.1',crs:L.CRS.EPSG4326,attribution:'Imóveis GSO: Terracap'}
-);
-var overlays = {
-  '🏷 Rótulos': esriLabels,
-  // Cadastro territorial
-  '🟡 Lotes Registrados (IDE-DF)': lotesWMS,
-  '🔵 Concessão de Lotes (IDE-DF)': concessaoWMS,
-  '🏚 Ocupações Identificadas': ocupacoesWMS,
-  '⬜ Quadras': quadrasWMS,
-  '🔲 Setores Cadastrais': setorWMS,
-  '🏢 Edificações': edificWMS,
-  '🏙 Unidades Autônomas': unidAut,
-  // Uso do solo e limitações
-  '🟣 Zoneamento LUOS': luosWMS,
-  '📐 Zoneamento PDOT': pdotWMS,
-  '🏛 Área Tombada UNESCO': tombadaWMS,
-  '✈ Zona de Proteção Aérea': zonaProteAerea,
-  // Meio físico
-  '🌊 Rios e Córregos': riosWMS,
-  '💧 Lagos e Barragens': lagosWMS,
-  '🌳 Parques Urbanos': parquesWMS,
-  // Limites e outros
-  '🏘 Regiões Administrativas': raWMS,
-  '🟠 Imóveis Urbanos GSO (Terracap)': terracapWMS
-};
-L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
+// ── Camadas WMS: criadas dinamicamente a partir de _LAYER_GROUPS ────────────
+var _LAYER_GROUPS=[
+  {title:'Cadastro Territorial',layers:[
+    {label:'Lotes Registrados',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'230',op:0.7,key:'lotesWMS',checked:true},
+    {label:'Concessão de Lotes',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'231',op:0.75,key:'concessaoWMS',checked:false},
+    {label:'Ocupações Identificadas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'229',op:0.6,key:null,checked:false},
+    {label:'Quadras',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'227',op:0.4,key:null,checked:false},
+    {label:'Conjunto',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'228',op:0.35,key:null,checked:false},
+    {label:'Setor',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'226',op:0.3,key:null,checked:false},
+    {label:'Número dos Lotes',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'150',op:0.8,key:null,checked:false},
+    {label:'Edificação',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'235',op:0.7,key:null,checked:false},
+    {label:'Unidades Autônomas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'232',op:0.65,key:null,checked:false},
+    {label:'Telheiro',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'233',op:0.6,key:null,checked:false},
+    {label:'Piscinas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'234',op:0.6,key:null,checked:false},
+    {label:'Pavimento',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'236',op:0.6,key:null,checked:false},
+    {label:'Marquises',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'237',op:0.6,key:null,checked:false},
+    {label:'Cobertura',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'238',op:0.6,key:null,checked:false},
+    {label:'Campos e Quadras Poliesportivas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'239',op:0.6,key:null,checked:false},
+    {label:'Cercas e Muros',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'240',op:0.6,key:null,checked:false},
+  ]},
+  {title:'Uso do Solo',layers:[
+    {label:'Zoneamento LUOS',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/LUOS/MapServer/WMSServer',layer:'11',op:0.65,key:'luosWMS',checked:false},
+    {label:'Lote Luos (polígono)',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'103',op:0.55,key:null,checked:false},
+    {label:'Zoneamento PDOT',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'94',op:0.45,key:null,checked:false},
+    {label:'Macrozona Urbana',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'70',op:0.4,key:null,checked:false},
+    {label:'Macrozona de Proteção Integral',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'72',op:0.4,key:null,checked:false},
+    {label:'Macrozona Rural Uso Controlado',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'91',op:0.4,key:null,checked:false},
+    {label:'Área Rural c/ Proteção Ambiental',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'71',op:0.4,key:null,checked:false},
+    {label:'Hierarquia Viária',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'66',op:0.5,key:null,checked:false},
+    {label:'Área Econômica',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'65',op:0.45,key:null,checked:false},
+    {label:'Zona de Proteção Aérea (ANAC)',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'176',op:0.4,key:null,checked:false},
+    {label:'Área de Interesse Ambiental',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'74',op:0.45,key:null,checked:false},
+    {label:'Conector Ambiental',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'75',op:0.5,key:null,checked:false},
+    {label:'Área de Proteção de Manancial',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'96',op:0.5,key:null,checked:false},
+  ]},
+  {title:'Regularização Fundiária',layers:[
+    {label:'Áreas de Regularização',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'83',op:0.55,key:null,checked:false},
+    {label:'Setor Habitacional Regularização',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'84',op:0.5,key:null,checked:false},
+    {label:'Parcelamento Urbano Isolado',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'87',op:0.55,key:null,checked:false},
+    {label:'Lotes Inst. EP Compartilhados',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'178',op:0.6,key:null,checked:false},
+    {label:'Desdobro / Remembramento',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'173',op:0.65,key:null,checked:false},
+    {label:'Alteração de Parcelamento',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'174',op:0.65,key:null,checked:false},
+    {label:'Novos Parcelamentos',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'175',op:0.65,key:null,checked:false},
+    {label:'Evolução das Ocupações',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'177',op:0.55,key:null,checked:false},
+    {label:'Assentamentos Rurais',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'195',op:0.55,key:null,checked:false},
+  ]},
+  {title:'Projetos e Licenciamento',layers:[
+    {label:'Projetos Elaborados SEDUH',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'40',op:0.65,key:null,checked:false},
+    {label:'Projetos Aprovados SEDUH',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'41',op:0.65,key:null,checked:false},
+    {label:'Projetos Especiais',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'180',op:0.65,key:null,checked:false},
+    {label:'Plano de Ocupação',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'181',op:0.65,key:null,checked:false},
+    {label:'Alvarás de Construção / Habite-se',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'190',op:0.65,key:null,checked:false},
+    {label:'Cotas de Soleira Emitidas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'189',op:0.65,key:null,checked:false},
+    {label:'Viabilidade de Localização',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'192',op:0.65,key:null,checked:false},
+  ]},
+  {title:'PPCUB — Preservação',layers:[
+    {label:'Abrangência PPCUB',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'61',op:0.4,key:null,checked:false},
+    {label:'Comp. Paisagem Urbana',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'47',op:0.55,key:null,checked:false},
+    {label:'Comp. Forma Urbana',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'48',op:0.55,key:null,checked:false},
+    {label:'Comp. Histórico',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'49',op:0.55,key:null,checked:false},
+    {label:'Territórios de Preservação',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'44',op:0.55,key:null,checked:false},
+    {label:'Unidades de Preservação',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'45',op:0.55,key:null,checked:false},
+  ]},
+  {title:'Transportes e Mobilidade',layers:[
+    {label:'Sistema Viário',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'149',op:0.55,key:null,checked:false},
+    {label:'Rodovia',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'21',op:0.6,key:null,checked:false},
+    {label:'Vias Marginais',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'22',op:0.55,key:null,checked:false},
+    {label:'Faixa de Domínio',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'24',op:0.5,key:null,checked:false},
+    {label:'Sistema Cicloviário',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'23',op:0.7,key:null,checked:false},
+    {label:'Linha de Metrô',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'100',op:0.8,key:null,checked:false},
+    {label:'Estação de Metrô',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'101',op:0.8,key:null,checked:false},
+    {label:'Pontes, Viadutos e Passarelas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'38',op:0.7,key:null,checked:false},
+    {label:'Estacionamentos',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'25',op:0.55,key:null,checked:false},
+  ]},
+  {title:'Hidrografia e Meio Ambiente',layers:[
+    {label:'Rios e Córregos',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'127',op:0.75,key:'riosWMS',checked:true},
+    {label:'Lagos e Barragens',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'128',op:0.75,key:'lagosWMS',checked:false},
+    {label:'Barragens',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'129',op:0.8,key:null,checked:false},
+    {label:'Bacias Hidrográficas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'92',op:0.5,key:null,checked:false},
+    {label:'Unidades Hidrográficas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'125',op:0.5,key:null,checked:false},
+    {label:'APP Curso d\'água — Pôr do Sol',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'133',op:0.6,key:null,checked:false},
+    {label:'Área de Periculosidade SHSN',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'131',op:0.55,key:null,checked:false},
+    {label:'Parques Urbanos',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'137',op:0.55,key:'parquesWMS',checked:false},
+  ]},
+  {title:'Vegetação e Cobertura do Solo',layers:[
+    {label:'Vegetação',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'2',op:0.65,key:null,checked:false},
+    {label:'Cerrado',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'4',op:0.65,key:null,checked:false},
+    {label:'Massa Arbórea',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'5',op:0.65,key:null,checked:false},
+    {label:'Jardins',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'3',op:0.65,key:null,checked:false},
+    {label:'Cobertura do Solo 2019',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'17',op:0.6,key:null,checked:false},
+    {label:'Cobertura do Solo 2018',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'16',op:0.6,key:null,checked:false},
+    {label:'Cobertura do Solo 2009',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'15',op:0.6,key:null,checked:false},
+    {label:'Área Queimada 2024',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'197',op:0.6,key:null,checked:false},
+    {label:'Área Queimada 2023',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'198',op:0.6,key:null,checked:false},
+    {label:'Área Queimada 2022',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'199',op:0.6,key:null,checked:false},
+    {label:'Área Queimada 2020',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'201',op:0.6,key:null,checked:false},
+  ]},
+  {title:'Equipamentos Urbanos',layers:[
+    {label:'Escolas Públicas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'144',op:0.8,key:null,checked:false},
+    {label:'Equipamentos de Saúde',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'141',op:0.8,key:null,checked:false},
+    {label:'Espaços Culturais',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'143',op:0.8,key:null,checked:false},
+    {label:'Espaços Comunitários',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'142',op:0.8,key:null,checked:false},
+    {label:'Equipamentos de Segurança',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'140',op:0.8,key:null,checked:false},
+    {label:'Feiras Livres',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'139',op:0.8,key:null,checked:false},
+    {label:'Mobiliário Esporte e Lazer',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'138',op:0.7,key:null,checked:false},
+  ]},
+  {title:'Limites Administrativos',layers:[
+    {label:'Regiões Administrativas',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'118',op:0.4,key:'raWMS',checked:true},
+    {label:'Área Tombada UNESCO',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'119',op:0.45,key:'tombadaWMS',checked:false},
+    {label:'Limite do Distrito Federal',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'117',op:0.45,key:null,checked:false},
+    {label:'Justiça DF',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'120',op:0.45,key:null,checked:false},
+  ]},
+  {title:'Cartografia',layers:[
+    {label:'Curvas de Nível 1m (2016)',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'216',op:0.6,key:null,checked:false},
+    {label:'Curvas de Nível 5m (2009)',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'217',op:0.55,key:null,checked:false},
+    {label:'Rede Geodésica',url:'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',layer:'219',op:0.8,key:null,checked:false},
+  ]},
+  {title:'Terracap',layers:[
+    {label:'Imóveis Urbanos GSO',url:'https://terrageo2.terracap.df.gov.br/arcgis/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/WMSServer',layer:'0',op:0.7,key:'terracapWMS',checked:false},
+  ]},
+];
+var _WMS_OBJS={};
+(function(){
+  _LAYER_GROUPS.forEach(function(g){
+    g.layers.forEach(function(l){
+      var wms=L.tileLayer.wms(l.url,{layers:l.layer,format:'image/png',
+        transparent:true,opacity:l.op,version:'1.1.1',crs:L.CRS.EPSG4326,
+        attribution:'IDE-DF'});
+      _WMS_OBJS[l.label]=wms;
+      if(l.key) window[l.key]=wms;
+      if(l.checked) wms.addTo(map);
+    });
+  });
+})();
+// Rótulos (base layer usada também como overlay)
+var esriLabelsOv=esriLabels;
+// Controle de base (sem overlays — painel customizado cuida disso)
+L.control.layers(baseLayers,{},{position:'topright',collapsed:true}).addTo(map);
 
 // ── TerraGeo login ────────────────────────────────────────────────────────────
 var _tgToken = null;
@@ -1114,6 +1217,72 @@ document.getElementById('sel-mt').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-T').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-E').addEventListener('change',aplicarFiltros);
 document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
+
+// ── Painel de camadas customizado ─────────────────────────────────────────────
+(function(){
+  var panel=document.createElement('div');
+  panel.id='cam-panel';
+  var open=true;
+  function renderPanel(){
+    var html='<div id="cam-hdr" onclick="_camToggle()">🗺 Camadas <span>'+(open?'▲':'▼')+'</span></div>';
+    if(open){
+      html+='<div id="cam-body">';
+      // Rótulos (toggle do esri labels)
+      var rotOn=map.hasLayer(esriLabels);
+      html+='<div class="cam-item" style="border-bottom:1px solid #1a2a50;padding:5px 12px">'
+        +'<input type="checkbox" id="cb-rotulos"'+(rotOn?' checked':'')+'>'
+        +'<span>🏷 Rótulos (cartografia)</span></div>';
+      _LAYER_GROUPS.forEach(function(g,gi){
+        var anyOn=g.layers.some(function(l){return map.hasLayer(_WMS_OBJS[l.label]);});
+        var cid='cam-g'+gi;
+        html+='<div class="cam-grp-hdr" onclick="_camGrp(''+cid+'')">'
+          +'<span>'+g.title+'</span>'
+          +'<span id="'+cid+'-chv">▸</span></div>';
+        html+='<div id="'+cid+'" class="cam-grp-items" style="display:none">';
+        g.layers.forEach(function(l){
+          var on=map.hasLayer(_WMS_OBJS[l.label]);
+          var sid='cb-'+l.label.replace(/[^a-z0-9]/gi,'_');
+          html+='<div class="cam-item"><input type="checkbox" id="'+sid+'"'+(on?' checked':'')+'>'
+            +'<span>'+l.label+'</span></div>';
+        });
+        html+='</div>';
+      });
+      html+='</div>';
+    }
+    panel.innerHTML=html;
+    // wire events
+    var rotCb=document.getElementById('cb-rotulos');
+    if(rotCb) rotCb.addEventListener('change',function(){
+      if(this.checked) esriLabels.addTo(map); else map.removeLayer(esriLabels);
+    });
+    _LAYER_GROUPS.forEach(function(g,gi){
+      g.layers.forEach(function(l){
+        var sid='cb-'+l.label.replace(/[^a-z0-9]/gi,'_');
+        var cb=document.getElementById(sid);
+        if(cb) cb.addEventListener('change',function(){
+          var wms=_WMS_OBJS[l.label];
+          if(this.checked) wms.addTo(map); else map.removeLayer(wms);
+        });
+      });
+    });
+  }
+  window._camToggle=function(){open=!open;renderPanel();};
+  window._camGrp=function(cid){
+    var el=document.getElementById(cid);
+    var chv=document.getElementById(cid+'-chv');
+    if(!el) return;
+    var vis=el.style.display!=='none';
+    el.style.display=vis?'none':'block';
+    if(chv) chv.textContent=vis?'▸':'▾';
+  };
+  document.getElementById('map').appendChild(panel);
+  renderPanel();
+  // Abre automaticamente os grupos que têm camadas ativas
+  _LAYER_GROUPS.forEach(function(g,gi){
+    var anyOn=g.layers.some(function(l){return map.hasLayer(_WMS_OBJS[l.label]);});
+    if(anyOn) window._camGrp('cam-g'+gi);
+  });
+})();
 </script>
 </body>
 </html>
