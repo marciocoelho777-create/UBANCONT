@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 27/10/2026 16:51 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
+    <div class="sub">Gerado em 27/10/2026 16:55 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
   </div>
 </div>
 <div id="main">
@@ -331,50 +331,62 @@ var baseLayers = {
   '🗺 Mapa (ruas)': esriStreet,
   '🛰 Satélite': esriSat
 };
-var lotesWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',
-  {layers:'230', format:'image/png', transparent:true, opacity:0.7,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Lotes: IDE-DF/SEDUH'}
-);
-var terracapWMS = L.tileLayer.wms(
-  'https://terrageo2.terracap.df.gov.br/arcgis/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/WMSServer',
-  {layers:'0', format:'image/png', transparent:true, opacity:0.7,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Imóveis GSO: Terracap'}
-);
+// URL base dos serviços IDE-DF
+var _IDE='https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer';
+var _wms=function(lyr,op,att){return L.tileLayer.wms(_IDE,
+  {layers:lyr,format:'image/png',transparent:true,opacity:op,version:'1.1.1',
+    crs:L.CRS.EPSG4326,attribution:att});}
+// ── Cadastro territorial ──────────────────────────────────────────────────────
+var lotesWMS       = _wms('230',0.70,'Lotes Registrados: IDE-DF/SEDUH');
+var concessaoWMS   = _wms('231',0.75,'Concessão de Lotes: IDE-DF/SEDUH');
+var ocupacoesWMS   = _wms('229',0.60,'Ocupações Identificadas: IDE-DF');
+var quadrasWMS     = _wms('227',0.40,'Quadras: IDE-DF/SEDUH');
+var setorWMS       = _wms('226',0.35,'Setor: IDE-DF/SEDUH');
+var unidAut        = _wms('232',0.65,'Unidades Autônomas: IDE-DF');
+var edificWMS      = _wms('235',0.70,'Edificações: IDE-DF/SEDUH');
+// ── Limitações e uso do solo ──────────────────────────────────────────────────
 var luosWMS = L.tileLayer.wms(
   'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/LUOS/MapServer/WMSServer',
-  {layers:'11', format:'image/png', transparent:true, opacity:0.65,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Zoneamento LUOS: IDE-DF/SEDUH'}
+  {layers:'11',format:'image/png',transparent:true,opacity:0.65,
+    version:'1.1.1',crs:L.CRS.EPSG4326,attribution:'Zoneamento LUOS: IDE-DF/SEDUH'}
 );
-var tombadaWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/LIMITES/MapServer/WMSServer',
-  {layers:'0', format:'image/png', transparent:true, opacity:0.45,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Área Tombada: IDE-DF/TJDFT'}
-);
-var raWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/LIMITES/MapServer/WMSServer',
-  {layers:'1', format:'image/png', transparent:true, opacity:0.4,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Regiões Adm.: IDE-DF/SEDUH'}
-);
-var concessaoWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',
-  {layers:'231', format:'image/png', transparent:true, opacity:0.75,
-    version:'1.1.1', crs:L.CRS.EPSG4326,
-    attribution:'Concessão de Lotes: IDE-DF/SEDUH'}
+var pdotWMS        = _wms('94', 0.45,'Zoneamento PDOT: IDE-DF/SEDUH');
+var tombadaWMS     = _wms('119',0.45,'Área Tombada: IDE-DF/TJDFT');
+var zonaProteAerea = _wms('176',0.40,'Zona de Proteção Aérea: ANAC');
+// ── Limites administrativos ───────────────────────────────────────────────────
+var raWMS          = _wms('118',0.40,'Regiões Adm.: IDE-DF/SEDUH');
+// ── Meio físico e ambiente ────────────────────────────────────────────────────
+var riosWMS        = _wms('127',0.75,'Rios e Córregos: IDE-DF');
+var lagosWMS       = _wms('128',0.75,'Lagos e Barragens: IDE-DF');
+var parquesWMS     = _wms('137',0.55,'Parques Urbanos: IDE-DF');
+// ── Terracap ──────────────────────────────────────────────────────────────────
+var terracapWMS = L.tileLayer.wms(
+  'https://terrageo2.terracap.df.gov.br/arcgis/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/WMSServer',
+  {layers:'0',format:'image/png',transparent:true,opacity:0.70,
+    version:'1.1.1',crs:L.CRS.EPSG4326,attribution:'Imóveis GSO: Terracap'}
 );
 var overlays = {
   '🏷 Rótulos': esriLabels,
+  // Cadastro territorial
   '🟡 Lotes Registrados (IDE-DF)': lotesWMS,
-  '🟠 Imóveis Urbanos GSO (Terracap)': terracapWMS,
+  '🔵 Concessão de Lotes (IDE-DF)': concessaoWMS,
+  '🏚 Ocupações Identificadas': ocupacoesWMS,
+  '⬜ Quadras': quadrasWMS,
+  '🔲 Setores Cadastrais': setorWMS,
+  '🏢 Edificações': edificWMS,
+  '🏙 Unidades Autônomas': unidAut,
+  // Uso do solo e limitações
   '🟣 Zoneamento LUOS': luosWMS,
+  '📐 Zoneamento PDOT': pdotWMS,
   '🏛 Área Tombada UNESCO': tombadaWMS,
+  '✈ Zona de Proteção Aérea': zonaProteAerea,
+  // Meio físico
+  '🌊 Rios e Córregos': riosWMS,
+  '💧 Lagos e Barragens': lagosWMS,
+  '🌳 Parques Urbanos': parquesWMS,
+  // Limites e outros
   '🏘 Regiões Administrativas': raWMS,
-  '🔵 Concessão de Lotes (IDE-DF)': concessaoWMS
+  '🟠 Imóveis Urbanos GSO (Terracap)': terracapWMS
 };
 L.control.layers(baseLayers, overlays, {position:'topright'}).addTo(map);
 
