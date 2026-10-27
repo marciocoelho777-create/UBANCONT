@@ -121,7 +121,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 27/10/2026 16:21 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
+    <div class="sub">Gerado em 27/10/2026 16:42 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
   </div>
 </div>
 <div id="main">
@@ -332,8 +332,8 @@ var baseLayers = {
   '🛰 Satélite': esriSat
 };
 var lotesWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/CADASTRO_TERRITORIAL/MapServer/WMSServer',
-  {layers:'6', format:'image/png', transparent:true, opacity:0.7,
+  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',
+  {layers:'11', format:'image/png', transparent:true, opacity:0.7,
     version:'1.1.1', crs:L.CRS.EPSG4326,
     attribution:'Lotes: IDE-DF/SEDUH'}
 );
@@ -362,8 +362,8 @@ var raWMS = L.tileLayer.wms(
     attribution:'Regiões Adm.: IDE-DF/SEDUH'}
 );
 var concessaoWMS = L.tileLayer.wms(
-  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/CADASTRO_TERRITORIAL/MapServer/WMSServer',
-  {layers:'9', format:'image/png', transparent:true, opacity:0.75,
+  'https://www.geoservicos.ide.df.gov.br/arcgis/services/Publico/IDEDF/MapServer/WMSServer',
+  {layers:'10', format:'image/png', transparent:true, opacity:0.75,
     version:'1.1.1', crs:L.CRS.EPSG4326,
     attribution:'Concessão de Lotes: IDE-DF/SEDUH'}
 );
@@ -506,7 +506,7 @@ map.on('click', function(e){
 
   var ptParam='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=false&f=json';
   var ptParamGeo='?geometry='+lon+','+lat+'&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&returnGeometry=true&outSR=31983&f=json';
-  var urlLote='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/10/query'
+  var urlLote='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/IDEDF/FeatureServer/11/query'
     +ptParamGeo+'&outFields=pu_ciu,pu_end_cart,pu_end_usual,pu_ra,pu_situacao,pu_tipo,pu_cipu,qd_setor,qd_quadra,qd_lote,pn_uso,pn_alt_max,qd_dim_frente,qd_dim_fundo,pn_norma_vg';
   var urlTerracap='https://terrageo2.terracap.df.gov.br/arcgis/rest/services/ImoveisUrbanos/Imoveis_GSO_v1/MapServer/0/query'
     +ptParam+'&outFields=CD_IMOVEL,ENDERECO,DS_REGIAO_ADM,NR_AREA,NR_AREA_MAX,IN_TIPO_USO';
@@ -514,7 +514,7 @@ map.on('click', function(e){
     +ptParam+'&outFields=lu_cipu,lu_end_cart,lu_area_proj,lu_padrao_cores,lu_uos_setor,lu_cfa_b,lu_cfa_m,lu_tx_ocu,lu_tx_perm,lu_alt_max,lu_afr,lu_afu,lu_notas';
   var urlTombada='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/LIMITES/MapServer/0/query'
     +ptParam+'&outFields=tomb_descricao,tomb_decreto_cr';
-  var urlConcessao='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/CADASTRO_TERRITORIAL/FeatureServer/9/query'
+  var urlConcessao='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Publico/IDEDF/FeatureServer/10/query'
     +ptParam+'&outFields=ciu,end_rest,destinacao,tipo_destinacao,dimen_cessao,processo,processo_2';
   var _iptuBase='https://www.geoservicos.ide.df.gov.br/arcgis/rest/services/Aplicacoes/CERTIDAO_IMOVEL/MapServer/0/query';
   var urlIPTU=_iptuInsc
