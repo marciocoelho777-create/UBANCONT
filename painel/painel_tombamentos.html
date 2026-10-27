@@ -144,7 +144,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 27/10/2026 17:39 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
+    <div class="sub">Gerado em 27/10/2026 18:02 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,12 bi</div>
   </div>
 </div>
 <div id="main">
@@ -1232,7 +1232,7 @@ document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
       _LAYER_GROUPS.forEach(function(g,gi){
         var anyOn=g.layers.some(function(l){return map.hasLayer(_WMS_OBJS[l.label]);});
         var cid='cam-g'+gi;
-        html+='<div class="cam-grp-hdr" onclick="_camGrp(''+cid+'')">'
+        html+='<div class="cam-grp-hdr" onclick="_camGrp(\''+cid+'\')">'
           +'<span>'+g.title+'</span>'
           +'<span id="'+cid+'-chv">▸</span></div>';
         html+='<div id="'+cid+'" class="cam-grp-items" style="display:none">';
