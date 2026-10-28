@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controles de Rotina GDF 10/2026</title>
+<style>
+:root{
+  --brand:#1A4A8F;--pg:#F1F4FB;--s1:#FFF;--s2:#E8EDF7;--bd:#C8D5ED;
+  --t1:#0D1829;--t2:#4C5C7A;--t3:#8A9BBD;
+  --err:#BE1C1C;--err-bg:#FEF2F2;--err-bd:#FECACA;
+  --ok:#156030;--ok-bg:#F0FDF4;--ok-bd:#BBF7D0;
+  --inf:#1547A0;--inf-bg:#EFF6FF;--inf-bd:#BFDBFE;
+  --diff:#7030A0;
+  --fn:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --fm:'Cascadia Code','SF Mono',Consolas,'Courier New',monospace;
+  --r:8px;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
+  --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
+  --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
+  --ok:#4ADE80;--ok-bg:#031309;--ok-bd:#14532D;
+  --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
+  --diff:#C084FC;
+}}
+:root[data-theme="dark"]{
+  --brand:#4889D8;--pg:#080C18;--s1:#101827;--s2:#182035;--bd:#1D2C48;
+  --t1:#D4DFF5;--t2:#6A7EA6;--t3:#3D5070;
+  --err:#F87171;--err-bg:#170404;--err-bd:#7F1D1D;
+  --ok:#4ADE80;--ok-bg:#031309;--ok-bd:#14532D;
+  --inf:#93C5FD;--inf-bg:#0C1A35;--inf-bd:#1E3A5F;
+  --diff:#C084FC;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);font-size:14px;line-height:1.5;color:var(--t1);background:var(--pg)}
+.hd{background:var(--brand);color:#fff;padding:14px 24px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10}
+.hd-title{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.hd-sub{font-size:12px;opacity:.72;margin-top:2px}
+.hd-ts{font-size:11px;opacity:.55;margin-top:3px;font-family:var(--fm)}
+.hd-badge{font-size:11px;font-weight:600;background:rgba(255,255,255,.18);
+          border:1px solid rgba(255,255,255,.28);border-radius:100px;padding:3px 11px}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:14px}
+.ctrl-filter{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+             padding:8px 0 4px;border-bottom:1px solid var(--bd);margin-bottom:2px}
+.ctrl-filter label{font-size:11px;font-weight:600;color:var(--t2);white-space:nowrap}
+.ctrl-filter select{font-size:11px;font-family:var(--fm);border:1px solid var(--bd);
+                    border-radius:5px;padding:3px 7px;background:var(--s2);color:var(--t1);
+                    min-width:120px;max-width:200px}
+.ctrl-filter button{font-size:10px;padding:3px 10px;border:1px solid var(--bd);
+                    border-radius:5px;background:var(--s2);color:var(--t2);cursor:pointer}
+.ctrl-filter button:hover{background:var(--bd)}
+.ctrl-filter-info{font-size:10px;color:var(--t3);margin-left:4px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;background:var(--s1);
+     border:1px solid var(--bd);border-radius:var(--r)}
+.nav a{font-size:11px;font-weight:600;color:var(--brand);text-decoration:none;
+       padding:3px 9px;border-radius:100px;border:1px solid var(--bd)}
+.nav a:hover{border-color:var(--brand);background:var(--s2)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);
+     padding:13px 15px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+             background:var(--kpi-stripe,var(--bd))}
+.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:5px}
+.kpi-val{font-size:26px;font-weight:700;letter-spacing:-.025em;color:var(--kpi-color,var(--t1));
+         font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:11px;color:var(--t3);margin-top:3px}
+details.ctrl{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden}
+details.ctrl summary{padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer;
+                     list-style:none;display:flex;align-items:center;gap:10px;background:var(--s2);
+                     user-select:none}
+details.ctrl summary::-webkit-details-marker{display:none}
+details.ctrl summary::after{content:'+';font-size:16px;font-weight:400;color:var(--t3);margin-left:auto}
+details.ctrl[open] summary::after{content:'−'}
+.ctrl-num{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--t3);
+          background:var(--pg);border:1px solid var(--bd);border-radius:4px;
+          padding:1px 7px;letter-spacing:.02em;flex-shrink:0}
+.ctrl-body{padding:14px 18px;display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--bd)}
+.ctrl-stats{font-size:12px;color:var(--t2)}
+.chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;border:1px solid;white-space:nowrap;flex-shrink:0}
+.c-ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.c-err{background:var(--err-bg);color:var(--err);border-color:var(--err-bd)}
+.c-inf{background:var(--inf-bg);color:var(--inf);border-color:var(--inf-bd)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:6px;max-height:480px;overflow-y:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-family:var(--fm)}
+table.tbl th,table.tbl td{padding:4px 9px;border-bottom:1px solid var(--bd);white-space:nowrap}
+table.tbl th{background:var(--s2);font-weight:700;font-family:var(--fn);position:sticky;top:0;z-index:1}
+table.tbl th.diff-hd{background:var(--diff);color:#fff}
+table.tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+table.tbl td.ug-cell{background:rgba(217,232,245,.4);font-weight:600}
+table.tbl tr.has-diff td{background:var(--err-bg)}
+table.tbl tr.has-diff td.ug-cell{background:#fde8ea}
+table.tbl tr.has-diff td.diff-cell{color:var(--err);font-weight:700}
+table.tbl tr.ok-row td.diff-cell{color:var(--ok);font-weight:600}
+table.tbl td.diff-cell{font-weight:600}
+.ok-msg{color:var(--ok);font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.ok-msg::before{content:'✓';font-size:15px}
+.trunc-note{font-size:11px;color:var(--inf);font-style:italic;padding:6px 2px}
+footer{font-size:11px;color:var(--t3);text-align:center;padding:14px;margin-top:10px}
+@media(max-width:680px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.run-wrap{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--s1);
+          border:1px solid var(--bd);border-radius:var(--r)}
+.run-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);
+         white-space:nowrap;flex-shrink:0}
+#run-select{flex:1;padding:5px 9px;border:1px solid var(--bd);border-radius:6px;
+            background:var(--s2);color:var(--t1);font-size:12px;font-family:var(--fn);
+            cursor:pointer;max-width:320px}
+#run-select:focus{outline:2px solid var(--brand);outline-offset:1px}
+/* ── Tabela hierárquica (drill-down) ── */
+.tbl-hier tr.hier-l1 td{background:var(--s2);font-weight:700;font-size:12px}
+.tbl-hier tr.hier-l2 td{background:var(--s1);font-size:11.5px}
+.tbl-hier tr.hier-l3 td{background:var(--pg);font-size:11px;color:var(--t2)}
+.hier-cell{white-space:nowrap}
+.tbl-hier tr.hier-l2 .hier-cell{padding-left:22px}
+.tbl-hier tr.hier-l3 .hier-cell{padding-left:42px}
+.hier-btn{background:none;border:none;cursor:pointer;font-size:10px;color:var(--brand);
+          padding:0 5px 0 0;line-height:1;transition:transform .15s;display:inline-block;
+          vertical-align:middle}
+.hier-btn.exp{transform:rotate(90deg)}
+.hier-lbl{vertical-align:middle}
+.hier-total{font-variant-numeric:tabular-nums;font-weight:700}
+.tbl-hier tfoot tr.hier-total-row td{
+  background:var(--brand);color:#fff;font-weight:700;font-size:12px;
+  position:sticky;bottom:0;z-index:1;border-top:2px solid var(--brand)}
+.btn-diff{font-size:10px;padding:3px 10px;border:1px solid var(--bd);border-radius:5px;
+          background:var(--s2);color:var(--t2);cursor:pointer;white-space:nowrap}
+.btn-diff.active{background:var(--err-bg);color:var(--err);border-color:var(--err-bd);font-weight:700}
+.ctrl-desc{font-size:11.5px;color:var(--t2);line-height:1.55;padding:8px 14px 6px;
+           border-left:3px solid var(--brand);background:var(--s1);border-radius:0 5px 5px 0;
+           margin:0 0 10px;font-style:italic}
+.ug-name{font-size:10px;color:var(--t3);font-weight:400;display:block;
+         white-space:normal;line-height:1.2;margin-top:2px}
+.conta-name{font-size:10px;color:var(--t3);font-weight:400;display:block;
+            white-space:normal;line-height:1.2;margin-top:2px}
+</style>
+</head>
+<body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+
+<div class="hd">
+  <div>
+    <div class="hd-title">Controles de Rotina &#8212; GDF</div>
+    <div class="hd-sub">Dados de competência 10/2026 (Outubro/2026)</div>
+    <div class="hd-ts">Executado em 28/10/2026 14:10:25</div>
+  </div>
+  <div class="hd-badge">10/2026</div>
+</div>
+<div class="wrap">
+  <div class="run-wrap"><span class="run-lbl">Compet&#234;ncia</span><select id="run-select" onchange="window.location.href=this.value"><option value="rotina_controles_2026_10_20261028_141025.html"selected>Outubro/2026 · extraído em 28/10/2026 14:10</option>
+<option value="rotina_controles_2026_10_20261028_044935.html">Outubro/2026 · extraído em 28/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261027_044932.html">Outubro/2026 · extraído em 27/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261026_044925.html">Outubro/2026 · extraído em 26/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261023_134017.html">Outubro/2026 · extraído em 23/10/2026 13:40</option>
+<option value="rotina_controles_2026_10_20261022_092706.html">Outubro/2026 · extraído em 22/10/2026 09:27</option>
+<option value="rotina_controles_2026_10_20261021_102523.html">Outubro/2026 · extraído em 21/10/2026 10:25</option>
+<option value="rotina_controles_2026_10_20261020_044716.html">Outubro/2026 · extraído em 20/10/2026 04:47</option>
+<option value="rotina_controles_2026_10_20261019_044911.html">Outubro/2026 · extraído em 19/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261016_044852.html">Outubro/2026 · extraído em 16/10/2026 04:48</option>
+<option value="rotina_controles_2026_10_20261015_044937.html">Outubro/2026 · extraído em 15/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261014_044851.html">Outubro/2026 · extraído em 14/10/2026 04:48</option>
+<option value="rotina_controles_2026_10_20261013_151027.html">Outubro/2026 · extraído em 13/10/2026 15:10</option>
+<option value="rotina_controles_2026_10_20261013_134657.html">Outubro/2026 · extraído em 13/10/2026 13:46</option>
+<option value="rotina_controles_2026_10_20261012_044851.html">Outubro/2026 · extraído em 12/10/2026 04:48</option>
+<option value="rotina_controles_2026_10_20261011_045010.html">Outubro/2026 · extraído em 11/10/2026 04:50</option>
+<option value="rotina_controles_2026_10_20261009_045019.html">Outubro/2026 · extraído em 09/10/2026 04:50</option>
+<option value="rotina_controles_2026_10_20261008_145609.html">Outubro/2026 · extraído em 08/10/2026 14:56</option>
+<option value="rotina_controles_2026_10_20261007_044957.html">Outubro/2026 · extraído em 07/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261006_044916.html">Outubro/2026 · extraído em 06/10/2026 04:49</option>
+<option value="rotina_controles_2026_10_20261005_102659.html">Outubro/2026 · extraído em 05/10/2026 10:26</option>
+<option value="rotina_controles_2026_10_20261005_095751.html">Outubro/2026 · extraído em 05/10/2026 09:57</option>
+<option value="rotina_controles_2026_10_20261002_044635.html">Outubro/2026 · extraído em 02/10/2026 04:46</option>
+<option value="rotina_controles_2026_10_20261001_101432.html">Outubro/2026 · extraído em 01/10/2026 10:14</option>
+<option value="rotina_controles_2026_09_20261005_114802.html">Setembro/2026 · extraído em 05/10/2026 11:48</option>
+<option value="rotina_controles_2026_09_20261002_162023.html">Setembro/2026 · extraído em 02/10/2026 16:20</option>
+<option value="rotina_controles_2026_09_20260930_173013.html">Setembro/2026 · extraído em 30/09/2026 17:30</option>
+<option value="rotina_controles_2026_09_20260929_165233.html">Setembro/2026 · extraído em 29/09/2026 16:52</option>
+<option value="rotina_controles_2026_09_20260929_044826.html">Setembro/2026 · extraído em 29/09/2026 04:48</option>
+<option value="rotina_controles_2026_09_20260928_172921.html">Setembro/2026 · extraído em 28/09/2026 17:29</option>
+<option value="rotina_controles_2026_09_20260928_160035.html">Setembro/2026 · extraído em 28/09/2026 16:00</option>
+<option value="rotina_controles_2026_09_20260928_084621.html">Setembro/2026 · extraído em 28/09/2026 08:46</option>
+<option value="rotina_controles_2026_09_20260925_044254.html">Setembro/2026 · extraído em 25/09/2026 04:42</option>
+<option value="rotina_controles_2026_09_20260924_044502.html">Setembro/2026 · extraído em 24/09/2026 04:45</option>
+<option value="rotina_controles_2026_09_20260923_075629.html">Setembro/2026 · extraído em 23/09/2026 07:56</option>
+<option value="rotina_controles_2026_09_20260922_044140.html">Setembro/2026 · extraído em 22/09/2026 04:41</option>
+<option value="rotina_controles_2026_09_20260921_184643.html">Setembro/2026 · extraído em 21/09/2026 18:46</option>
+<option value="rotina_controles_2026_09_20260921_141101.html">Setembro/2026 · extraído em 21/09/2026 14:11</option>
+<option value="rotina_controles_2026_09_20260921_132541.html">Setembro/2026 · extraído em 21/09/2026 13:25</option>
+<option value="rotina_controles_2026_09_20260918_044103.html">Setembro/2026 · extraído em 18/09/2026 04:41</option>
+<option value="rotina_controles_2026_09_20260917_044045.html">Setembro/2026 · extraído em 17/09/2026 04:40</option>
+<option value="rotina_controles_2026_09_20260916_130304.html">Setembro/2026 · extraído em 16/09/2026 13:03</option>
+<option value="rotina_controles_2026_09_20260915_135242.html">Setembro/2026 · extraído em 15/09/2026 13:52</option>
+<option value="rotina_controles_2026_09_20260915_044153.html">Setembro/2026 · extraído em 15/09/2026 04:41</option>
+<option value="rotina_controles_2026_09_20260914_100921.html">Setembro/2026 · extraído em 14/09/2026 10:09</option>
+<option value="rotina_controles_2026_09_20260911_044135.html">Setembro/2026 · extraído em 11/09/2026 04:41</option>
+<option value="rotina_controles_2026_09_20260910_143808.html">Setembro/2026 · extraído em 10/09/2026 14:38</option>
+<option value="rotina_controles_2026_09_20260910_141023.html">Setembro/2026 · extraído em 10/09/2026 14:10</option>
+<option value="rotina_controles_2026_09_20260910_140259.html">Setembro/2026 · extraído em 10/09/2026 14:02</option>
+<option value="rotina_controles_2026_09_20260910_135849.html">Setembro/2026 · extraído em 10/09/2026 13:58</option>
+<option value="rotina_controles_2026_09_20260910_134604.html">Setembro/2026 · extraído em 10/09/2026 13:46</option>
+<option value="rotina_controles_2026_09_20260910_044113.html">Setembro/2026 · extraído em 10/09/2026 04:41</option>
+<option value="rotina_controles_2026_09_20260909_095603.html">Setembro/2026 · extraído em 09/09/2026 09:56</option>
+<option value="rotina_controles_2026_09_20260908_152334.html">Setembro/2026 · extraído em 08/09/2026 15:23</option>
+<option value="rotina_controles_2026_08_20260910_144447.html">Agosto/2026 · extraído em 10/09/2026 14:44</option>
+<option value="rotina_controles_2026_08_20260910_141741.html">Agosto/2026 · extraído em 10/09/2026 14:17</option>
+<option value="rotina_controles_2026_08_20260910_140259.html">Agosto/2026 · extraído em 10/09/2026 14:02</option>
+<option value="rotina_controles_2026_08_20260910_135255.html">Agosto/2026 · extraído em 10/09/2026 13:52</option>
+<option value="rotina_controles_2026_08_20260908_151633.html">Agosto/2026 · extraído em 08/09/2026 15:16</option>
+<option value="rotina_controles_2026_07_20260911_165827.html">Julho/2026 · extraído em 11/09/2026 16:58</option></select></div>
+  <div class="kpi-row">
+    <div class="kpi" style="--kpi-stripe:var(--brand)">
+      <div class="kpi-lbl">Controles</div><div class="kpi-val">1</div>
+      <div class="kpi-sub">executados em 10/2026</div>
+    </div>
+    <div class="kpi" style="--kpi-stripe:var(--err);--kpi-color:var(--err)">
+      <div class="kpi-lbl">Com Diferença</div><div class="kpi-val">0</div>
+    </div>
+    <div class="kpi" style="--kpi-stripe:var(--ok);--kpi-color:var(--ok)">
+      <div class="kpi-lbl">OK</div><div class="kpi-val">0</div>
+    </div>
+    <div class="kpi" style="--kpi-stripe:var(--inf);--kpi-color:var(--inf)">
+      <div class="kpi-lbl">Ocorrências</div><div class="kpi-val">1</div>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Controles"><a href="#ctrl-15">C15</a></nav>
+  <details class="ctrl" id="ctrl-15">
+  <summary><span class="ctrl-num">C15</span>    Controle 15 — Receita Negativa Saldo    <span class="chip c-inf">OCORRÊNCIAS</span></summary>
+  <div class="ctrl-body">    <p class="ctrl-desc">Identifica contas de receita orçamentária com saldo ACUMULADO negativo (jan ao mês corrente) — situação anômala, pois contas de receita têm natureza credora e saldo positivo é o esperado. O controle usa o acumulado (e não o saldo mensal isolado) para não confundir estornos pontuais de um mês com anomalias reais. Saldo acumulado negativo pode indicar: estorno cumulativo maior que o arrecadado no ano, classificação equivocada de despesa como receita, ou lançamento na conta errada. Contas retificadoras (ININVERSAOSALDO='S' no PCASP, ex.: deduções da receita) são excluídas — seu saldo negativo é esperado pela natureza da conta. Base: MCASP — Natureza das Contas do PCASP; NBC TSP 03 — Receitas.</p>    <div class="ctrl-filter"><label for="sel-ug-15">UG</label><select id="sel-ug-15" onchange="filtrarCtrl('15')"><option value="">&#8212; todas as UGs &#8212;</option><option value="130101">130101</option>
+<option value="140905">140905</option>
+<option value="170901">170901</option>
+<option value="200202">200202</option>
+<option value="200204">200204</option>
+<option value="210203">210203</option>
+<option value="220201">220201</option>
+<option value="220906">220906</option>
+<option value="240204">240204</option>
+<option value="280208">280208</option>
+<option value="280209">280209</option>
+<option value="320202">320202</option>
+<option value="440905">440905</option></select><button id="btn-diff-15" class="btn-diff" onclick="toggleSoDiff('15')">S&#243; dif.</button><button onclick="limparCtrl('15')">Limpar</button><span class="ctrl-filter-info" id="info-15"></span></div>    <span class="ctrl-stats">85 ocorrência(s)</span>    <div class="tbl-wrap"><table class="tbl" data-ctrl="15"><thead><tr><th>UG</th><th>Conta Corrente (8 dígitos)</th><th>Conta Contábil</th><th class="diff-hd">Saldo</th><th>Ret.</th></tr></thead><tbody><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">17115001</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−237.945.594,00</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125108</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−4.148.760,27</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145025</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−7.169,35</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125103</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−19.060.228,82</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125203</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−1.075.701,09</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">17115111</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−69.907.498,31</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125101</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−345.887.216,03</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125105</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−7.905.277,53</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125106</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−3.858.726,83</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125207</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−60.910,79</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125208</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−238.071,71</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125206</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−457.611,18</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">17115301</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−1.992.661,38</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125201</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−43.963.825,51</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145026</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−5.173,23</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145011</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−2.165.640.135,87</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145015</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−5.558.322,81</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125205</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−1.025.165,42</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125107</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−1.295.786,47</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">17115201</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−169.485,73</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145016</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−6.242.374,92</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145017</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−1.284.844,91</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145018</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−4.271.473,88</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145013</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−21.021.402,31</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145021</td><td class="ug-cell">621310100<span class="conta-name">(-) FUNDEB</span></td><td class="num diff-cell">−16.755.808,50</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11210406</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−79.885,75</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110616</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−16.218,03</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11199905</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−241,95</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">12150111</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.008.371,21</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">12150211</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.469.325,50</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11220101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−109.103,28</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145111</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−5.248,88</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125001</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.557.844,48</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">13110206</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−366,21</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110107</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−46,90</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110611</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−303.958,60</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−364.787,96</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125301</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−499.399,14</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19219901</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−23.672,03</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">12219911</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−37.878,36</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110108</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−39.089,56</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11130341</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−170,67</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11199903</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.800.792,02</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19229901</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−79.580,06</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11210101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−200.785,07</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−4.435.746,27</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">16320101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−53.902,90</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19909911</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−88.982,72</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19991211</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−11.141.448,27</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11210401</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−294.213,53</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110613</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.048,78</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">13110111</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−79.674,71</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">13110201</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−69.568,36</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">16110301</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−11.773.123,40</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11210405</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−33.125,41</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11125201</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−347.854,42</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11145011</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−160.073,14</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110618</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−883,93</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">23110711</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−437.492,47</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19239901</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−1.610.121,97</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11210103</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−9.796,10</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19999921</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−514.334,53</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11199906</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−168,80</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">11219801</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−24.932,44</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">19110106</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−5.174,83</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">24149901</td><td class="ug-cell">621390102<span class="conta-name">(-) RESTITUIÇÕES DE CONVÊNIOS</span></td><td class="num diff-cell">−108.519,24</td><td>N</td></tr><tr data-ug="130101" data-gest="" data-retif=""><td class="ug-cell">130101<span class="ug-name">SECR. DE ESTADO DE ECONOMIA DO DF</span></td><td class="ug-cell">13210101</td><td class="ug-cell">621390102<span class="conta-name">(-) RESTITUIÇÕES DE CONVÊNIOS</span></td><td class="num diff-cell">−214.396,29</td><td>N</td></tr><tr data-ug="140905" data-gest="" data-retif=""><td class="ug-cell">140905<span class="ug-name">FUNDO DE MELHORIA DA GESTÃO PÚBLICA - PRÓ-GESTÃO</span></td><td class="ug-cell">16110101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−65.279,00</td><td>N</td></tr><tr data-ug="170901" data-gest="" data-retif=""><td class="ug-cell">170901<span class="ug-name">FUNDO DE SAÚDE DO DISTRITO FEDERAL</span></td><td class="ug-cell">19229901</td><td class="ug-cell">621390199<span class="conta-name">(-) RESTITUIÇÕES DE OUTRAS RECEITAS</span></td><td class="num diff-cell">−162.457,11</td><td>N</td></tr><tr data-ug="200202" data-gest="" data-retif=""><td class="ug-cell">200202<span class="ug-name">DEPTO DE ESTRADAS E RODAGEM DO DF - DER/DF</span></td><td class="ug-cell">19111401</td><td class="ug-cell">621310300<span class="conta-name">(-) CRÉDITOS A RECOLHER À UNIÃO POR PARTICIPAÇÃO NA RECEITA</span></td><td class="num diff-cell">−2.078.179,02</td><td>N</td></tr><tr data-ug="200204" data-gest="" data-retif=""><td class="ug-cell">200204<span class="ug-name">COMPANHIA DO METROPOLITANO DO DF - METRÔ-DF</span></td><td class="ug-cell">13210101</td><td class="ug-cell">621390108<span class="conta-name">(-) IRRF SOBRE RENDIMENTOS DE APLICAÇÃO FINANCEIRA</span></td><td class="num diff-cell">−6.419,17</td><td>N</td></tr><tr data-ug="210203" data-gest="" data-retif=""><td class="ug-cell">210203<span class="ug-name">EMPRESA DE ASSIST. TÉC. E EXT. RURAL DO DF-EMATER</span></td><td class="ug-cell">13210101</td><td class="ug-cell">621390102<span class="conta-name">(-) RESTITUIÇÕES DE CONVÊNIOS</span></td><td class="num diff-cell">−3.966,81</td><td>N</td></tr><tr data-ug="210203" data-gest="" data-retif=""><td class="ug-cell">210203<span class="ug-name">EMPRESA DE ASSIST. TÉC. E EXT. RURAL DO DF-EMATER</span></td><td class="ug-cell">16110101</td><td class="ug-cell">621390104<span class="conta-name">(-) DEDUÇÃO DA RECEITA DE VENDAS E SERVIÇOS</span></td><td class="num diff-cell">−7.770,21</td><td>N</td></tr><tr data-ug="220201" data-gest="" data-retif=""><td class="ug-cell">220201<span class="ug-name">DEPARTAMENTO DE TRÂNSITO DO DF - DETRAN-DF</span></td><td class="ug-cell">19111401</td><td class="ug-cell">621310300<span class="conta-name">(-) CRÉDITOS A RECOLHER À UNIÃO POR PARTICIPAÇÃO NA RECEITA</span></td><td class="num diff-cell">−15.990.740,93</td><td>N</td></tr><tr data-ug="220201" data-gest="" data-retif=""><td class="ug-cell">220201<span class="ug-name">DEPARTAMENTO DE TRÂNSITO DO DF - DETRAN-DF</span></td><td class="ug-cell">19111401</td><td class="ug-cell">621390199<span class="conta-name">(-) RESTITUIÇÕES DE OUTRAS RECEITAS</span></td><td class="num diff-cell">−90.676.788,15</td><td>N</td></tr><tr data-ug="220906" data-gest="" data-retif=""><td class="ug-cell">220906<span class="ug-name">FUNDO DE MOD., MANUT. E REEQ. DA PCDF - FUNPCDF</span></td><td class="ug-cell">17910101</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−36.643,00</td><td>N</td></tr><tr data-ug="240204" data-gest="" data-retif=""><td class="ug-cell">240204<span class="ug-name">JUNTA COMERCIAL, INDUSTRIAL E SERVIÇOS DO DF</span></td><td class="ug-cell">16110301</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−85.423,98</td><td>N</td></tr><tr data-ug="280208" data-gest="" data-retif=""><td class="ug-cell">280208<span class="ug-name">INSTITUTO DE MEIO AMBIENTE E REC. HÍDRICOS DO DF</span></td><td class="ug-cell">16110301</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−18.989,50</td><td>N</td></tr><tr data-ug="280209" data-gest="" data-retif=""><td class="ug-cell">280209<span class="ug-name">COMPANHIA DE DESENV. DA HABITAÇÃO  DO DF - CODHAB</span></td><td class="ug-cell">13119901</td><td class="ug-cell">621390104<span class="conta-name">(-) DEDUÇÃO DA RECEITA DE VENDAS E SERVIÇOS</span></td><td class="num diff-cell">−832.385,76</td><td>N</td></tr><tr data-ug="280209" data-gest="" data-retif=""><td class="ug-cell">280209<span class="ug-name">COMPANHIA DE DESENV. DA HABITAÇÃO  DO DF - CODHAB</span></td><td class="ug-cell">22210101</td><td class="ug-cell">621390104<span class="conta-name">(-) DEDUÇÃO DA RECEITA DE VENDAS E SERVIÇOS</span></td><td class="num diff-cell">−718.737,17</td><td>N</td></tr><tr data-ug="280209" data-gest="" data-retif=""><td class="ug-cell">280209<span class="ug-name">COMPANHIA DE DESENV. DA HABITAÇÃO  DO DF - CODHAB</span></td><td class="ug-cell">13210101</td><td class="ug-cell">621390104<span class="conta-name">(-) DEDUÇÃO DA RECEITA DE VENDAS E SERVIÇOS</span></td><td class="num diff-cell">−112.298,19</td><td>N</td></tr><tr data-ug="280209" data-gest="" data-retif=""><td class="ug-cell">280209<span class="ug-name">COMPANHIA DE DESENV. DA HABITAÇÃO  DO DF - CODHAB</span></td><td class="ug-cell">16110101</td><td class="ug-cell">621390104<span class="conta-name">(-) DEDUÇÃO DA RECEITA DE VENDAS E SERVIÇOS</span></td><td class="num diff-cell">−2.484,66</td><td>N</td></tr><tr data-ug="280209" data-gest="" data-retif=""><td class="ug-cell">280209<span class="ug-name">COMPANHIA DE DESENV. DA HABITAÇÃO  DO DF - CODHAB</span></td><td class="ug-cell">13210101</td><td class="ug-cell">621390108<span class="conta-name">(-) IRRF SOBRE RENDIMENTOS DE APLICAÇÃO FINANCEIRA</span></td><td class="num diff-cell">−329.130,22</td><td>N</td></tr><tr data-ug="320202" data-gest="" data-retif=""><td class="ug-cell">320202<span class="ug-name">FUNDO SOLIDÁRIO GARANTIDOR DE PREVIDÊNCIA DO DF</span></td><td class="ug-cell">13210401</td><td class="ug-cell">621390107<span class="conta-name">(-) PERDAS APLICAÇÕES FINANCEIRAS</span></td><td class="num diff-cell">−80.246.855,59</td><td>N</td></tr><tr data-ug="440905" data-gest="" data-retif=""><td class="ug-cell">440905<span class="ug-name">FUNDO DE APAR DA DEFENSORIA PÚBLICA DO DF - PRODEF</span></td><td class="ug-cell">19991221</td><td class="ug-cell">621390101<span class="conta-name">(-) RESTITUIÇÕES DE TRIBUTOS</span></td><td class="num diff-cell">−12.422,51</td><td>N</td></tr></tbody></table></div>  </div>
+</details>
+</div>
+<footer>Gerado em 28/10/2026 14:10:25 &mdash; Controles de Rotina GDF 10/2026 &mdash; dados de MIL2026.LANCAMENTOCONTABIL</footer>
+<script>
+/* ── toggle drill-down ── */
+function toggleHier(btn){
+  var key=btn.dataset.key;
+  var tbl=btn.closest('table');
+  var exp=btn.classList.toggle('exp');
+  tbl.querySelectorAll('tr[data-parent="'+key+'"]').forEach(function(tr){
+    tr.style.display=exp?'':'none';
+    if(!exp){
+      var ck=tr.dataset.key;
+      if(ck){
+        tbl.querySelectorAll('tr[data-parent="'+ck+'"]').forEach(function(g){g.style.display='none';});
+        var cb=tr.querySelector('.hier-btn');
+        if(cb)cb.classList.remove('exp');
+      }
+    }
+  });
+}
+/* ── filtros por controle ── */
+function toggleSoDiff(num){
+  var btn=document.getElementById('btn-diff-'+num);
+  if(!btn)return;
+  btn.classList.toggle('active');
+  filtrarCtrl(num);
+}
+function toggleRetif(num){
+  var btn=document.getElementById('btn-retif-'+num);
+  if(!btn)return;
+  btn.classList.toggle('active');
+  filtrarCtrl(num);
+}
+function filtrarCtrl(num){
+  var ugEl=document.getElementById('sel-ug-'+num);
+  var gsEl=document.getElementById('sel-gest-'+num);
+  var ctEl=document.getElementById('sel-conta-'+num);
+  var diffBtn=document.getElementById('btn-diff-'+num);
+  var retifBtn=document.getElementById('btn-retif-'+num);
+  var ug=ugEl?ugEl.value:'';
+  var gs=gsEl?gsEl.value:'';
+  var conta=ctEl?ctEl.value:'';
+  var soDiff=diffBtn&&diffBtn.classList.contains('active');
+  var semRetif=retifBtn&&retifBtn.classList.contains('active');
+  var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
+  if(!tbl)return;
+  var isHier=tbl.classList.contains('tbl-hier');
+  var info=document.getElementById('info-'+num);
+  if(isHier){
+    /* colapsa tudo e filtra L1 por UG e/ou Conta Contábil */
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+      if(tr.classList.contains('hier-l1')){
+        var okUg=!ug||tr.dataset.ug===ug;
+        var okCt=!conta||(tr.dataset.contas||'').split('|').indexOf(conta)>=0;
+        tr.style.display=(okUg&&okCt)?'':'none';
+      } else {
+        tr.style.display='none';
+        var cb=tr.querySelector('.hier-btn');
+        if(cb)cb.classList.remove('exp');
+      }
+    });
+    if(info){
+      var vis=tbl.querySelectorAll('tr.hier-l1').length - tbl.querySelectorAll('tr.hier-l1[style*="none"]').length;
+      var tot=tbl.querySelectorAll('tr.hier-l1').length;
+      info.textContent=(ug||conta)?vis+' de '+tot+' UG(s)':'';
+    }
+  } else {
+    var vis=0,tot=0;
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+      var m=(!ug||tr.dataset.ug===ug)&&(!gs||tr.dataset.gest===gs);
+      if(m&&soDiff&&tr.classList.contains('ok-row'))m=false;
+      if(m&&semRetif&&tr.dataset.retif==='S')m=false;
+      tr.style.display=m?'':'none'; tot++;if(m)vis++;
+    });
+    if(info)info.textContent=(ug||gs||soDiff||semRetif)?vis+' de '+tot+' linha(s)':'';
+  }
+}
+function limparCtrl(num){
+  var ugEl=document.getElementById('sel-ug-'+num);
+  var gsEl=document.getElementById('sel-gest-'+num);
+  var ctEl=document.getElementById('sel-conta-'+num);
+  var diffBtn=document.getElementById('btn-diff-'+num);
+  var retifBtn=document.getElementById('btn-retif-'+num);
+  if(ugEl)ugEl.value='';
+  if(gsEl)gsEl.value='';
+  if(ctEl)ctEl.value='';
+  if(diffBtn)diffBtn.classList.remove('active');
+  if(retifBtn)retifBtn.classList.add('active');
+  var tbl=document.querySelector('table[data-ctrl="'+num+'"]');
+  if(!tbl)return;
+  if(tbl.classList.contains('tbl-hier')){
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){
+      tr.style.display=tr.classList.contains('hier-l1')?'':'none';
+      var cb=tr.querySelector('.hier-btn');
+      if(cb)cb.classList.remove('exp');
+    });
+  } else {
+    tbl.querySelectorAll('tbody tr').forEach(function(tr){tr.style.display='';});
+  }
+  var info=document.getElementById('info-'+num);
+  if(info)info.textContent='';
+}
+</script>
+</body>
+</html>
