@@ -144,7 +144,7 @@ body{font-family:'Segoe UI',sans-serif;font-size:13px;background:#1a1a2e;color:#
 <div id="header">
   <div>
     <h1>Mapa de Tombamentos — GDF / SISGEPAT</h1>
-    <div class="sub">Gerado em 28/10/2026 14:09 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,27 bi</div>
+    <div class="sub">Gerado em 28/10/2026 14:17 &nbsp;|&nbsp; 6,302 imóveis georeferenciados &nbsp;|&nbsp; R$ 483,27 bi</div>
   </div>
 </div>
 <div id="main">
@@ -488,10 +488,20 @@ var _WMS_OBJS={};
     });
   });
 })();
-// Rótulos (base layer usada também como overlay)
-var esriLabelsOv=esriLabels;
-// Controle de base (sem overlays — painel customizado cuida disso)
-L.control.layers(baseLayers,{},{position:'topright',collapsed:true}).addTo(map);
+// ── Mapa base — gerenciado pelo painel customizado ───────────────────────────
+var _activeBase='Satelite';
+var _baseDefs=[
+  {name:'Satelite',layer:esriSat},
+  {name:'Mapa (escuro)',layer:esriDark},
+  {name:'Mapa (claro)',layer:esriLight},
+  {name:'Mapa (ruas)',layer:esriStreet}
+];
+window._setBase=function(name){
+  _baseDefs.forEach(function(b){
+    if(b.name===name){b.layer.addTo(map);_activeBase=name;}
+    else map.removeLayer(b.layer);
+  });
+};
 
 // ── TerraGeo login ────────────────────────────────────────────────────────────
 var _tgToken = null;
@@ -1224,6 +1234,16 @@ document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
     var html='<div id="cam-hdr" onclick="_camToggle()">🗺 Camadas <span>'+(open?'▲':'▼')+'</span></div>';
     if(open){
       html+='<div id="cam-body">';
+      // ── Mapa base ──
+      html+='<div style="border-bottom:1px solid #1a2a50;padding:5px 12px">';
+      html+='<div style="color:#9ab;font-size:10px;letter-spacing:1px;margin-bottom:4px">MAPA BASE</div>';
+      _baseDefs.forEach(function(b){
+        var chk=(_activeBase===b.name)?' checked':'';
+        html+='<label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:1px 0">'
+          +'<input type="radio" name="base-map" value="'+b.name+'"'+chk+'>'
+          +'<span style="font-size:12px">'+b.name+'</span></label>';
+      });
+      html+='</div>';
       // Rótulos (toggle do esri labels)
       var rotOn=map.hasLayer(esriLabels);
       html+='<div class="cam-item" style="border-bottom:1px solid #1a2a50;padding:5px 12px">'
@@ -1248,6 +1268,9 @@ document.getElementById('cb-O').addEventListener('change',aplicarFiltros);
     }
     panel.innerHTML=html;
     // wire events
+    document.querySelectorAll('input[name="base-map"]').forEach(function(r){
+      r.addEventListener('change',function(){_setBase(this.value);});
+    });
     var rotCb=document.getElementById('cb-rotulos');
     if(rotCb) rotCb.addEventListener('change',function(){
       if(this.checked) esriLabels.addTo(map); else map.removeLayer(esriLabels);
