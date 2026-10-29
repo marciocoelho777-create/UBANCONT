@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Custo de Oportunidade — Imóveis GDF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0d1117;--card:#161b22;--border:#21262d;--text:#e6edf3;--muted:#8b949e;
+  --blue:#58a6ff;--green:#3fb950;--red:#f85149;--orange:#f0883e;
+  --purple:#bc8cff;--yellow:#e3b341;--teal:#39d353;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+.header{padding:18px 24px 14px;border-bottom:1px solid var(--border)}
+.header h1{font-size:19px;font-weight:700}
+.header .sub{color:var(--muted);font-size:12px;margin-top:4px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 24px;background:var(--card)}
+.tab{padding:10px 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
+      border-bottom:2px solid transparent;transition:color .15s}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab:hover{color:var(--text)}
+.panel{display:none;padding:20px 24px} .panel.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.card-lbl{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.card-val{font-size:20px;font-weight:700}
+.card-sub{color:var(--muted);font-size:11px;margin-top:3px}
+.g{color:var(--green)} .b{color:var(--blue)} .r{color:var(--red)}
+.o{color:var(--orange)} .p{color:var(--purple)} .y{color:var(--yellow)}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:20px}
+.chart-ttl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--card);color:var(--muted);font-weight:600;text-transform:uppercase;
+          font-size:10px;letter-spacing:.04em;padding:7px 8px;border-bottom:1px solid var(--border);
+          white-space:nowrap;position:sticky;top:0}
+thead th:not(:first-child){text-align:right}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04)}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+td{padding:7px 8px}
+td:not(:first-child){text-align:right}
+.tbl-wrap{max-height:480px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.tag{display:inline-block;padding:1px 7px;border-radius:12px;font-size:11px;font-weight:600}
+.tag-g{background:rgba(63,185,80,.12);color:var(--green)}
+.tag-b{background:rgba(88,166,255,.12);color:var(--blue)}
+.tag-o{background:rgba(240,136,62,.12);color:var(--orange)}
+.note{background:rgba(88,166,255,.07);border:1px solid rgba(88,166,255,.2);border-radius:8px;
+       padding:12px 14px;font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.note b{color:var(--blue)}
+input.srch{background:var(--card);border:1px solid var(--border);border-radius:6px;
+            color:var(--text);font-size:12px;padding:6px 10px;width:100%;max-width:320px;
+            margin-bottom:12px;outline:none}
+input.srch:focus{border-color:var(--blue)}
+.sec-ttl{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;
+          letter-spacing:.06em;margin:18px 0 10px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+
+
+<div class="header">
+  <h1>Custo de Oportunidade — Imóveis do GDF</h1>
+  <div class="sub">Receitas × Despesas × Obras em andamento &nbsp;|&nbsp; Acumulado 2026 (mês 10) &nbsp;|&nbsp; 29/10/2026 14:18</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('resumo',this)">Resumo</div>
+  <div class="tab" onclick="showTab('obras',this)">Obras por Imóvel</div>
+  <div class="tab" onclick="showTab('contratos',this)">Contratos de Serviços</div>
+  <div class="tab" onclick="showTab('receitas',this)">Receitas × Despesas</div>
+</div>
+
+<!-- ═══════════ RESUMO ═══════════ -->
+<div id="tab-resumo" class="panel active">
+<div class="cards">
+  <div class="card"><div class="card-lbl">Receita de Imóveis</div>
+    <div class="card-val g">R$ 3.977.413,92</div>
+    <div class="card-sub">Concessão + Exploração &nbsp;|&nbsp; jan–out/2026</div></div>
+  <div class="card"><div class="card-lbl">Concessão de Uso</div>
+    <div class="card-val b">R$ 2.127.199,40</div>
+    <div class="card-sub">Conta 4.3.3.1.2.8 &nbsp;|&nbsp; 9 UGs</div></div>
+  <div class="card"><div class="card-lbl">Exploração Imobiliária</div>
+    <div class="card-val p">R$ 1.850.214,52</div>
+    <div class="card-sub">Conta 4.3.3.1.1.0 &nbsp;|&nbsp; 4 UGs</div></div>
+  <div class="card"><div class="card-lbl">Obras em Imóveis 2026</div>
+    <div class="card-val y">R$ 68.029.562,72</div>
+    <div class="card-sub">48 imóveis &nbsp;|&nbsp; 86 empenhos</div></div>
+  <div class="card"><div class="card-lbl">Contratos Serviços Ativos</div>
+    <div class="card-val o">R$ 625.719.671,29</div>
+    <div class="card-sub">172 contratos &nbsp;|&nbsp; limpeza/vigil/manut</div></div>
+  <div class="card"><div class="card-lbl">Limpeza e Conservação</div>
+    <div class="card-val r">R$ 4.309.684,43</div>
+    <div class="card-sub">Natureza 3.3.9.1.3 &nbsp;|&nbsp; 58 UGs</div></div>
+</div>
+
+<div class="note">
+  <b>Como interpretar:</b> A receita de imóveis (R$ R$ 3.977.413,92) é o fluxo atual de concessões e exploração. Obras (R$ R$ 68.029.562,72)
+  são despesas de capital vinculadas a tombamentos específicos via PAT_OBRAS × SISGEPAT. Contratos de serviços são identificados pelo texto
+  do objeto (limpeza, vigilância, manutenção, portaria, cessão). A ligação direta entre imóvel e despesa corrente não existe no SIGGO —
+  apenas obras têm tombamento vinculado.
+</div>
+
+<div class="grid2">
+  <div class="chart-box">
+    <div class="chart-ttl">Top obras em imóveis 2026 (R$ mil)</div>
+    <canvas id="chartObras" height="280"></canvas>
+  </div>
+  <div class="chart-box">
+    <div class="chart-ttl">Receita por UG (R$ mil)</div>
+    <canvas id="chartRec" height="280"></canvas>
+  </div>
+</div>
+
+<div class="chart-box">
+  <div class="chart-ttl">Composição das receitas e contratos de serviços</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div><canvas id="chartPie" height="200"></canvas></div>
+    <div style="padding-top:8px">
+      <div class="sec-ttl" style="margin-top:0">Maiores contratos de serviços ativos</div>
+      <table>
+        <thead><tr><th style="text-align:left">Objeto</th><th>UG</th><th>Valor R$</th></tr></thead>
+        <tbody>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 66.178.523,04</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 61.549.766,16</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 57.244.305,12</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 56.693.951,76</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 51.533.938,32</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 49.632.843,36</td></tr>
+<tr><td>Prestação de serviços especializados de vigilância oste</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 48.488.138,64</td></tr>
+<tr><td>Contratação de agente de integração para operacionaliza</td><td style="text-align:right">130103</td><td style="text-align:right;color:var(--orange)">R$ 28.002.928,68</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div><!-- /tab-resumo -->
+
+<!-- ═══════════ OBRAS ═══════════ -->
+<div id="tab-obras" class="panel">
+<div class="cards">
+  <div class="card"><div class="card-lbl">Total obras 2026</div>
+    <div class="card-val y">R$ 68.029.562,72</div>
+    <div class="card-sub">48 imóveis com empenho</div></div>
+  <div class="card"><div class="card-lbl">Empenhos registrados</div>
+    <div class="card-val b">86</div>
+    <div class="card-sub">via PAT_OBRAS × NE 2026</div></div>
+  <div class="card"><div class="card-lbl">Vinculados ao SISGEPAT</div>
+    <div class="card-val g">100%</div>
+    <div class="card-sub">tombamento + endereço + cidade</div></div>
+</div>
+<div class="note">
+  <b>Fonte:</b> SIGGO.PAT_OBRAS cruzado com PAT_IMOVEIS pelo tombamento.
+  Cada linha é uma medição/empenho de obra. O valor total por tombamento é a soma de todas as medições em 2026.
+</div>
+<input class="srch" id="srchObras" placeholder="Filtrar por tombamento, cidade, descrição..." oninput="filterObras()">
+<div class="tbl-wrap">
+<table id="tblObras">
+<thead><tr>
+  <th style="text-align:left">Tombamento</th>
+  <th style="text-align:left">Endereço</th>
+  <th style="text-align:left">Cidade</th>
+  <th style="text-align:left">Ocupação</th>
+  <th>UG</th>
+  <th>Empenhos</th>
+  <th>Total Obras R$</th>
+</tr></thead>
+<tbody id="obrasBody"></tbody>
+</table>
+</div>
+</div><!-- /tab-obras -->
+
+<!-- ═══════════ CONTRATOS ═══════════ -->
+<div id="tab-contratos" class="panel">
+<div class="cards">
+  <div class="card"><div class="card-lbl">Contratos ativos</div>
+    <div class="card-val o">172</div>
+    <div class="card-sub">limpeza/vigil/manut/cessão</div></div>
+  <div class="card"><div class="card-lbl">Valor total</div>
+    <div class="card-val y">R$ 625.719.671,29</div>
+    <div class="card-sub">valor contratado original</div></div>
+</div>
+<div class="note">
+  <b>Filtro:</b> Contratos com status=ativo e objeto contendo "limpeza", "vigilância", "manutenção", "conservação",
+  "predial", "portaria", "cessão", "concessão", "permissão" ou "locação". O processo SEI do contrato pode ser cruzado
+  manualmente com o campo PROCESSO do SISGEPAT para identificar o imóvel específico.
+</div>
+<input class="srch" id="srchContr" placeholder="Filtrar por UG, objeto, processo..." oninput="filterContr()">
+<div class="tbl-wrap">
+<table id="tblContr">
+<thead><tr>
+  <th style="text-align:left">Nº Contrato</th>
+  <th style="text-align:left">UG</th>
+  <th style="text-align:left">Objeto</th>
+  <th style="text-align:left">Processo SEI</th>
+  <th>Início</th>
+  <th>Fim</th>
+  <th>Valor R$</th>
+</tr></thead>
+<tbody id="contrBody"></tbody>
+</table>
+</div>
+</div><!-- /tab-contratos -->
+
+<!-- ═══════════ RECEITAS × DESPESAS ═══════════ -->
+<div id="tab-receitas" class="panel">
+<div class="cards">
+  <div class="card"><div class="card-lbl">Receita de imóveis</div>
+    <div class="card-val g">R$ 3.977.413,92</div>
+    <div class="card-sub">Concessão + Exploração</div></div>
+  <div class="card"><div class="card-lbl">Limpeza/Conservação</div>
+    <div class="card-val o">R$ 4.309.684,43</div>
+    <div class="card-sub">Natureza 3.3.9.1.3</div></div>
+  <div class="card"><div class="card-lbl">Vigilância (codificada)</div>
+    <div class="card-val y">R$ 49.971,93</div>
+    <div class="card-sub">Natureza 3.3.9.1.4</div></div>
+  <div class="card"><div class="card-lbl">Obras de capital</div>
+    <div class="card-val b">R$ 68.029.562,72</div>
+    <div class="card-sub">PAT_OBRAS 2026</div></div>
+</div>
+<div class="note">
+  <b>Saldo receita − limpeza:</b> R$ -332.270,51 — a receita identificada cobre 92.3% do custo de limpeza/conservação.
+  A vigilância geral (sub-naturezas 33903xxx) soma ~R$ 503M mas inclui todos os contratos de serviços PJ, não só imóveis.
+</div>
+<div class="tbl-wrap">
+<table>
+<thead><tr>
+  <th style="text-align:left">UG</th>
+  <th style="text-align:left">Órgão</th>
+  <th>Concessão R$</th>
+  <th>Exploração R$</th>
+  <th>Total Receita</th>
+  <th>Limpeza R$</th>
+  <th>Vigilância R$</th>
+  <th>Saldo Rec−Limp</th>
+</tr></thead>
+<tbody>
+<tr><td><b>130101</b></td><td>SECR. DE ESTADO DE ECONOMIA DO DF</td><td>R$ 1.708.345,93</td><td>R$ 1.444.868,05</td><td style="font-weight:700;color:var(--green)">R$ 3.153.213,98</td><td style="color:var(--orange)">R$ 0,00</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-g">R$ 3.153.213,98</span></td></tr>
+<tr><td><b>200202</b></td><td>DEPTO DE ESTRADAS E RODAGEM DO DF - DER/DF</td><td>R$ 10.294,05</td><td>R$ 329.836,77</td><td style="font-weight:700;color:var(--green)">R$ 340.130,82</td><td style="color:var(--orange)">R$ 141.588,05</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-g">R$ 198.542,77</span></td></tr>
+<tr><td><b>200101</b></td><td>SECRETARIA DE EST.DE TRANSPORTE E MOBILIDADE </td><td>R$ 180.045,59</td><td>R$ 71.059,22</td><td style="font-weight:700;color:var(--green)">R$ 251.104,81</td><td style="color:var(--orange)">R$ 2.484.721,20</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-r">R$ -2.233.616,39</span></td></tr>
+<tr><td><b>200204</b></td><td>COMPANHIA DO METROPOLITANO DO DF - METRÔ-DF</td><td>R$ 219.423,05</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 219.423,05</td><td style="color:var(--orange)">R$ 7.966,72</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-g">R$ 211.456,33</span></td></tr>
+<tr><td><b>170203</b></td><td>FUNDAÇÃO DE ENS. E PESQ. EM CIÊNC. DA SAÚDE-F</td><td>R$ 0,00</td><td>R$ 4.450,48</td><td style="font-weight:700;color:var(--green)">R$ 4.450,48</td><td style="color:var(--orange)">R$ 0,00</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-g">R$ 4.450,48</span></td></tr>
+<tr><td><b>150204</b></td><td>FUNDAÇÃO JARDIM ZOOLÓGICO DE BRASÍLIA</td><td>R$ 3.699,26</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 3.699,26</td><td style="color:var(--orange)">R$ 71.891,10</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-r">R$ -68.191,84</span></td></tr>
+<tr><td><b>20101</b></td><td>TRIBUNAL DE CONTAS DO DISTRITO FEDERAL</td><td>R$ 3.317,84</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 3.317,84</td><td style="color:var(--orange)">R$ 0,00</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-g">R$ 3.317,84</span></td></tr>
+<tr><td><b>280208</b></td><td>INSTITUTO DE MEIO AMBIENTE E REC. HÍDRICOS DO</td><td>R$ 1.422,58</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 1.422,58</td><td style="color:var(--orange)">R$ 29.772,85</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-r">R$ -28.350,27</span></td></tr>
+<tr><td><b>210101</b></td><td>SECRETARIA DE AGRIC. ABASTECIMENTO E DESENV R</td><td>R$ 389,53</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 389,53</td><td style="color:var(--orange)">R$ 8.551,03</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-r">R$ -8.161,50</span></td></tr>
+<tr><td><b>10101</b></td><td>CÂMARA LEGISLATIVA DO DISTRITO FEDERAL</td><td>R$ 261,57</td><td>R$ 0,00</td><td style="font-weight:700;color:var(--green)">R$ 261,57</td><td style="color:var(--orange)">R$ 509,76</td><td style="color:var(--yellow)">R$ 0,00</td><td><span class="tag tag-r">R$ -248,19</span></td></tr>
+</tbody>
+</table>
+</div>
+</div><!-- /tab-receitas -->
+
+<script>
+// ── Dados ──────────────────────────────────────────────────────────────────
+const OBRAS = [{"tomb": "0834/08", "ug": "220104", "end": "SAI  Lt. D (TEI 162/80)", "cid": "Asa Norte", "total": 8698489.38, "n_ne": 3, "descr": "despesa com contratacao de empresa especializada para a construcao da edificacao", "ocup": ""}, {"tomb": "02497/13", "ug": "220105", "end": "SPO, Conj. A, Lt. 23", "cid": "Asa Sul", "total": 5698055.37, "n_ne": 3, "descr": "nova sede da policlinica da policia civil do distrito federal, referente a 2ª me", "ocup": ""}, {"tomb": "03025/26", "ug": "220105", "end": "Setor Central, AE (TEI nº 1808/92)", "cid": "Taguatinga", "total": 3981361.8, "n_ne": 1, "descr": "construcao da 12ªdp, de acordo com a nota fiscal nº448 , referente ao contrato n", "ocup": ""}, {"tomb": "03019/26", "ug": "160101", "end": " Qd. 104, Conj. 10-A, Lt. 01 (R.E. QD 104 CJ 10A LT 1)  ( TE", "cid": "Recanto das Emas", "total": 3938007.85, "n_ne": 3, "descr": "aprop.desp.ct.85/2025.const.cepi t1.tr.1,qd 104,cj10,lt1,rec.das emas.rel.cirº 6", "ocup": ""}, {"tomb": "02997/24", "ug": "160101", "end": "Setor Habitacional Sol Nascente - SHSN, Trecho 01, Etapa 01,", "cid": "Ceilândia", "total": 3774903.72, "n_ne": 5, "descr": "const. cepi t1 -  tr. 1, et. 1, q. 601, a.e 03, st. hab. sol nasc.-df, ct. 108/2", "ocup": ""}, {"tomb": "03002/25", "ug": "480101", "end": "Bairro Centro, Centro de Múltiplas Atividades AE 05 ( TEI 62", "cid": "São Sebastião", "total": 3635763.96, "n_ne": 2, "descr": "construção do naj de são sebastião, reajuste 8º a 15ª medição, -2026NL01127", "ocup": ""}, {"tomb": "03013/25", "ug": "480101", "end": "Trecho 2, Quadra 209, Conjunto K, Setor Habitacional Sol Nas", "cid": "Sol Nascente", "total": 3224149.41, "n_ne": 1, "descr": "construção do naj do sol nascente/por do sol,7ª medição, cont. nº 31/2025. perío", "ocup": ""}, {"tomb": "01352/09", "ug": "220103", "end": "SAI/SUDOESTE, Lt. 04  (SPO/SUL)  (TEI 507/83 )\r\n", "cid": "Asa Sul", "total": 3116354.04, "n_ne": 2, "descr": "obra de reforma e ampliacao(arquitetura e engenharia civil da sede do centro odo", "ocup": ""}, {"tomb": "02915/22", "ug": "340101", "end": "Diversos locais", "cid": "Brasília", "total": 2938370.03, "n_ne": 4, "descr": "reforma das pistas de atletismo  do estádio augustinho lima (204768517). 2026NL0", "ocup": ""}, {"tomb": "02919/22", "ug": "160101", "end": "Quadra 112 conjunto 05a lote 01 (TEI 4681/13)", "cid": "Recanto das Emas", "total": 2767057.46, "n_ne": 4, "descr": "aprop.desp.ct.48/2026.const.cepi t1,qd 112, cj15-a, lt1,rec.das emas.3ªet.rel.ci", "ocup": ""}, {"tomb": "02999/24", "ug": "160101", "end": "Qd. 805, lt. 01 ( TEI  3396/05 )\r\n", "cid": "Recanto das Emas", "total": 2353923.33, "n_ne": 3, "descr": "aprop.desp.ct.52/2024. cepi tp 1,q. 805, lt 1-recanto das emas/df.(1ºe2º reaj.).", "ocup": ""}, {"tomb": "03030/26", "ug": "200101", "end": "18 Abrigos de Passageiros Tipo C - Contrato 056627/2026", "cid": "Brasília", "total": 1914099.69, "n_ne": 2, "descr": "aprop desp implantação de abrigos tipo c de passageiros de ônibus  - sei 2107260", "ocup": ""}, {"tomb": "03027/26", "ug": "160101", "end": "Qd. 201, Conj. 13, Lt 01 (TEI 4733/13)", "cid": "Recanto das Emas", "total": 1888379.29, "n_ne": 2, "descr": "aprop. desp. ct.14/2026. const.cepi t1.tr.1, et.1, qd 201, cj13, lt1, rec.das em", "ocup": ""}, {"tomb": "03009/25", "ug": "160101", "end": "Paranoá Parque, Qd. 01, Cj. 01, AE 02", "cid": "Paranoá", "total": 1870747.66, "n_ne": 1, "descr": "aprop.desp.ct38/2025.obra cepi tp 1 urbanização qd 1 conj 1 ae2. 8ª med. reg:par", "ocup": ""}, {"tomb": "03012/25", "ug": "200101", "end": "Quadra 8, próximo à DF-087 (EPVL), em frente ao Parque Urban", "cid": "Estrutural", "total": 1803907.1, "n_ne": 3, "descr": "construção do terminal rodoviário na cidade estrutural - df, sei 215302941, proc", "ocup": ""}, {"tomb": "03028/26", "ug": "200101", "end": "QR 119 - Terminal Rodoviário BRT (TEI 2431/ 98)", "cid": "Santa Maria", "total": 1284266.15, "n_ne": 2, "descr": "aprop desp para construção do terminal rodoviário brt santa maria - df (6ª med),", "ocup": ""}, {"tomb": "03018/26", "ug": "210101", "end": "Rodovia DF 463, km 0,1", "cid": "Jardim Botânico", "total": 1179532.33, "n_ne": 1, "descr": "9ªmed construção do novo empório jardins mangueiral, rodovia df-463, km 0,1. 202", "ocup": ""}, {"tomb": "02988/24", "ug": "160101", "end": "QN 14-E, AE 1", "cid": "Riacho Fundo II", "total": 1088458.83, "n_ne": 3, "descr": "aprop.desp. ct.63/2023.cepi tp1,qn14e ae01.riacho fundo ii-df. 25ª med.rel:15/26", "ocup": ""}, {"tomb": "03026/26", "ug": "220103", "end": "SAF NORTE, entre via N2 e via L4", "cid": "Brasília", "total": 1068021.16, "n_ne": 2, "descr": "aprop/pagto de repasse financeiro referente ao convenio numero 01/2024 pmdf/nova", "ocup": ""}, {"tomb": "02141/12", "ug": "220103", "end": "Setor E Sul, Lt. E (TEI 2413/98)", "cid": "Taguatinga", "total": 1029557.28, "n_ne": 2, "descr": "aprop/pagto desp. c/ execução obra(2°bpm). emp: valdete rodrigues. 054-00164036/", "ocup": ""}, {"tomb": "02975/23", "ug": "220103", "end": "CAPS PMDF", "cid": "Brasília", "total": 923622.7, "n_ne": 2, "descr": "obra(edificação do caps). process 00054-00143152/2023-10. pl.204418196.-2026NL00", "ocup": ""}, {"tomb": "0619/07", "ug": "160101", "end": "Qd. 31, Conj. F, AE", "cid": "Paranoá", "total": 841050.82, "n_ne": 1, "descr": "aprop.desp.ct.143/2025.ref.const.da obra de implant. de qd coberta,qd31,cj f,á.e", "ocup": ""}, {"tomb": "01857/11", "ug": "20101", "end": "Praça Municipal, Lt. 04 (TEI 474/83)", "cid": "Eixo Monumental", "total": 798449.05, "n_ne": 2, "descr": "serv de engª referentes a mudanças de leiaute do ed anexo do tcdf. 2ª med. 2026N", "ocup": ""}, {"tomb": "03010/25", "ug": "340101", "end": "Quadra 25", "cid": "Paranoá", "total": 770563.01, "n_ne": 1, "descr": "construção do centro olímpico e paralímpico do paranoá/df 1ª etapa, 2º medição(2", "ocup": ""}, {"tomb": "02059/12", "ug": "190106", "end": "Praça Central, INCRA 08.", "cid": "Brazlândia", "total": 632626.34, "n_ne": 2, "descr": "1ª med. lote 01: revitalização praça central do incra 08 e do pi e lote nº 02: r", "ocup": ""}, {"tomb": "02990/24", "ug": "160101", "end": "sh taquari, qd 04, ae 04, lago norte/df", "cid": "Lago Norte", "total": 601565.16, "n_ne": 3, "descr": "aprop.desp.ct70/2023.obra cepi tp 1 sh taquari qd 4 ae 04 lago norte. 1ª et, 28ª", "ocup": ""}, {"tomb": "02880/20", "ug": "220103", "end": "Diversos Locais , contrato 57/2019 e 63/2023", "cid": "Asa Sul", "total": 573649.64, "n_ne": 1, "descr": "elaboracao de projetos (building information modeling - bim). processo sei 00054", "ocup": ""}, {"tomb": "03014/25", "ug": "200101", "end": "Paraciclos horizontais para estacionamento de bicicletas em ", "cid": "Brasília", "total": 554733.0, "n_ne": 1, "descr": "aprop desp aquisição e instalação de paraciclos horizontais (os 127) - metalco d", "ocup": ""}, {"tomb": "0045/01", "ug": "160101", "end": "SGA Qd. 611, Módulos 78 a 82 (TEI 4954/14)", "cid": "Asa Sul", "total": 540487.73, "n_ne": 1, "descr": "aprop.desp.ct.65/2025.ref.implant. de qd coberta com vestiário padrão fnde,sgas ", "ocup": ""}, {"tomb": "03032/26", "ug": "220104", "end": "SHSN Trecho 01, Quadra 500, Área Especial 03, Setor Habitaci", "cid": "Ceilândia", "total": 530502.55, "n_ne": 3, "descr": "despesas com obras e instalações construção do 42 gbm sol nascente nf 679 111/20", "ocup": ""}, {"tomb": "03031/26", "ug": "230101", "end": "Praça Lourival Bandeira Área Especial nº 01, Setor Leste (Ci", "cid": "Gama", "total": 499105.78, "n_ne": 1, "descr": "desp. c/ ctr nº 13/2026-secec. empresa, prest. de serv. manut. predial e forneci", "ocup": ""}, {"tomb": "03023/26", "ug": "340101", "end": "Estádio augustinho lima  (TEI 19/74)", "cid": "Sobradinho", "total": 436405.67, "n_ne": 1, "descr": "aprop. despesa de reforma das pistas de atletismo do estádio augustinho lima, co", "ocup": ""}, {"tomb": "03029/26", "ug": "160101", "end": " Quadra 11, Área Especial, Núcleo Rural Vargem Bonita, Park ", "cid": "Park Way", "total": 413486.98, "n_ne": 1, "descr": "aprop.desp.ct.65/2025.obra de constr.cepi.qd11.ae.nuc.rur.vargem bonita,park way", "ocup": ""}, {"tomb": "02738/14", "ug": "130103", "end": "Praça Municipal, Lt. 03 (TEI 446/83)", "cid": "Eixo Monumental", "total": 410534.79, "n_ne": 1, "descr": "reforma da cobertura do anexo palácio buriti contrato nº 54508/2025-seec. 04044-", "ocup": ""}, {"tomb": "02986/24", "ug": "160101", "end": "Setor Habitacional Arniqueiras, Conjunto 04, AE 01", "cid": "Arniqueiras", "total": 376982.64, "n_ne": 1, "descr": "aprop.desp.ct.48/2023.const ced-sha,cj 04,ae 06,arniqueira/df.(25ª med-reajuste)", "ocup": ""}, {"tomb": "03024/26", "ug": "200101", "end": "Abrigos de Passageiros - não especificado pela UG (Contrato ", "cid": "Brasília", "total": 376665.6, "n_ne": 1, "descr": "aprop p/ retenção de inss, implantação de abrigos, as engenharia ltda_cnpj 17.70", "ocup": ""}, {"tomb": "03034/26", "ug": "200101", "end": "Setor Habitacional Mangueiral, CR 3, Lotes 1 e 2", "cid": "Jardim Botânico", "total": 369259.76, "n_ne": 1, "descr": "construção do terminal rodoviário do jardim botânico/df - sei 211402657, proc 00", "ocup": ""}, {"tomb": "03035/26", "ug": "160101", "end": "Paranoa Parque, EQ. 01/02, AE 05 (TEI 6088/17)", "cid": "Paranoa", "total": 229212.84, "n_ne": 1, "descr": "aprop. desp. ct 119/2025. const.tp1, cepi,  eq1/2,ae5, paranoá parque, ra-vii, r", "ocup": ""}, {"tomb": "02881/20", "ug": "210101", "end": "Núcleo Rural Oziel Alves", "cid": "Planaltina", "total": 186259.76, "n_ne": 2, "descr": "1ª med. construção do galpão de comercialização rural do assentamento oziel alve", "ocup": ""}, {"tomb": "02992/24", "ug": "190106", "end": "Setor Norte , AE 3 ( TEI 211/80 )", "cid": "Brazlândia", "total": 130580.0, "n_ne": 1, "descr": "revitalização do galpão do almoxarifado, parte do complexo do parque de serviços", "ocup": ""}, {"tomb": "03033/26", "ug": "190133", "end": "DF 150, km 13, Quadra 17, Área Especial 02, Comunidade Alto ", "cid": "Fercal", "total": 127565.37, "n_ne": 1, "descr": "despesa referente execução da reforma das dependências do centro comunitário do ", "ocup": ""}, {"tomb": "02981/24", "ug": "160101", "end": "QN 417, AE 01 (QR 415, AE 01) ", "cid": "Samambaia", "total": 121914.45, "n_ne": 1, "descr": "aprop.desp.ct 55/2023.ref.reconst.ec 415-qn 417,ae,st.norte,samambaia/df.(22ºmed", "ocup": ""}, {"tomb": "03006/25", "ug": "160101", "end": "QD 2/4, AE 7", "cid": "Candangolândia", "total": 118866.4, "n_ne": 1, "descr": "aprop.desp.ct 49/25.dec. judicial nº 0732066-90.2018.8.07.0001(15,00%). reconst ", "ocup": ""}, {"tomb": "03036/26", "ug": "190110", "end": "Praça Vitória, Vila Cauhy", "cid": "Nucleo Bandeirante", "total": 64500.0, "n_ne": 1, "descr": "Playground, empresa 08727087000105 - rei dos capachos comercio e industria. aut ", "ocup": ""}, {"tomb": "03022/26", "ug": "190108", "end": "Qd. 3/4, Vila Buritis, Planaltina-df", "cid": "Planaltina", "total": 62000.0, "n_ne": 1, "descr": "despesa com obras e instalações de parque infantil na entrequadra 3/4 da vila bu", "ocup": ""}, {"tomb": "03021/26", "ug": "190108", "end": "Quadra 6 da Vila Buritis, Planaltina-DF", "cid": "Planaltina", "total": 62000.0, "n_ne": 1, "descr": "despesa com obras e instalações de parque infantil na quadra 6 da vila buritis. ", "ocup": ""}, {"tomb": "03017/25", "ug": "310101", "end": "Setor Tradicional, Av. Marechal Deodoro 1073, Qd. 53, Lt. 09", "cid": "Planaltina", "total": 22829.7, "n_ne": 1, "descr": "elaboração de projeto arquitetônico - 2026NL00047\r\n", "ocup": ""}, {"tomb": "02918/22", "ug": "220104", "end": "SAI/SUDOESTE, ÁREA 03 ( LT. 03, SPO - 70602-900)  ( TEI 4648", "cid": "Asa Sul", "total": 737.14, "n_ne": 1, "descr": "desp obras e instalações repasse 14 med. contrato 45/2021 e convenio n 888.228/2", "ocup": ""}];
+const CONTRATOS = [{"num": 34911, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017107/2017-21", "valor": 66178523.04, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34967, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017106/2017-86", "valor": 61549766.16, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34913, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017109/2017-10", "valor": 57244305.12, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34909, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017102/2017-06", "valor": 56693951.76, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34912, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017108/2017-75", "valor": 51533938.32, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34910, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017105/2017-31", "valor": 49632843.36, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 34914, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Prestação de serviços especializados de vigilância ostensiva armada e desarmada, diurna e noturna, fixa e motorizada, pa", "processo": "00410-0000017110/2017-44", "valor": 48488138.64, "inicio": "28/08/2017", "fim": "28/08/2023"}, {"num": 35848, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Contratação de agente de integração para operacionalização do Programa de Estágio da Secretaria de Estado de Planejament", "processo": "00410-0000015470/2017-10", "valor": 28002928.68, "inicio": "01/03/2018", "fim": "01/03/2024"}, {"num": 50986, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Serviços de gerenciamento de frota e administração de manutenção preventiva e corretiva da frota de veículos.", "processo": "04033-0000002690/2024-17", "valor": 20219974.7, "inicio": "22/04/2024", "fim": "22/04/2025"}, {"num": 32190, "ug": 190101, "nome_ug": "SECRETARIA DE ESTADO DE OBRAS E INFRAEST", "objeto": "PRESTAÇÃO DE SERVIÇOS A SEREM EXECUTADOS DE FORMA CONTÍNUA, CORRESPONDENTES A CONSULTORIA, ENGENHARIA DE MANUTENÇÃO, OPE", "processo": "00000-0360000332/2011-00", "valor": 18954560.88, "inicio": "03/07/2012", "fim": "04/07/2018"}, {"num": 54081, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "PRESTAÇÃO DE SERVIÇOS CONTINUADOS DE LIMPEZA, CONSERVAÇÃO E ASSEIO, COM FORNECIMENTO DE MÃO DE OBRA, MATERIAIS, EQUIPAME", "processo": "04044-0000015082/2025-80", "valor": 18033069.0, "inicio": "01/08/2025", "fim": "31/12/2025"}, {"num": 54981, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "CONTRATAÇÃO DE EMPRESA ESPECIALIZADA NA IMPLANTAÇÃO E MANUTENÇÃO DE CALÇADAS NAS ÁREAS DE DESENVOLVIMENTO ECONÔMICO E ÁR", "processo": "04035-0000007037/2025-61", "valor": 17627207.98, "inicio": "22/08/2025", "fim": "22/08/2026"}, {"num": 51837, "ug": 200202, "nome_ug": "DEPTO DE ESTRADAS E RODAGEM DO DF - DER/", "objeto": " PRESTAÇÃO DE SERVIÇOS DE ENGENHARIA DE MANUTENÇÃO DE PAVIMENTOS DE CONCRETO EM DIVERSOS LOCAIS NO DISTRITO FEDERAL REFE", "processo": "00113-0000001340/2023-94", "valor": 13504999.99, "inicio": "19/03/2024", "fim": "20/03/2026"}, {"num": 34666, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Contratação de empresa especializada em serviços de brigada contra incêndio e pânico, com alocação de Bombeiros Civis, a", "processo": "00410-0000013568/2017-00", "valor": 11482734.3, "inicio": "14/06/2017", "fim": "14/06/2023"}, {"num": 49780, "ug": 200101, "nome_ug": "SECRETARIA DE EST.DE TRANSPORTE E MOBILI", "objeto": "Prestação de serviço de limpeza e conservação - outras necessidades", "processo": "00090-0000014497/2022-31", "valor": 8582534.4, "inicio": "05/09/2023", "fim": "05/09/2024"}, {"num": 49194, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "aquisição de materiais para manutenção de bens imóveis/instalações (material de pintura em geral), a serem empregados em", "processo": "04012-0000002642/2022-51", "valor": 8215119.7, "inicio": "13/07/2023", "fim": "13/07/2025"}, {"num": 41239, "ug": 250907, "nome_ug": "FUNDO DO TRABALHO DO DISTRITO FEDERAL -", "objeto": "A CONTRATAÇÃO DE EMPRESA ESPECIALIZADA PARA A PRESTAÇÃO DE SERVIÇOS DE MANUTENÇÃO PREDIAL E REFORMAS, COM FORNECIMENTO D", "processo": "04012-0000001892/2020-11", "valor": 7996057.76, "inicio": "01/07/2020", "fim": "01/07/2026"}, {"num": 25076, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "A aquisição de reagentes para realização de exames com fornecimento de equi- pamentos automatizados, na modalidade comod", "processo": "00000-0060001710/2011-00", "valor": 6378200.0, "inicio": "09/11/2012", "fim": "08/11/2013"}, {"num": 41761, "ug": 640101, "nome_ug": "SECRETARIA DE ESTADO DE ADM. PENITENCIÁR", "objeto": "PRESTAR SERVIÇO DE LIMPEZA E CONSERVAÇÃO.                                                                               ", "processo": "04026-0000011762/2020-38", "valor": 5608971.84, "inicio": "01/08/2022", "fim": "31/07/2023"}, {"num": 49487, "ug": 10101, "nome_ug": "CÂMARA LEGISLATIVA DO DISTRITO FEDERAL", "objeto": "Contratação, por meio de execução indireta, de serviços contínuos E SOB DEMANDA de vigilância patrimonial (armada e desa", "processo": "00001-0000016450/2020-48", "valor": 4902322.56, "inicio": "31/07/2023", "fim": "30/07/2024"}, {"num": 37340, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "O presente Contrato tem por objeto a contratação de serviços de locação de veículos automotores, tipo minivan ou utilitá", "processo": "00410-0000004768/2018-77", "valor": 3698457.48, "inicio": "28/09/2018", "fim": "28/03/2024"}, {"num": 27314, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "Aquisição de testes diagnósticos de HIV I/II e Hepatites Virais A, B e C integrado a locação de equipamentos, por meio d", "processo": "00000-0060007329/2012-00", "valor": 3322964.0, "inicio": "23/05/2013", "fim": "22/05/2014"}, {"num": 40276, "ug": 150204, "nome_ug": "FUNDAÇÃO JARDIM ZOOLÓGICO DE BRASÍLIA", "objeto": "Prestação de serviços, sob demanda, comuns de engenharia inerentes à manutenção predial preventiva e corretiva dos bens ", "processo": "00196-0000003056/2018-12", "valor": 3128469.0, "inicio": "06/12/2019", "fim": "06/12/2020"}, {"num": 25572, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "AQUISIÇÃO DE REAGENTES P/ REALIZAÇÃO DE EXAMES DE HEMOGRAMA COMPLETO, SUFICIENTES P/ A AVALIAÇÃO DA SÉRIE BRANCA, VERMEL", "processo": "00000-0060001712/2011-00", "valor": 2534400.0, "inicio": "12/12/2012", "fim": "11/12/2013"}, {"num": 43376, "ug": 10101, "nome_ug": "CÂMARA LEGISLATIVA DO DISTRITO FEDERAL", "objeto": "Contratação dos serviços de manutenção predial nos sistemas prediais e nas instalações do edifício sede da CLDF, com for", "processo": "00001-0000000765/2019-00", "valor": 2399099.34, "inicio": "15/03/2021", "fim": "08/04/2023"}, {"num": 55960, "ug": 160101, "nome_ug": "SECRETARIA DE ESTADO DE EDUCAÇÃO DO DF", "objeto": "LOCAÇÃO DE IMÓVEL NA REGIÃO ADMINISTRATIVA DO PARANOÁ, COM O OBJETIVO DE ATENDER A ESCOLA CLASSE COMUNIDADE DE APRENDIZA", "processo": "00080-0000002320/2024-91", "valor": 2347904.4, "inicio": "11/11/2025", "fim": "11/11/2026"}, {"num": 27887, "ug": 190101, "nome_ug": "SECRETARIA DE ESTADO DE OBRAS E INFRAEST", "objeto": "EXECUÇÃO DE SERVIÇO DE MANUTENÇÃO EM MOBILIÁRIO URBANO, DE ESPORTE E LAZER E DE CULTURA, DE NATUREZA CONTINUADA EM TAGUA", "processo": "00000-0110000413/2012-00", "valor": 2043130.64, "inicio": "05/08/2013", "fim": "03/11/2014"}, {"num": 32316, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "PRESTAÇÃO DE SERVIÇOS CONTINUADOS DE EXPLORAÇÃO DE RESTAURANTE COMUNITÁRIO COM A PRESTAÇÃO DE SERVIÇOS DE PREPARO, FORNE", "processo": "00000-0380000846/2015-00", "valor": 1977300.0, "inicio": "19/08/2015", "fim": "14/02/2016"}, {"num": 28531, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "Prestação de serviços de locação de Kit´s de oxigenoterapia domiciliar de baixo fluxo, com manutenção preventiva, corret", "processo": "00000-0060011423/2013-00", "valor": 1944000.0, "inicio": "12/11/2013", "fim": "10/05/2014"}, {"num": 49195, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "Aquisição de materiais para manutenção de bens imóveis/instalações (material de pintura em geral), a serem empregados em", "processo": "04012-0000002642/2022-51", "valor": 1870889.71, "inicio": "14/07/2023", "fim": "14/07/2025"}, {"num": 30080, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "LOCAÇÃO DE FRAÇÃO DO IMÓVEL LOCALIZADO NO SCS, QUADRA 09, BLOCO A/B, 1º SUBSOLO, BRASÍLIA/DF A SUBSAÚDE.                ", "processo": "00000-0414000489/2012-00", "valor": 1800000.0, "inicio": "01/04/2014", "fim": "31/03/2019"}, {"num": 30152, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "Aquisição de FRASCOS REAGENTES PARA HEMOCULTIVO p sistema automatizado, bem como a manutenção preventiva e corretiva des", "processo": "00000-0060006931/2013-00", "valor": 1558680.0, "inicio": "27/05/2014", "fim": "26/05/2015"}, {"num": 56400, "ug": 190201, "nome_ug": "COMPANHIA URB. DA NOVA CAPITAL DO BRASIL", "objeto": "SERVIÇOS DE COLETA E ANÁLISE DO AR, LIMPEZA DAS REDES DE DUTOS E EQUIPAMENTOS, TRATAMENTO CORRETIVO E PREVENTIVO DOS SIS", "processo": "00112-0000027778/2023-21", "valor": 1507963.96, "inicio": "22/12/2025", "fim": "22/12/2026"}, {"num": 32654, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "PRESTAÇÃO DE SERVIÇO DE MANUTENÇÃO PREVENTIVA E CORRETIVA NAS INSTALAÇÕES PREDIAIS, ELETRICAS, LOGICAS, HIDRAULICAS, OBR", "processo": "00000-0430000043/2014-00", "valor": 1500000.0, "inicio": "09/10/2015", "fim": "10/10/2017"}, {"num": 40455, "ug": 130103, "nome_ug": "SEÇÃO DE ORÇAMENTO DA SEEC", "objeto": "Contratação de empresa especializada para prestação de serviços de manutenção predial, com fornecimento de peças, equipa", "processo": "00040-0000002192/2020-00", "valor": 1421661.15, "inicio": "29/01/2020", "fim": "04/08/2022"}, {"num": 45036, "ug": 570101, "nome_ug": "SECRETARIA DE ESTADO DA MULHER DO DISTRI", "objeto": "O Contrato tem por objetivo contratação de serviços de manutenção predial destinado ao atendimento das necessidades das ", "processo": "04011-0000002314/2021-01", "valor": 1354544.26, "inicio": "20/11/2022", "fim": "19/11/2023"}, {"num": 54911, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "FORNECIMENTO DE ÓRTESES, PRÓTESES E MATERIAIS ESPECIAIS (OPME), PERTENCENTE(S) AO(S) GRUPO 36.90.03.1 ORTOPEDIA - COMPRA", "processo": "00060-0000191679/2025-80", "valor": 1344000.0, "inicio": "07/10/2025", "fim": "07/10/2030"}, {"num": 20255, "ug": 10101, "nome_ug": "CÂMARA LEGISLATIVA DO DISTRITO FEDERAL", "objeto": "PRESTAÇÃO DE SERVIÇOS CONTÍNUOS DE LIMPEZA, CONSERVAÇÃO E HIGIENIZAÇÃO, COM FORNECIMENTO DE MATERIAS E EQUIPAMENTOS.    ", "processo": "00000-0000000365/2010-00", "valor": 1239291.6, "inicio": "14/12/2010", "fim": "13/12/2015"}, {"num": 55173, "ug": 640101, "nome_ug": "SECRETARIA DE ESTADO DE ADM. PENITENCIÁR", "objeto": "CONTRATO ADMINISTRATIVO Nº 034 - SEAPE X NUTECH, CUJO OBJETO É A CONTRATAÇÃO EMERGENCIAL DE EMPRESA ESPECIALIZADA PARA A", "processo": "04026-0000025960/2025-93", "valor": 1214750.4, "inicio": "22/08/2025", "fim": "22/08/2026"}, {"num": 48069, "ug": 440101, "nome_ug": "SECRETARIA DE EST. DE JUSTIÇA E CIDADANI", "objeto": "PRESTAÇÃO DE SERVIÇOS DE MANUTENÇÃO PREVENTIVA E CORRETIVA COM A PREVISÃO, QUANDO NECESSÁRIO, DE FORNECIMENTO DE PEÇAS O", "processo": "00400-0000002886/2021-83", "valor": 1203576.0, "inicio": "16/12/2022", "fim": "16/12/2023"}, {"num": 28045, "ug": 170101, "nome_ug": "SECRETARIA DE ESTADO DE SAÚDE DO DISTRIT", "objeto": "AQUISIÇÃO DE 1500 CADEIRAS GIRATÓRIAS PARA ATENDER A DEMANDA DA SUBSECRETARIA DE VIGILANCIA A SAÚDE/SES/DF. \n           ", "processo": "00000-0065000124/2013-00", "valor": 1177500.0, "inicio": "21/08/2013", "fim": "20/08/2014"}, {"num": 53713, "ug": 150205, "nome_ug": "SERVIÇO DE LIMPEZA URBANA DO DISTRITO FE", "objeto": "CONTRATAÇÃO DE EMPRESA ESPECIALIZADA PARA LICENCIAMENTO, MANUTENÇÃO E ATUALIZAÇÃO DO SOFTWARE DE SISTEMA DE INFORMAÇÃO G", "processo": "00094-0000001554/2024-71", "valor": 1168706.22, "inicio": "19/02/2025", "fim": "18/02/2026"}, {"num": 23306, "ug": 190128, "nome_ug": "ADMINISTRAÇÃO REGIONAL DE SOBRADINHO II", "objeto": "EXECUÇÃO DE REFORMA DAS INSTALAÇÕES DA FEIRA PERMANENTE, LOCALIZADA NA AR 5 EM SOBRADINHO II.                           ", "processo": "00000-0304000271/2011-00", "valor": 1120516.14, "inicio": "07/12/2011", "fim": "19/08/2012"}, {"num": 56611, "ug": 200202, "nome_ug": "DEPTO DE ESTRADAS E RODAGEM DO DF - DER/", "objeto": "ONTRATAÇÃO DE SERVIÇO DE LOCAÇÃO DE CAMINHÃO BASCULANTE, ESPECIFICADO(S) NO(S) ITEM 2 DO TERMO DE REFERÊNCIA Nº 76 (SEI ", "processo": "00113-0000023215/2025-05", "valor": 1047412.5, "inicio": "30/01/2026", "fim": "29/01/2027"}, {"num": 31760, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "OBJETO LOCAÇÃO DE IMÓVEL DECR.36.236, DE 01/15, EM 01 DE JANEIRO/15QUE TRATA DA TRANSF.CARGOS E FUNÇOES UG:560.102, CIAS", "processo": "00000-0430000978/2012-00", "valor": 994842.0, "inicio": "05/09/2014", "fim": "05/09/2020"}, {"num": 48913, "ug": 200204, "nome_ug": "COMPANHIA DO METROPOLITANO DO DF - METRÔ", "objeto": "contratação de empresa para prestação de serviços continuados de apoio administrativo ao Núcleo de Informação da Manuten", "processo": "00097-0000009949/2022-76", "valor": 945887.16, "inicio": "12/05/2023", "fim": "12/05/2024"}, {"num": 41938, "ug": 220201, "nome_ug": "DEPARTAMENTO DE TRÂNSITO DO DF - DETRAN-", "objeto": "SERVIÇO MANUTENÇÃO PREVENTIVO E CORRETIVO, PROGRAMADO E NÃO PROGRAMADO, COM APLICAÇÃO DE PEÇAS, EM AERONAVE MOD ESQUILO ", "processo": "00055-0000010317/2020-99", "valor": 799554.19, "inicio": "22/10/2020", "fim": "22/10/2026"}, {"num": 50983, "ug": 250101, "nome_ug": "SECR. EST. DESENV. ECON., TRABALHO E REN", "objeto": "Contratação de empresa especializada para prestação de serviços de manutenção preventiva e corretiva nos aparelhos condi", "processo": "04035-0000000973/2024-60", "valor": 796227.0, "inicio": "19/02/2024", "fim": "19/02/2025"}, {"num": 29184, "ug": 10101, "nome_ug": "CÂMARA LEGISLATIVA DO DISTRITO FEDERAL", "objeto": "PRESTAÇÃO DE SERVIÇO DE OPERAÇÃO E MANUTENÇÃO DOS SISTEMAS INSTALAÇÕES ELÉTRICAS, COMBATE INCENDIO, HIDROSANITÁRIAS E AF", "processo": "00000-0001000931/2012-00", "valor": 780000.0, "inicio": "24/01/2014", "fim": "23/07/2017"}, {"num": 47097, "ug": 180203, "nome_ug": "UNIVERSIDADE DO DISTRITO FEDERAL - UNDF", "objeto": "PROVER A UNDF DE COMPUTADORES DESKTOP E PERIFÉRICOS, MEDIANTE SISTEMA DE REGISTRO DE PREÇOS, COM GARANTIA DE MANUTENÇÃO ", "processo": "04030-0000000268/2022-31", "valor": 778500.0, "inicio": "04/08/2022", "fim": "04/08/2025"}];
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Formata ────────────────────────────────────────────────────────────────
+function fmtR(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── Tabela obras ──────────────────────────────────────────────────────────
+function renderObras(data) {
+  const tb = document.getElementById('obrasBody');
+  tb.innerHTML = data.map(o=>`<tr>
+    <td><b style="color:var(--blue)">${o.tomb}</b></td>
+    <td>${o.end}</td>
+    <td>${o.cid}</td>
+    <td style="color:var(--muted)">${o.ocup||'—'}</td>
+    <td style="text-align:right">${o.ug}</td>
+    <td style="text-align:right">${o.n_ne}</td>
+    <td style="text-align:right;color:var(--yellow);font-weight:700">${fmtR(o.total)}</td>
+  </tr>`).join('');
+}
+renderObras(OBRAS);
+
+function filterObras() {
+  const q = document.getElementById('srchObras').value.toLowerCase();
+  renderObras(OBRAS.filter(o =>
+    o.tomb.toLowerCase().includes(q) || o.end.toLowerCase().includes(q) ||
+    o.cid.toLowerCase().includes(q)  || o.descr.toLowerCase().includes(q) ||
+    o.ocup.toLowerCase().includes(q) || o.ug.includes(q)
+  ));
+}
+
+// ── Tabela contratos ──────────────────────────────────────────────────────
+function renderContr(data) {
+  const tb = document.getElementById('contrBody');
+  tb.innerHTML = data.map(c=>`<tr>
+    <td><b>${c.num}</b></td>
+    <td>${c.ug}<br><span style="color:var(--muted);font-size:11px">${c.nome_ug}</span></td>
+    <td>${c.objeto}</td>
+    <td style="color:var(--muted);font-size:11px">${c.processo}</td>
+    <td>${c.inicio}</td>
+    <td>${c.fim}</td>
+    <td style="text-align:right;color:var(--orange);font-weight:700">${fmtR(c.valor)}</td>
+  </tr>`).join('');
+}
+renderContr(CONTRATOS);
+
+function filterContr() {
+  const q = document.getElementById('srchContr').value.toLowerCase();
+  renderContr(CONTRATOS.filter(c =>
+    c.objeto.toLowerCase().includes(q) || String(c.ug).includes(q) ||
+    c.nome_ug.toLowerCase().includes(q) || c.processo.includes(q)
+  ));
+}
+
+// ── Charts ─────────────────────────────────────────────────────────────────
+const G = 'rgba(255,255,255,.06)';
+const DEF = {
+  responsive:true,
+  plugins:{legend:{labels:{color:'#8b949e',font:{size:11}}}},
+};
+
+// Obras barras horizontais
+new Chart(document.getElementById('chartObras'),{
+  type:'bar',
+  data:{
+    labels:["0834/08", "02497/13", "03025/26", "03019/26", "02997/24", "03002/25", "03013/25", "01352/09", "02915/22", "02919/22", "02999/24", "03030/26", "03027/26", "03009/25", "03012/25"],
+    datasets:[{
+      label:'Obras R$ mil',
+      data:[8698.5, 5698.1, 3981.4, 3938.0, 3774.9, 3635.8, 3224.1, 3116.4, 2938.4, 2767.1, 2353.9, 1914.1, 1888.4, 1870.7, 1803.9],
+      backgroundColor:'rgba(227,179,65,.75)',
+      borderRadius:3
+    }]
+  },
+  options:{...DEF,indexAxis:'y',
+    plugins:{...DEF.plugins,tooltip:{callbacks:{label:c=>'R$ '+(c.parsed.x*1000).toLocaleString('pt-BR',{maximumFractionDigits:0})}}},
+    scales:{
+      x:{ticks:{color:'#8b949e',callback:v=>v+'k'},grid:{color:G}},
+      y:{ticks:{color:'#e6edf3',font:{size:11}},grid:{color:G}}
+    }
+  }
+});
+
+// Receitas barras verticais
+new Chart(document.getElementById('chartRec'),{
+  type:'bar',
+  data:{
+    labels:["SECR. DE ESTADO DE ECONOM", "DEPTO DE ESTRADAS E RODAG", "SECRETARIA DE EST.DE TRAN", "COMPANHIA DO METROPOLITAN", "FUNDA\u00c7\u00c3O DE ENS. E PESQ. ", "FUNDA\u00c7\u00c3O JARDIM ZOOL\u00d3GICO", "TRIBUNAL DE CONTAS DO DIS", "INSTITUTO DE MEIO AMBIENT"],
+    datasets:[
+      {label:'Concessão',data:[1708.3, 10.3, 180.0, 219.4, 0.0, 3.7, 3.3, 1.4],backgroundColor:'rgba(88,166,255,.75)',borderRadius:3},
+      {label:'Exploração',data:[1444.9, 329.8, 71.1, 0.0, 4.5, 0.0, 0.0, 0.0],backgroundColor:'rgba(188,140,255,.75)',borderRadius:3},
+    ]
+  },
+  options:{...DEF,
+    plugins:{...DEF.plugins,tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$ '+(c.parsed.y*1000).toLocaleString('pt-BR',{maximumFractionDigits:0})}}},
+    scales:{
+      x:{ticks:{color:'#8b949e',font:{size:10}},grid:{color:G}},
+      y:{ticks:{color:'#8b949e',callback:v=>v+'k'},grid:{color:G}}
+    }
+  }
+});
+
+// Pizza receitas
+new Chart(document.getElementById('chartPie'),{
+  type:'doughnut',
+  data:{
+    labels:['Concessão/Permissão','Exploração Imobiliária'],
+    datasets:[{
+      data:[2127199,1850215],
+      backgroundColor:['rgba(88,166,255,.85)','rgba(188,140,255,.85)'],
+      borderColor:'#161b22',borderWidth:2
+    }]
+  },
+  options:{responsive:true,plugins:{
+    legend:{position:'bottom',labels:{color:'#8b949e',font:{size:11}}},
+    tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+  }}
+});
+</script>
+</body>
+</html>
