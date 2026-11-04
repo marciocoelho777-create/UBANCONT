@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resumo de alertas e divergências 10/2026</title><style>
+:root{--bg:#0b1020;--s1:#111a30;--s2:#16213d;--bd:#26335a;--t1:#e8ecf8;--t2:#9aa7c7;--ok:#3ecf8e;
+--err:#ff6b6b;--wrn:#f5b84b;--inf:#6ea8fe;--mut:#7b88ab}
+:root[data-theme="light"]{--bg:#f4f6fb;--s1:#fff;--s2:#eef1f8;--bd:#d5dbec;--t1:#1b2440;--t2:#55608a;--ok:#14935a;
+--err:#c9302c;--wrn:#a86b00;--inf:#2a63c9;--mut:#6f7aa0}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f6fb;--s1:#fff;--s2:#eef1f8;--bd:#d5dbec;
+--t1:#1b2440;--t2:#55608a;--ok:#14935a;--err:#c9302c;--wrn:#a86b00;--inf:#2a63c9;--mut:#6f7aa0}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t1);font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--t2);margin:0 0 20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.kpi{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.kpi b{display:block;font-size:26px}.kpi span{color:var(--t2);font-size:12px}
+.sec{background:var(--s1);border:1px solid var(--bd);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.sec-h{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--bd)}
+.sec-h h2{font-size:15px;margin:0}.sec-h small{color:var(--t2)}.sec-h .dt{margin-left:auto;color:var(--mut);font-size:12px}
+.badge{display:inline-block;border:1px solid var(--bd);border-radius:999px;padding:1px 9px;font-size:11px;font-weight:600}
+.b-err{color:var(--err);border-color:var(--err)}.b-wrn{color:var(--wrn);border-color:var(--wrn)}
+.b-ok{color:var(--ok);border-color:var(--ok)}.b-inf{color:var(--inf);border-color:var(--inf)}.b-mut{color:var(--mut)}
+.vazio{padding:12px 16px;color:var(--ok)}.nota{padding:12px 16px;color:var(--wrn)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 14px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--t2);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+td.v{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+code{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.det{color:var(--t2);font-size:12px;margin-top:2px}
+.foot{color:var(--mut);font-size:12px;margin-top:18px}
+@media (max-width:560px){th,td{padding:7px 10px}}
+</style></head>
+<body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+<div class="wrap">
+<h1>Resumo de alertas e divergências — 10/2026</h1>
+<p class="sub">Só o que não está OK, reunido dos painéis de integridade. Montado em 04/11/2026 16:25; a data de cada fonte aparece no cabeçalho do bloco.</p>
+<div class="kpis"><div class="kpi"><b style="color:var(--err)">3</b><span>Erros</span></div><div class="kpi"><b style="color:var(--mut)">0</b><span>Alertas</span></div><div class="kpi"><b style="color:var(--err)">1</b><span>Divergências</span></div><div class="kpi"><b style="color:var(--wrn)">14</b><span>Controles com ocorrências</span></div><div class="kpi"><b style="color:var(--ok)">3</b><span>Fontes sem problema</span></div></div>
+<section class="sec"><div class="sec-h"><h2>Leitura rápida</h2></div><div class="nota" style="color:var(--t1)">O BO-04 / Regra 22 aparece em 4 fontes (Diagnóstico consolidado (diag); Por tipo de agregação (diag_tipoagreg); Diagnóstico unificado (consolidado + tipo + UG); Integridade interna dos PDFs oficiais), mas é <b>um só problema</b>: o saldo da conta 521920500 (Previsão Adicional a Lançar, C18), crédito adicional ainda não reclassificado. Os controles de rotina listam o detalhe por UG (C18a).</div></section>
+<section class="sec"><div class="sec-h"><h2>Diagnóstico consolidado (diag)</h2><small>36 controles</small><span class="dt">04/11/2026 13:43</span></div><div class="tw"><table><thead><tr><th>Nível</th><th>Código</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead><tbody><tr><td><span class="badge b-err">Erro</span></td><td><code>BO-04</code></td><td>Previsão Adicional a Lançar pendente (C18)<div class="det">Saldo 521920500 = 0.57 (dos quais 0.57 já vem de mês(es) anterior(es) já encerrado(s)) — dotação aprovada ainda não reclassificada às contas definitivas; explica o gap do equilíbrio orçamentário. Mês ENCERRADO: o saldo deveria ter zerado. Veja rotina C18.</div></td><td class="v">0,57</td></tr></tbody></table></div></section><section class="sec"><div class="sec-h"><h2>Por tipo de agregação (diag_tipoagreg)</h2><small>tipos 1 a 10</small><span class="dt">04/11/2026 14:03</span></div><div class="tw"><table><thead><tr><th>Nível</th><th>Código</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead><tbody><tr><td><span class="badge b-err">Erro</span></td><td><code>BO-04</code></td><td>Previsão Adicional a Lançar pendente (C18)<div class="det">Tipos 1, 3, 4, 5, 6, 7, 9 — mesmo valor em cada um</div><div class="det">Saldo 521920500 = 0.57 (dos quais 0.57 já vem de mês(es) anterior(es) já encerrado(s)) — dotação aprovada ainda não reclassificada às contas definitivas; explica o gap do equilíbrio orçamentário. Mês ENCERRADO: o saldo deveria ter zerado. Veja rotina C18.</div></td><td class="v">0,57</td></tr></tbody></table></div></section><section class="sec"><div class="sec-h"><h2>Diagnóstico unificado (consolidado + tipo + UG)</h2><small>174 UGs · 0 com erro · 0 com alerta</small><span class="dt">04/11/2026 14:09</span></div><div class="tw"><table><thead><tr><th>Nível</th><th>Código</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead><tbody><tr><td><span class="badge b-err">Erro</span></td><td><code>BO-04</code></td><td>Consolidado (todas as UGs)</td><td class="v">0,57</td></tr></tbody></table></div></section><section class="sec"><div class="sec-h"><h2>Banco Oracle × PDFs oficiais</h2><small>BF, BP, BO, DFC</small><span class="dt">04/11/2026 14:23</span></div><div class="vazio">✔ Sem erros, alertas ou divergências.</div></section><section class="sec"><div class="sec-h"><h2>Classificação e GND</h2><small>valores que somem · GND × natureza</small><span class="dt">04/11/2026 14:11</span></div><div class="vazio">✔ Sem erros, alertas ou divergências.</div></section><section class="sec"><div class="sec-h"><h2>Integridade interna dos PDFs oficiais</h2><small>46 regras</small><span class="dt">04/11/2026 16:14</span></div><div class="tw"><table><thead><tr><th>Nível</th><th>Código</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead><tbody><tr><td><span class="badge b-err">Divergente</span></td><td><code>Regra 22</code></td><td>Equilíbrio orçamentário (BO-04): Dotação Atualizada = Previsão Atualizada + Saldos de Exercícios Anteriores<div class="det">A dotação atualizada supera a previsão + superávit financeiro: é o saldo da conta 521920500 (Previsão Adicional a Lançar, C18) — crédito adicional aprovado ainda não reclassificado. Mesma diferença do BO-04 / Equilíbrio Orçamentário do diagnóstico (que a lê no Oracle). Deve zerar no fechamento do mês. Diferença (Previsão Adicional a Lançar): 0.57.</div></td><td class="v">0,57</td></tr></tbody></table></div></section><section class="sec"><div class="sec-h"><h2>Continuidade entre exercícios (2026 × 2025)</h2><small>BP e DMPL, colunas anterior × publicado</small><span class="dt">04/11/2026 16:25</span></div><div class="vazio">✔ Sem erros ou divergências. 4 diferença(s) já explicada(s) ao centavo (Lista de Equações / lançamentos de INMES 14) — detalhe no painel de continuidade.</div></section><section class="sec"><div class="sec-h"><h2>Controles de rotina (SIGGO)</h2><small>rotina/*.sql · detalhe no painel de rotina</small><span class="dt">04/11/2026 15:58</span></div><div class="tw"><table><thead><tr><th>Nível</th><th>Código</th><th>Descrição</th><th style="text-align:right">Valor (R$)</th></tr></thead><tbody><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C01</code></td><td>Contas 21 F Principal do exercício × 827110101<div class="det">490 linha(s)  |  177 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C01b</code></td><td>Contas 21XXXXXXX sem cobertura no C01 (gap finder)<div class="det">93 linha(s)  |  93 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C02</code></td><td>Contas 21 F Ret do exercício × 827110201/827110203/63181<div class="det">190 linha(s)  |  124 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C04</code></td><td>Contas 21 sem NE × 827110401<div class="det">93 linha(s)  |  7 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C06</code></td><td>Contas 21 RPNP liquidado × 6313<div class="det">176 linha(s)  |  138 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C06b</code></td><td>Variantes 218914XXX / 218924XXX fora do escopo do C06<div class="det">11 linha(s)  |  11 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C08</code></td><td>Balancete INTRA<div class="det">1332 linha(s)  |  1203 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C08b</code></td><td>Batimento INTRA por conta contábil (NET entre todas as UGs)<div class="det">211 linha(s)  |  211 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C10</code></td><td>Balanço Financeiro<div class="det">1438 linha(s)  |  3 UG(s) c/ diferença</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C15</code></td><td>Receita Negativa Saldo<div class="det">85 linha(s)  |  85 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C17</code></td><td>Inversão de Saldo<div class="det">1619 linha(s)  |  1619 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C17b</code></td><td>Inversão de Saldo Classe 2 (Passivo com saldo devedor)<div class="det">7291 linha(s)  |  7291 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C18a</code></td><td>Previsão Adicional a Lançar (521920500)<div class="det">1 linha(s)  |  1 ocorrência(s)</div></td><td class="v"></td></tr><tr><td><span class="badge b-wrn">Ocorrências</span></td><td><code>C18b</code></td><td>Superávit por Fonte a Classificar (821191201)<div class="det">42 linha(s)  |  42 ocorrência(s)</div></td><td class="v"></td></tr></tbody></table></div></section>
+<p class="foot">Fontes: painel/dados (diag, diag_tipoagreg, diag_unificado, Oracle × PDF, classificação, integridade dos PDFs, continuidade, controles de rotina). Os detalhes completos ficam em cada painel.</p>
+</div></body></html>
