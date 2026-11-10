@@ -86,7 +86,7 @@ footer{font-size:11px;color:var(--t3);text-align:center;padding:12px}
 .kpi-row{grid-template-columns:repeat(5,1fr)}
 @media (max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
 </style>
-</head>
+<script>window.MESES_FECHADOS = {"2025-01": "2025-02-06 21:31:44", "2025-02": "2025-03-07 08:50:23", "2025-03": "2025-04-07 18:36:04", "2025-04": "2025-05-06 21:00:19", "2025-05": "2025-06-06 18:30:45", "2025-06": "2025-07-06 15:37:46", "2025-07": "2025-08-06 19:46:34", "2025-08": "2025-09-05 20:04:28", "2025-09": "2025-10-07 18:44:05", "2025-10": "2025-11-05 19:58:10", "2025-11": "2025-12-05 21:10:58", "2025-12": "2026-01-14 13:23:16", "2026-01": "2026-03-14 13:18:59", "2026-02": "2026-03-14 13:19:05", "2026-03": "2026-04-10 18:14:41", "2026-04": "2026-05-07 18:18:05", "2026-05": "2026-06-08 18:11:13", "2026-06": "2026-07-05 21:01:57", "2026-07": "2026-08-06 20:01:10", "2026-08": "2026-09-04 19:46:48", "2026-09": "2026-10-06 20:40:51", "2026-10": "2026-11-06 21:48:41"};</script></head>
 <body>
 <div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
   background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
@@ -13616,7 +13616,7 @@ function buildSelector(){
     let lbl='';
     try{
       const d=new Date(h.gerado_em.replace('T',' '));
-      lbl=`${MESES[h.mes]||h.mes}/${h.ano} · extraído em ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+      lbl=`${MESES[h.mes]||h.mes}/${h.ano}${(typeof MESES_FECHADOS==='undefined'?'':(function(){try{var f=MESES_FECHADOS[h.ano+'-'+String(h.mes).padStart(2,'0')];return (f&&String(h.gerado_em).replace(' ','T')>=f.replace(' ','T'))?' - fechado':'';}catch(e){return '';}})())} · extraído em ${d.toLocaleDateString('pt-BR')} ${d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
     }catch(e){lbl=h.gerado_em||String(i);}
     if(nDiv) lbl+=' ⚠ '+nDiv+' divergência(s)';
     return `<option value="${i}">${lbl}</option>`;
