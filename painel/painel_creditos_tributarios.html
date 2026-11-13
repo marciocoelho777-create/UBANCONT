@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Créditos Tributários a Receber</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mut:#667085;--bd:#e3e7ee;--ac:#1f5fbf;--ac2:#e07b00;--ok:#1a7f4b;--bad:#c0392b;--warn:#b7791f;--bar1:#1f5fbf;--bar2:#e07b00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#182029;--tx:#e6ebf2;--mut:#98a4b5;--bd:#2a3542;--ac:#6ea8ff;--ac2:#ffa94d;--ok:#4cc38a;--bad:#ff7a6b;--warn:#e0b04a;--bar1:#6ea8ff;--bar2:#ffa94d}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:30px 0 10px}
+.sub{color:var(--mut);font-size:13px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.card .l{font-size:12px;color:var(--mut)}.card .v{font-size:22px;font-weight:650;margin-top:2px;font-variant-numeric:tabular-nums}
+.card .n{font-size:12px;color:var(--mut);margin-top:2px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:6px 9px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{font-size:12px;color:var(--mut);font-weight:600}
+tr.tot td{font-weight:650;border-top:2px solid var(--bd)}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.warn{color:var(--warn)}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--bd);color:var(--mut)}
+.tag.bad{border-color:var(--bad)}.tag.ok{border-color:var(--ok)}.tag.warn{border-color:var(--warn)}
+.note{font-size:13px;color:var(--mut);margin:8px 0}
+.alert{border-left:4px solid var(--warn);background:var(--card);border-radius:6px;padding:10px 12px;margin:10px 0;font-size:13px}
+select{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font:inherit}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--mut);margin:6px 0}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+ol.q li{margin:8px 0}ol.q .r{color:var(--mut);font-size:13px;margin-top:2px}
+svg text{fill:var(--mut);font-size:11px}
+</style>
+</head>
+<body>
+<div id="_gate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:#0d1b3e;align-items:center;justify-content:center;font-family:'Segoe UI',system-ui,sans-serif">
+  <div style="background:#162550;border:1px solid #1e3267;border-radius:14px;
+    padding:40px 48px;min-width:300px;max-width:400px;text-align:center;width:90%">
+    <div style="font-size:30px;margin-bottom:12px">&#128274;</div>
+    <div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px">
+      Controles Cont&aacute;beis</div>
+    <div style="color:#9ab0cc;font-size:12px;margin-bottom:24px">GDF &middot; CONTDF</div>
+    <input id="_gpw" type="password" placeholder="Senha de acesso"
+      style="width:100%;padding:10px 14px;border:1px solid #1e3267;border-radius:8px;
+      background:#0d1b3e;color:#fff;font-size:14px;outline:none;margin-bottom:12px;
+      box-sizing:border-box">
+    <button id="_gbtn"
+      style="width:100%;padding:10px;background:#0090a8;color:#fff;border:none;
+      border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button>
+    <div id="_gerr" style="color:#f87171;font-size:12px;margin-top:10px;min-height:16px"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var H="2bea89a49ae0f463aa32710bb5d4d3d2118613e0b822d7fcc6d09ca5c9e402b2",K="gate_"+H.slice(0,8);
+  var g=document.getElementById('_gate');
+  if(!g) return;
+  if(sessionStorage.getItem(K)===H){return;}
+  g.style.display='flex';
+  document.body.style.overflow='hidden';
+  var inp=document.getElementById('_gpw');
+  var btn=document.getElementById('_gbtn');
+  var err=document.getElementById('_gerr');
+  function ok(){g.style.display='none';document.body.style.overflow='';}
+  async function check(){
+    var enc=new TextEncoder().encode(inp.value);
+    var buf=await crypto.subtle.digest('SHA-256',enc);
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(hex===H){sessionStorage.setItem(K,H);ok();}
+    else{err.textContent='Senha incorreta.';inp.value='';inp.focus();}
+  }
+  btn.addEventListener('click',check);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')check();});
+  inp.focus();
+})();
+</script>
+
+<main>
+<h1>Créditos Tributários a Receber — Nota de Auditoria nº 19 (TCDF)</h1>
+<div class="sub">Processo 00600-00007830/2026-37-e · e-DOC C51ADB22 · contas 1.1.2.1.1.xx.xx · dados do Oracle (MIL2026) em <span id="ger"></span> · valores em R$</div>
+
+<div class="cards" id="cards"></div>
+
+<h2>1. O que o Tribunal aponta</h2>
+<div class="box">
+<ul style="margin:0;padding-left:18px">
+<li>Em 09/01/2026, a <b>2026NL00080</b> lançou num só documento os créditos de IPVA (R$ 1,870 bi), IPTU (R$ 1,428 bi) e TLP (R$ 246,7 mi), com base no despacho SEEC/SEFAZ/SUREC/CONAD (SEI 04044-00001436/2026-90).</li>
+<li>As baixas mensais ("ajuste de créditos a receber por competência, com base na arrecadação do mês") existem <b>só até março</b> (NLs 2026NL00551, 00553, 00554, 01060, 01591).</li>
+<li>A arrecadação de abril em diante não reduziu o saldo — o ativo pode estar <b>superavaliado</b>, a depender da conciliação entre créditos, arrecadação e baixas.</li>
+<li>Referência: MCASP 11ª ed. pp. 272–275 e IPC 02/STN (a baixa se dá na arrecadação; ICMS por homologação reconhece na declaração).</li>
+</ul>
+</div>
+
+<h2>2. Razão das contas × Tabela 1 da nota</h2>
+<div class="box"><table id="t1"></table></div>
+<div class="note">"Δ" = Oracle − nota. A nota traz valores arredondados ao real e posição de 27/10; o Oracle é D-1 e muda diariamente. Diferença de poucos reais é arredondamento; em taxas de poder de polícia (≈ R$ 43,7 mil) são movimentos posteriores a 27/10.</div>
+
+<h2>3. Baixas × arrecadação, mês a mês <select id="sel"></select></h2>
+<div class="legend"><span><i style="background:var(--bar1)"></i>Arrecadação (principal)</span><span><i style="background:var(--bar2)"></i>Baixa no crédito a receber (créditos na conta)</span></div>
+<div class="box"><svg id="gr" width="100%" viewBox="0 0 1100 280" preserveAspectRatio="xMidYMid meet"></svg><table id="tm" style="margin-top:8px"></table></div>
+<div class="note"><b>Achado:</b> em IPVA e IPTU, de janeiro a março a baixa é <b>igual ao principal arrecadado no mês</b> (barras idênticas) — a rotina de "ajuste por competência" existiu e funcionava; ela simplesmente parou em abril. Novembro é parcial. Nas taxas, a arrecadação e as baixas não casam.</div>
+
+<h2>4. Quanto o saldo estaria superavaliado? (estimativa)</h2>
+<div class="box"><table id="t4"></table></div>
+<div class="alert"><b>Como ler.</b> Saldo teórico = saldo inicial + débitos − arrecadação do <i>principal</i> até o mês de corte. A coluna "Exposição" é saldo final − saldo teórico (só se positivo). É ordem de grandeza para preparar a resposta, não conclusão: parte da arrecadação paga dívida ativa e exercícios anteriores (que já estariam fora desta conta), e o saldo inicial de 2025 tem sua própria dinâmica. Nas taxas, a arrecadação supera o crédito reconhecido — sinal de reconhecimento por regime de caixa, não por competência.</div>
+
+<h2>5. Tabela 2 da nota × Oracle — e uma inconsistência na própria nota</h2>
+<div class="box"><table id="t5"></table></div>
+<div class="alert" id="inc"></div>
+
+<h2>6. Notas de lançamento relevantes (≥ R$ 1 milhão)</h2>
+<div class="box"><table id="t6"></table></div>
+
+<h2>7. Esclarecimentos solicitados (a–d) e o que o painel já sustenta</h2>
+<div class="box"><ol class="q">
+<li><b>(a)</b> Natureza e base de apuração da NL 2026NL00080; períodos; ausência de baixas após março.
+<div class="r">Painel: seção 1 e 3 mostram o lançamento único de 09/01 e a ausência de baixa de abril em diante. A resposta precisa vir da SEFAZ/SUREC (despacho 191306739): se o lançamento é o <i>lançamento do exercício</i> (IPTU/TLP/IPVA de 2026) ou saldo de estoque.</div></li>
+<li><b>(b)</b> Normativo/rotina de reconhecimento e baixa; conciliação entre sistema tributário, arrecadação e saldo contábil.
+<div class="r">Painel: a seção 4 é uma conciliação indicativa; a conciliação oficial depende do extrato de arrecadação da SEFAZ por tributo e competência.</div></li>
+<li><b>(c)</b> Como são contabilizados ISS, ICMS, ITCMD e ITBI.
+<div class="r">Painel: não há saldo a receber desses tributos em 1.1.2.1.1 (a nota registra só quatro contas) — consistente com reconhecimento na arrecadação (regime de caixa). A resposta deve citar eventos e contas usadas.</div></li>
+<li><b>(d)</b> Registros da cobrança administrativa de vencidos e não pagos; contas até a inscrição em dívida ativa.
+<div class="r">Painel: não rastreado aqui — requer consulta aos eventos/contas do grupo 1.1.2.5 (dívida ativa) e ao fluxo de transferência.</div></li>
+</ol></div>
+
+<h2>Metodologia e limites</h2>
+<div class="box" style="font-size:13px;color:var(--mut)">
+Razão: SALDOCONTABIL das contas 112110102/105/201/202 (mês 0 = saldo inicial). Arrecadação: conta 621200000, natureza lida no código do conta-corrente (IPTU 111250 · IPVA 111251 · taxas de poder de polícia 1121 · TLP 1122); em IPVA/IPTU o "principal" é o componente 01 (os demais são dívida ativa, multas e juros). Arrecadação bruta, antes de deduções. A fórmula de exposição não separa pagamento de crédito de 2026 do de exercícios anteriores. Os valores da nota (Tabelas 1 e 2) foram transcritos do PDF. Posição D-1.
+</div>
+</main>
+<script>
+const D = {"gerado": "13/11/2026 14:04", "corte": 10, "mes_max": 11, "contas": {"112110102": {"rot": "IPVA", "so_principal": true, "razao": {"0": [276480360.26, 0.0], "1": [1870183715.1, 167436899.63], "2": [0.0, 624510360.6], "3": [0.0, 188174344.93], "4": [0.0, 0.0], "5": [0.0, 0.0], "6": [0.0, 0.0], "7": [0.0, 0.0], "8": [0.0, 0.0], "9": [0.0, 0.0], "10": [0.0, 0.0], "11": [0.0, 0.0], "12": [0.0, 0.0]}, "arrec": {"1": {"principal": 167436899.63, "outros": 16555104.07}, "2": {"principal": 624510360.6, "outros": 13238197.49}, "3": {"principal": 188174763.83, "outros": 17175358.02}, "4": {"principal": 163740843.24, "outros": 14607413.3}, "5": {"principal": 152132046.13, "outros": 20632032.07}, "6": {"principal": 153759429.34, "outros": 22709046.759999998}, "7": {"principal": 145374554.12, "outros": 23994638.040000003}, "8": {"principal": 63652617.99, "outros": 22131219.27}, "9": {"principal": 49192768.39, "outros": 20591546.97}, "10": {"principal": 47522725.11, "outros": 19174872.270000003}, "11": {"principal": 15394111.4, "outros": 7396272.4799999995}, "12": {"principal": 0.0, "outros": 0.0}}}, "112110105": {"rot": "IPTU", "so_principal": true, "razao": {"0": [226559719.06, 0.0], "1": [1428278919.18, 27452267.64], "2": [0.0, 20920606.48], "3": [0.0, 23517178.52], "4": [0.0, 0.0], "5": [4022.98, 4022.98], "6": [0.0, 0.0], "7": [0.0, 0.0], "8": [0.0, 0.0], "9": [0.0, 0.0], "10": [0.0, 0.0], "11": [0.0, 0.0], "12": [0.0, 0.0]}, "arrec": {"1": {"principal": 27452267.64, "outros": 14219799.190000001}, "2": {"principal": 20920606.48, "outros": 11277325.4}, "3": {"principal": 23517178.52, "outros": 12630829.15}, "4": {"principal": 48989044.37, "outros": 10793474.05}, "5": {"principal": 579335704.97, "outros": 17153456.29}, "6": {"principal": 115411336.57, "outros": 16915708.69}, "7": {"principal": 114503958.71, "outros": 17416291.8}, "8": {"principal": 109846455.35, "outros": 15171111.299999999}, "9": {"principal": 100987909.52, "outros": 12586059.750000002}, "10": {"principal": 95886294.03, "outros": 13488333.350000001}, "11": {"principal": 6164257.72, "outros": 5367646.86}, "12": {"principal": 0.0, "outros": 0.0}}}, "112110201": {"rot": "Taxas – poder de polícia", "so_principal": false, "razao": {"0": [3238306.89, 0.0], "1": [0.0, 0.0], "2": [0.0, 6176.45], "3": [2705.12, 96636.87], "4": [0.0, 206532.98], "5": [0.0, 182339.42], "6": [0.0, 177226.92], "7": [594467.8, 631818.76], "8": [0.0, 50057.08], "9": [0.0, 860.76], "10": [589081.51, 621498.16], "11": [0.0, 0.0], "12": [0.0, 0.0]}, "arrec": {"1": {"principal": 36839137.489999995, "outros": 0.0}, "2": {"principal": 66912055.58, "outros": 0.0}, "3": {"principal": 45192410.46, "outros": 0.0}, "4": {"principal": 25497451.589999996, "outros": 0.0}, "5": {"principal": 23582069.48, "outros": 0.0}, "6": {"principal": 21576146.05, "outros": 0.0}, "7": {"principal": 30384788.019999996, "outros": 0.0}, "8": {"principal": 22552055.7, "outros": 0.0}, "9": {"principal": 20506966.370000005, "outros": 0.0}, "10": {"principal": 22562856.72, "outros": 0.0}, "11": {"principal": 3484552.49, "outros": 0.0}, "12": {"principal": 0.0, "outros": 0.0}}}, "112110202": {"rot": "Taxas – prestação de serviços (TLP)", "so_principal": false, "razao": {"0": [37381621.11, 0.0], "1": [246670311.06, 6195520.72], "2": [6254177.23, 10894148.76], "3": [0.0, 5519330.46], "4": [0.0, 0.0], "5": [0.0, 0.0], "6": [0.0, 0.0], "7": [0.0, 0.0], "8": [0.0, 0.0], "9": [0.0, 0.0], "10": [0.0, 0.0], "11": [0.0, 0.0], "12": [0.0, 0.0]}, "arrec": {"1": {"principal": 10118281.75, "outros": 0.0}, "2": {"principal": 7855255.999999999, "outros": 0.0}, "3": {"principal": 8803250.479999999, "outros": 0.0}, "4": {"principal": 13720462.67, "outros": 0.0}, "5": {"principal": 97715065.42000002, "outros": 0.0}, "6": {"principal": 28901594.330000002, "outros": 0.0}, "7": {"principal": 30647715.840000004, "outros": 0.0}, "8": {"principal": 27540972.259999998, "outros": 0.0}, "9": {"principal": 25074904.89, "outros": 0.0}, "10": {"principal": 22240837.060000002, "outros": 0.0}, "11": {"principal": 2657162.44, "outros": 0.0}, "12": {"principal": 0.0, "outros": 0.0}}}}, "pdf_t1": {"112110102": [276480360, 1870183715, 980121605, 1166542470], "112110105": [226559719, 1428282942, 71894076, 1582948586], "112110201": [3238307, 718239, 1461442, 2495103], "112110202": [37381621, 252924488, 22609000, 267697109]}, "pdf_t1_total": [543660007, 3552109384, 1076086123, 3019683269], "pdf_t2": [["IPVA", 1870183715, 1550481472.53, 82.9, 1529716831.02], ["IPTU", 1428278919, 1370702442.73, 96.0, 1327500999.74], ["Taxa de serviço (TLP)", 246670311, 271244072.56, 110.0, 232778831.95]], "nls": [{"doc": "2026NL00080", "ev": 550484, "ug": 130101, "mes": 1, "dt": "2026-01-09", "conta": 112110105, "rot": "IPTU", "dc": "D", "val": 1428278919.18}, {"doc": "2026NL00080", "ev": 550490, "ug": 130101, "mes": 1, "dt": "2026-01-09", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "D", "val": 246670311.06}, {"doc": "2026NL00080", "ev": 550481, "ug": 130101, "mes": 1, "dt": "2026-01-09", "conta": 112110102, "rot": "IPVA", "dc": "D", "val": 1870183715.1}, {"doc": "2026NL00553", "ev": 570312, "ug": 130101, "mes": 1, "dt": "2026-01-31", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "C", "val": 6195520.72}, {"doc": "2026NL00554", "ev": 570310, "ug": 130101, "mes": 1, "dt": "2026-01-31", "conta": 112110102, "rot": "IPVA", "dc": "C", "val": 167436899.63}, {"doc": "2026NL00554", "ev": 570311, "ug": 130101, "mes": 1, "dt": "2026-01-31", "conta": 112110105, "rot": "IPTU", "dc": "C", "val": 27452267.64}, {"doc": "2026NL00551", "ev": 570312, "ug": 130101, "mes": 2, "dt": "2026-02-06", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "C", "val": 4376848.42}, {"doc": "2026NL00551", "ev": 570312, "ug": 130101, "mes": 2, "dt": "2026-02-06", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "C", "val": 1716728.88}, {"doc": "2026NL00552", "ev": 575312, "ug": 130101, "mes": 2, "dt": "2026-02-06", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "D", "val": 4376848.42}, {"doc": "2026NL00552", "ev": 575312, "ug": 130101, "mes": 2, "dt": "2026-02-06", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "D", "val": 1716728.88}, {"doc": "2026NL01060", "ev": 570312, "ug": 130101, "mes": 2, "dt": "2026-02-28", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "C", "val": 4639971.53}, {"doc": "2026NL01060", "ev": 570311, "ug": 130101, "mes": 2, "dt": "2026-02-28", "conta": 112110105, "rot": "IPTU", "dc": "C", "val": 20920606.48}, {"doc": "2026NL01060", "ev": 570310, "ug": 130101, "mes": 2, "dt": "2026-02-28", "conta": 112110102, "rot": "IPVA", "dc": "C", "val": 624510360.6}, {"doc": "2026NL01591", "ev": 570310, "ug": 130101, "mes": 3, "dt": "2026-03-31", "conta": 112110102, "rot": "IPVA", "dc": "C", "val": 188174344.93}, {"doc": "2026NL01591", "ev": 570311, "ug": 130101, "mes": 3, "dt": "2026-03-31", "conta": 112110105, "rot": "IPTU", "dc": "C", "val": 23517178.52}, {"doc": "2026NL01591", "ev": 570312, "ug": 130101, "mes": 3, "dt": "2026-03-31", "conta": 112110202, "rot": "Taxas – prestação de serviços (TLP)", "dc": "C", "val": 5519330.46}]};
+const M=["Saldo inicial","jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const f=v=>v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const f0=v=>Math.round(v).toLocaleString("pt-BR");
+const mi=v=>(v/1e6).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const bi=v=>(v/1e9).toLocaleString("pt-BR",{minimumFractionDigits:3,maximumFractionDigits:3});
+const ids=Object.keys(D.contas), K=D.corte;
+document.getElementById("ger").textContent=D.gerado;
+
+// ---- agregados por conta
+const A={};
+ids.forEach(id=>{const c=D.contas[id];let ini=c.razao["0"][0],deb=0,cre=0,arP=0,arO=0;
+  for(let m=1;m<=12;m++){deb+=c.razao[m][0];cre+=c.razao[m][1];}
+  for(let m=1;m<=K;m++){arP+=c.arrec[m].principal;arO+=c.arrec[m].outros;}
+  const fin=ini+deb-cre, teor=ini+deb-arP;
+  A[id]={ini,deb,cre,fin,arP,arO,teor,exp:Math.max(0,fin-teor)};});
+const sum=k=>ids.reduce((s,i)=>s+A[i][k],0);
+
+// ---- cards
+const cards=[["Saldo final (4 contas)","R$ "+bi(sum("fin"))+" bi","posição D-1; a nota traz R$ 3,020 bi em 27/10"],
+ ["Baixas no exercício","R$ "+bi(sum("cre"))+" bi","só jan–mar (créditos nas contas)"],
+ ["Arrecadação do principal até "+M[K],"R$ "+bi(sum("arP"))+" bi","IPVA + IPTU + taxas"],
+ ["Exposição indicativa","R$ "+bi(sum("exp"))+" bi","saldo final − saldo teórico (seção 4)"]];
+document.getElementById("cards").innerHTML=cards.map(c=>`<div class="card"><div class="l">${c[0]}</div><div class="v">${c[1]}</div><div class="n">${c[2]}</div></div>`).join("");
+
+// ---- t1
+let h="<tr><th>Conta</th><th>Saldo inicial</th><th>Débitos</th><th>Créditos</th><th>Saldo final</th><th>Δ saldo final × nota</th></tr>";
+ids.forEach(id=>{const a=A[id],p=D.pdf_t1[id],d=a.fin-p[3];
+ h+=`<tr><td>${id} — ${D.contas[id].rot}</td><td>${f(a.ini)}</td><td>${f(a.deb)}</td><td>${f(a.cre)}</td><td>${f(a.fin)}</td><td class="${Math.abs(d)<2?'ok':'warn'}">${f(d)}</td></tr>`;});
+const pt=D.pdf_t1_total,dt=sum("fin")-pt[3];
+h+=`<tr class="tot"><td>Total</td><td>${f(sum("ini"))}</td><td>${f(sum("deb"))}</td><td>${f(sum("cre"))}</td><td>${f(sum("fin"))}</td><td class="${Math.abs(dt)<5?'ok':'warn'}">${f(dt)}</td></tr>`;
+document.getElementById("t1").innerHTML=h;
+
+// ---- gráfico mensal
+const sel=document.getElementById("sel");
+sel.innerHTML=ids.map(i=>`<option value="${i}">${D.contas[i].rot}</option>`).join("");
+function draw(){const id=sel.value,c=D.contas[id];
+ const ar=[],ba=[];for(let m=1;m<=12;m++){ar.push(c.arrec[m].principal);ba.push(c.razao[m][1]);}
+ const mx=Math.max(1,...ar,...ba),W=1100,H=280,L=60,B=30,T=10,bw=(W-L)/12;
+ let s="";for(let g=0;g<=4;g++){const y=T+(H-T-B)*(1-g/4);s+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--bd)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${mi(mx*g/4)}</text>`;}
+ for(let m=0;m<12;m++){const x=L+m*bw,hh=v=>(H-T-B)*v/mx;
+  s+=`<rect x="${x+bw*.12}" y="${H-B-hh(ar[m])}" width="${bw*.34}" height="${hh(ar[m])}" fill="var(--bar1)"><title>${M[m+1]}: arrecadação ${f(ar[m])}</title></rect>`;
+  s+=`<rect x="${x+bw*.5}" y="${H-B-hh(ba[m])}" width="${bw*.34}" height="${hh(ba[m])}" fill="var(--bar2)"><title>${M[m+1]}: baixa ${f(ba[m])}</title></rect>`;
+  s+=`<text x="${x+bw/2}" y="${H-10}" text-anchor="middle">${M[m+1]}${m+1>D.mes_max-0&&m+1===D.mes_max?"*":""}</text>`;}
+ document.getElementById("gr").innerHTML=s+`<text x="${L}" y="8">R$ milhões</text>`;
+ let t="<tr><th></th>"+M.slice(1,13).map(x=>`<th>${x}</th>`).join("")+"</tr>";
+ t+="<tr><td>Arrecadação (principal)</td>"+ar.map(v=>`<td>${mi(v)}</td>`).join("")+"</tr>";
+ t+="<tr><td>Baixa (créditos)</td>"+ba.map(v=>`<td class="${v===0?'bad':''}">${mi(v)}</td>`).join("")+"</tr>";
+ document.getElementById("tm").innerHTML=t;}
+sel.onchange=draw;draw();
+
+// ---- exposição
+h="<tr><th>Conta</th><th>Saldo inicial + débitos</th><th>Arrecadação principal até "+M[K]+"</th><th>Saldo teórico</th><th>Saldo final</th><th>Exposição</th><th>Leitura</th></tr>";
+ids.forEach(id=>{const a=A[id];let lei;
+ if(a.arP>a.ini+a.deb)lei='<span class="tag warn">arrecadou mais que o crédito (caixa)</span>';
+ else if(a.exp>1e6)lei='<span class="tag bad">saldo não acompanha a arrecadação</span>';else lei='<span class="tag ok">compatível</span>';
+ h+=`<tr><td>${D.contas[id].rot}</td><td>${f(a.ini+a.deb)}</td><td>${f(a.arP)}</td><td>${f(a.teor)}</td><td>${f(a.fin)}</td><td class="${a.exp>1e6?'bad':''}">${f(a.exp)}</td><td>${lei}</td></tr>`;});
+h+=`<tr class="tot"><td>Total</td><td>${f(sum("ini")+sum("deb"))}</td><td>${f(sum("arP"))}</td><td>${f(sum("teor"))}</td><td>${f(sum("fin"))}</td><td class="bad">${f(sum("exp"))}</td><td></td></tr>`;
+document.getElementById("t4").innerHTML=h;
+
+// ---- tabela 2
+const mapa={"IPVA":"112110102","IPTU":"112110105","Taxa de serviço (TLP)":"112110202"};
+h="<tr><th>Tributo</th><th>Créditos (NL 80)</th><th>Arrecadado — tabela da nota</th><th>Arrecadado — texto da nota</th><th>Oracle total (até "+M[K]+")</th><th>Oracle principal</th><th>% nota (tabela)</th><th>% recalc. tabela</th><th>% recalc. texto</th></tr>";
+let tc=0,tt=0,tx=0;
+D.pdf_t2.forEach(r=>{const a=A[mapa[r[0]]];tc+=r[1];tt+=r[2];tx+=r[4];
+ h+=`<tr><td>${r[0]}</td><td>${f0(r[1])}</td><td>${f(r[2])}</td><td>${f(r[4])}</td><td>${f(a.arP+a.arO)}</td><td>${f(a.arP)}</td><td>${r[3].toFixed(1)}%</td><td>${(100*r[2]/r[1]).toFixed(1)}%</td><td>${(100*r[4]/r[1]).toFixed(1)}%</td></tr>`;});
+h+=`<tr class="tot"><td>Total</td><td>${f0(tc)}</td><td>${f(tt)}</td><td>${f(tx)}</td><td></td><td></td><td>90,1%</td><td>${(100*tt/tc).toFixed(1)}%</td><td>${(100*tx/tc).toFixed(1)}%</td></tr>`;
+document.getElementById("t5").innerHTML=h;
+document.getElementById("inc").innerHTML=`<b>Atenção:</b> o texto da nota cita arrecadação de R$ 1.529.716.831,02 (IPVA), R$ 1.327.500.999,74 (IPTU) e R$ 232.778.831,95 (TLP) e conclui <b>87,2%</b>; a Tabela 2 traz R$ 1.550.481.472,53, R$ 1.370.702.442,73 e R$ 271.244.072,56 e conclui <b>90,1%</b>. Os dois conjuntos não coincidem (somam R$ ${f(tx)} e R$ ${f(tt)}). Convém pedir ao TCDF qual é o correto antes de responder. O IPVA do Oracle (principal) fica bem acima de ambos — a diferença de filtro (deduções, dívida ativa, data de corte) precisa ser esclarecida com a equipe do Painel Contábil da Diafi.`;
+
+// ---- NLs
+h="<tr><th>NL</th><th>Data</th><th>Conta</th><th>D/C</th><th>Valor</th><th>Evento</th><th>UG</th></tr>";
+D.nls.forEach(n=>{h+=`<tr><td>${n.doc}</td><td>${n.dt.split("-").reverse().join("/")}</td><td>${n.rot}</td><td>${n.dc}</td><td>${f(n.val)}</td><td>${n.ev}</td><td>${n.ug}</td></tr>`;});
+document.getElementById("t6").innerHTML=h;
+</script>
+</body>
+</html>
