@@ -658,6 +658,10 @@ footer {
     <div class="card-hd">
       Ortografia do ITEMBALANCO
       <span id="ort-badge"></span>
+      <button id="ort-restaurar" onclick="ortRestaurarTodos()"
+        style="display:none;margin-left:auto;font-size:11px;padding:3px 10px;border:1px solid var(--bd);border-radius:4px;background:var(--s2);color:var(--t2);cursor:pointer">
+        Restaurar ignorados
+      </button>
     </div>
     <div class="tbl-wrap" id="ort-wrap">
       <table id="tbl-ortografia">
@@ -668,6 +672,7 @@ footer {
             <th>Nome (NOITEMBALANCO)</th>
             <th>Tipo de erro</th>
             <th>Detalhe / Sugestões</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="tbody-ortografia"></tbody>
@@ -675,6 +680,7 @@ footer {
       <p id="ort-ok" style="display:none;color:var(--ok);font-weight:600;padding:.5rem 0">
         ✅ Nenhum problema de ortografia detectado
       </p>
+      <p id="ort-ignorados-info" style="display:none;font-size:11px;color:var(--t3);padding:.3rem 0"></p>
     </div>
   </div>
 
@@ -2122,43 +2128,90 @@ function renderRun(data){
   montaSeletorDemo();
   pintaMudancas();
 
-  /* Ortografia do ITEMBALANCO */
-  const ortData = (typeof ORTOGRAFIA !== 'undefined') ? ORTOGRAFIA : [];
-  const ortBadge = document.getElementById('ort-badge');
-  const ortOk    = document.getElementById('ort-ok');
-  const ortTbody = document.getElementById('tbody-ortografia');
-  if(ortBadge){
-    if(ortData.length){
-      ortBadge.innerHTML=`<span class="badge b-wrn">${ortData.length} item(ns) com problema</span>`;
-    } else {
-      ortBadge.innerHTML=`<span class="badge b-ok">sem problemas</span>`;
+  /* Ortografia do ITEMBALANCO — com suporte a "ignorar" por item */
+  const ORT_STORAGE_KEY = 'ort_ignorados_v1';
+  function ortCarregarIgnorados(){ try{ return new Set(JSON.parse(localStorage.getItem(ORT_STORAGE_KEY)||'[]')); }catch(e){ return new Set(); } }
+  function ortSalvarIgnorados(s){ try{ localStorage.setItem(ORT_STORAGE_KEY, JSON.stringify([...s])); }catch(e){} }
+  function ortChave(x){ return `${x.demo}|${x.coitembalanco}`; }
+
+  window.ortIgnorar = function(chave){
+    const s = ortCarregarIgnorados();
+    s.add(chave);
+    ortSalvarIgnorados(s);
+    renderOrtografia();
+  };
+  window.ortRestaurarTodos = function(){
+    ortSalvarIgnorados(new Set());
+    renderOrtografia();
+  };
+
+  function renderOrtografia(){
+    const ortData = (typeof ORTOGRAFIA !== 'undefined') ? ORTOGRAFIA : [];
+    const ignorados = ortCarregarIgnorados();
+    const visiveis  = ortData.filter(x => !ignorados.has(ortChave(x)));
+    const nIgn      = ortData.length - visiveis.length;
+
+    const ortBadge   = document.getElementById('ort-badge');
+    const ortOk      = document.getElementById('ort-ok');
+    const ortTbody   = document.getElementById('tbody-ortografia');
+    const ortRestaur = document.getElementById('ort-restaurar');
+    const ortIgnInfo = document.getElementById('ort-ignorados-info');
+
+    if(ortRestaur) ortRestaur.style.display = nIgn > 0 ? '' : 'none';
+    if(ortIgnInfo){
+      if(nIgn > 0){
+        ortIgnInfo.textContent = `${nIgn} item(ns) ignorado(s) oculto(s).`;
+        ortIgnInfo.style.display = '';
+      } else {
+        ortIgnInfo.style.display = 'none';
+      }
+    }
+
+    if(ortBadge){
+      if(visiveis.length){
+        const extra = nIgn ? ` · ${nIgn} ignorado(s)` : '';
+        ortBadge.innerHTML=`<span class="badge b-wrn">${visiveis.length} item(ns) com problema${extra}</span>`;
+      } else if(ortData.length === 0){
+        ortBadge.innerHTML=`<span class="badge b-ok">sem problemas</span>`;
+      } else {
+        ortBadge.innerHTML=`<span class="badge b-ok">sem problemas${nIgn ? ` · ${nIgn} ignorado(s)` : ''}</span>`;
+      }
+    }
+
+    if(ortTbody){
+      if(visiveis.length){
+        if(ortOk) ortOk.style.display='none';
+        ortTbody.innerHTML=visiveis.map(x=>{
+          const probs=x.problemas||[];
+          const tipos=[...new Set(probs.map(p=>p.tipo))].join(', ');
+          const detalhes=probs.map(p=>{
+            let d=p.detalhe||'';
+            if(p.sugestoes&&p.sugestoes.length) d+=` → ${p.sugestoes.join(', ')}`;
+            return d;
+          }).join(' | ');
+          const nome=(x.noitembalanco||'').replace(/</g,'&lt;');
+          const chave=ortChave(x).replace(/'/g,"\\'");
+          return `<tr>
+            <td><span class="badge b-muted">${x.demo||'?'}</span></td>
+            <td><code>${x.coitembalanco||'—'}</code></td>
+            <td style="max-width:300px;word-break:break-word">${nome}</td>
+            <td>${tipos}</td>
+            <td style="font-size:12px">${detalhes}</td>
+            <td style="text-align:center;white-space:nowrap">
+              <button onclick="ortIgnorar('${chave}')" title="Ignorar este item — não aparece mais na lista"
+                style="font-size:11px;padding:2px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--s2);color:var(--t3);cursor:pointer">
+                Ignorar
+              </button>
+            </td>
+          </tr>`;
+        }).join('');
+      } else {
+        ortTbody.innerHTML='';
+        if(ortOk) ortOk.style.display='';
+      }
     }
   }
-  if(ortTbody){
-    if(ortData.length){
-      if(ortOk) ortOk.style.display='none';
-      ortTbody.innerHTML=ortData.map(x=>{
-        const probs=x.problemas||[];
-        const tipos=[...new Set(probs.map(p=>p.tipo))].join(', ');
-        const detalhes=probs.map(p=>{
-          let d=p.detalhe||'';
-          if(p.sugestoes&&p.sugestoes.length) d+=` → ${p.sugestoes.join(', ')}`;
-          return d;
-        }).join(' | ');
-        const nome=(x.noitembalanco||'').replace(/</g,'&lt;');
-        return `<tr>
-          <td><span class="badge b-muted">${x.demo||'?'}</span></td>
-          <td><code>${x.coitembalanco||'—'}</code></td>
-          <td style="max-width:320px;word-break:break-word">${nome}</td>
-          <td>${tipos}</td>
-          <td style="font-size:12px">${detalhes}</td>
-        </tr>`;
-      }).join('');
-    } else {
-      ortTbody.innerHTML='';
-      if(ortOk) ortOk.style.display='';
-    }
-  }
+  renderOrtografia();
 
   /* Banco vs PDF oficial */
   const vpData = pdfDaCompetencia(typeof VS_PDF_HIST !== 'undefined' ? VS_PDF_HIST : null,
